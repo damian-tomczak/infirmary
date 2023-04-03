@@ -29,7 +29,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC $<$<BOOL:${SQLITECPP_ENABLE_AS
 if(UNIX)
     target_compile_options(${PROJECT_NAME} PUBLIC
         $<$<NOT:$<CONFIG:Debug>>:-DNDEBUG>
-        $<IF:$<CONFIG:Debug>, -g -Og, -O3>
+        $<IF:$<CONFIG:Debug>, -g, -O3>
         -Wall -Werror -Wno-unused-function -Wfatal-errors
     )
 endif()

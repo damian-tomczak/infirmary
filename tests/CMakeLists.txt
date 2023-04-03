@@ -7,10 +7,12 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/src
 )
 
-
 target_link_libraries(${PROJECT_NAME} PRIVATE
     gtest_main
     ${CMAKE_PROJECT_NAME}_lib
 )
 
-add_test(DummyTests ${PROJECT_NAME} WORKING_DIRECTORY ${OUTPUT_DIR})
+add_test(DummyTests
+    ${PROJECT_NAME}
+    WORKING_DIRECTORY ${OUTPUT_DIR}
+)

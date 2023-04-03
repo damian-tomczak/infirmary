@@ -13,7 +13,7 @@ public:
         drogon::HttpResponsePtr& pResp,
         const tsrpp::Database::User::Role& role = tsrpp::Database::User::Role::INVALID)
     {
-        auto user{pReq->session()->getOptional<tsrpp::Database::User>("user")};
+        auto user{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
         if (!user)
         {
             pResp = drogon::HttpResponse::newRedirectionResponse(tsrpp::createUrl("/login"));
@@ -43,7 +43,7 @@ public:
 protected:
     bool isAlreadyLogged(const drogon::HttpRequestPtr& pReq, drogon::HttpResponsePtr& pResp)
     {
-        auto user{pReq->session()->getOptional<tsrpp::Database::User>("user")};
+        auto user{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
         if (user)
         {
             pResp = drogon::HttpResponse::newRedirectionResponse(tsrpp::createUrl("/panel"));
@@ -100,7 +100,7 @@ public:
                 {
                     throw std::runtime_error{"login was successful, after which the user couldn't be found"};
                 }
-                pReq->session()->insert("user", *user);
+                pReq->getSession()->insert("user", *user);
                 callback(pResp);
                 return;
             }
@@ -140,7 +140,7 @@ public:
     {
         const auto redirectionUrl = tsrpp::createUrl("/");
         drogon::HttpResponsePtr pResp = drogon::HttpResponse::newRedirectionResponse(redirectionUrl);
-        pReq->session()->erase("user");
+        pReq->getSession()->erase("user");
         callback(pResp);
     }
 };

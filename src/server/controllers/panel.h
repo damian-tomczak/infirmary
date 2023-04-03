@@ -12,8 +12,8 @@ public:
     METHOD_ADD(::Panel::doctor, "doctor");
     METHOD_ADD(::Panel::receptionist, "receptionist");
 
-    METHOD_ADD(::Panel::patientPersonalInformations, "patient/personal");
-    METHOD_ADD(::Panel::doctorPersonalInformations, "doctor/personal");
+    METHOD_ADD(::Panel::patientPersonal, "patient/personal");
+    METHOD_ADD(::Panel::doctorPersonal, "doctor/personal");
     METHOD_ADD(::Panel::receptionistPendingRequests, "receptionist/pending_requests");
     METHOD_LIST_END
 
@@ -29,11 +29,11 @@ public:
 
     // MEAT
     // Patient
-    void patientPersonalInformations(const drogon::HttpRequestPtr& pReq,
+    void patientPersonal(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
     
     // Doctor
-    void doctorPersonalInformations(const drogon::HttpRequestPtr& pReq,
+    void doctorPersonal(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 
     // Receptionist
