@@ -10,8 +10,7 @@ void Panel::index(const drogon::HttpRequestPtr& pReq,
         callback(pResp);
         return;
     }
-
-    auto user{pReq->session()->getOptional<tsrpp::Database::User>("user")};
+    auto user{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
     if (user->role == tsrpp::Database::User::Role::PATIENT)
     {
         pResp = drogon::HttpResponse::newRedirectionResponse(tsrpp::createUrl("/panel/patient"));
@@ -96,7 +95,7 @@ catch(const std::exception& e)
     ERROR_PAGE;
 }
 
-void Panel::patientPersonalInformations(const drogon::HttpRequestPtr& pReq,
+void Panel::patientPersonal(const drogon::HttpRequestPtr& pReq,
     std::function<void(const drogon::HttpResponsePtr&)>&& callback) try
 {
     drogon::HttpResponsePtr pResp;
@@ -116,7 +115,7 @@ catch(const std::exception& e)
     ERROR_PAGE;
 }
 
-void Panel::doctorPersonalInformations(const drogon::HttpRequestPtr& pReq,
+void Panel::doctorPersonal(const drogon::HttpRequestPtr& pReq,
     std::function<void(const drogon::HttpResponsePtr&)>&& callback) try
 {
     drogon::HttpResponsePtr pResp;
