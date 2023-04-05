@@ -14,3 +14,7 @@ form label, form input, form textarea {
     display: table-cell;
     vertical-align: text-top;
 }
+
+.menu-button {
+    width: 75%;
+}
