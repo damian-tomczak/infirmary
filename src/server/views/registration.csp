@@ -57,7 +57,7 @@
                 </li>
                 <li>
                     <label for="lastName">Last Name:</label>
-                    <input id="lastName" type="text" name="lastName"> 
+                    <input id="lastName" type="text" name="lastName">
                 </li>
                 <li>
                     <label for="email">Email:</label>
@@ -65,7 +65,7 @@
                 </li>
                 <li>
                     <label for="pesel">PESEL:</label>
-                    <input id="pesl" type="text" name="pesel"> 
+                    <input id="pesl" type="text" name="pesel">
                 <li>
                 <li>
                     <label for="password">Password:</label>

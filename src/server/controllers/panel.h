@@ -13,7 +13,10 @@ public:
     METHOD_ADD(::Panel::receptionist, "receptionist");
 
     METHOD_ADD(::Panel::patientPersonal, "patient/personal");
+    METHOD_ADD(::Panel::patientEditPersonal, "patient/edit-personal");
+
     METHOD_ADD(::Panel::doctorPersonal, "doctor/personal");
+
     METHOD_ADD(::Panel::receptionistPendingRequests, "receptionist/pending_requests");
     METHOD_LIST_END
 
@@ -31,7 +34,9 @@ public:
     // Patient
     void patientPersonal(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
-    
+    void patientEditPersonal(const drogon::HttpRequestPtr& pReq,
+        std::function<void(const drogon::HttpResponsePtr&)>&& callback);
+
     // Doctor
     void doctorPersonal(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);

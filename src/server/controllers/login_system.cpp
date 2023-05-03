@@ -2,29 +2,37 @@
 
 #include <regex>
 
-bool validPesel(std::string pesel);
-bool validPassword(std::string password);
-bool validFirstName(std::string firstName);
-bool validLastName(std::string lastName);
-bool validEmail(std::string email);
+bool validFirstName(const std::string& firstName);
+bool validLastName(const std::string& lastName);
+bool validPesel(const std::string& pesel);
+bool validEmail(const std::string& email);
+bool validPassword(const std::string& password);
 
 LoginController::LoginStatus LoginController::postLogin(const drogon::HttpRequestPtr& pReq)
 {
     tsrpp::Database database{SQLite::OPEN_READWRITE};
 
+#ifdef NDEBUG
     auto pesel{pReq->getOptionalParameter<std::string>("pesel")};
+#else
+    std::optional<std::string> pesel{"00302800690"};
+#endif
     if ((!pesel) || (pesel->length() == 0) || (!validPesel(*pesel)))
     {
         return LoginStatus::INCORRECT_PESEL;
     }
 
+#ifdef NDEBUG
     auto password{pReq->getOptionalParameter<std::string>("password")};
+#else
+    std::optional<std::string> password{"password123"};
+#endif
     if ((!password) || (password->length() == 0) || (!validPassword(*password)))
     {
         return LoginStatus::INCORRECT_PASSWORD;
     }
 
-    auto user{database.getUser(*pesel)};
+    auto user{database.getUserbyPesel(*pesel)};
     if (user)
     {
         if (tsrpp::verifyPassword(*password, user->password))
@@ -70,7 +78,7 @@ RegisterController::RegistrationStatus RegisterController::postRegister(const dr
         return RegistrationStatus::INCORRECT_PASSWORD;
     }
 
-    auto hasUser{database.getUser(pesel.value())};
+    auto hasUser{database.getUserbyPesel(pesel.value())};
     if (hasUser)
     {
         return RegistrationStatus::ALREADY_EXISTS;
@@ -100,7 +108,7 @@ RegisterController::RegistrationStatus RegisterController::postRegister(const dr
     return RegistrationStatus::SUCCESS;
 }
 
-bool validPesel(std::string pesel)
+bool validPesel(const std::string& pesel)
 {
     std::regex regex(R"(^\d{11}$)");
     if (!std::regex_match(pesel, regex))
@@ -113,7 +121,13 @@ bool validPesel(std::string pesel)
     {
         sum += weights.at(i) * (pesel.at(i) - '0');
     }
-    if ((sum % 10) != (pesel.back() - '0'))
+    auto peselLastDigit{pesel.back() - '0'};
+    auto sumLastDigit{sum % 10};
+    if ((peselLastDigit != 0) && ((10 - (sumLastDigit) != peselLastDigit)))
+    {
+        return false;
+    }
+    else if ((peselLastDigit == 0) && (sumLastDigit != peselLastDigit))
     {
         return false;
     }
@@ -121,25 +135,25 @@ bool validPesel(std::string pesel)
     return true;
 }
 
-bool validPassword(std::string password)
+bool validPassword(const std::string& password)
 {
     std::regex regex(R"(^(?=.*\d).{9,}$)");
     return std::regex_match(password, regex);
 }
 
-bool validFirstName(std::string firstName)
+bool validFirstName(const std::string& firstName)
 {
-    std::regex regex(R"(^[a-zA-Z]{4,}$)");
+    std::regex regex(R"(^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ]{4,}$)");
     return std::regex_match(firstName, regex);
 }
 
-bool validLastName(std::string lastName)
+bool validLastName(const std::string& lastName)
 {
-    std::regex regex(R"(^[a-zA-Z]{4,}$)");
+    std::regex regex(R"(^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ]{4,}$)");
     return std::regex_match(lastName, regex);
 }
 
-bool validEmail(std::string email)
+bool validEmail(const std::string& email)
 {
     std::regex regex(R"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})");
     return std::regex_match(email, regex);

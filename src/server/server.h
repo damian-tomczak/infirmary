@@ -13,7 +13,6 @@ class Server final
     NOT_COPYABLE_AND_MOVEABLE(Server);
 public:
     Server();
-    ~Server() = default;
 
     void run();
 };

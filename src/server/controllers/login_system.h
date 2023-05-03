@@ -11,7 +11,7 @@ public:
     static bool isUserShouldSeeThis(
         const drogon::HttpRequestPtr& pReq,
         drogon::HttpResponsePtr& pResp,
-        const tsrpp::Database::User::Role& role = tsrpp::Database::User::Role::INVALID)
+        const tsrpp::Database::User::Role& role = tsrpp::Database::User::Role::PATIENT)
     {
         auto user{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
         if (!user)
@@ -21,10 +21,6 @@ public:
         }
         if constexpr (!isOnlyLogged)
         {
-            if (role == tsrpp::Database::User::Role::INVALID)
-            {
-                throw std::runtime_error{"isUserShouldSeeThis was invoked with INVALID role"};
-            }
             if (user->role != role)
             {
                 static constexpr std::string_view response{
@@ -90,12 +86,16 @@ public:
             {
                 tsrpp::Database database{SQLite::OPEN_READWRITE};
                 pResp = drogon::HttpResponse::newRedirectionResponse(tsrpp::createUrl("/panel"));
-                auto pesel{pReq->getOptionalParameter<std::string>("pesel")};
+#ifdef NDEBUG
+    auto pesel{pReq->getOptionalParameter<std::string>("pesel")};
+#else
+    std::optional<std::string> pesel{"00302800690"};
+#endif
                 if (!pesel)
                 {
                     throw std::runtime_error{"login was successful, after which the pesel couldn't be found"};
                 }
-                auto user{database.getUser(*pesel)};
+                auto user{database.getUserbyPesel(*pesel)};
                 if (!user)
                 {
                     throw std::runtime_error{"login was successful, after which the user couldn't be found"};
