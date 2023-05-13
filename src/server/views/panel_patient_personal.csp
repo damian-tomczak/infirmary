@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Infirmary</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+        <meta name="theme-color" content="#712cf9">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="../../style/style.css">
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-2 bg-light position-fixed h-100">
+                    <div class="row justify-content-center text-center">
+                        <h1><a href="/">Welcome to Infirmary</a></h1>
+                        <a href="personal" class="btn btn-primary my-2 menu-button mb-4">Personal information</a>
+
+                        <a href="calendar/internist" class="btn btn-secondary my-2 menu-button">Internist</a>
+                        <a href="calendar/gastroenterologist" class="btn btn-secondary my-2 menu-button">Gastroenterologist</a>
+                        <a href="calendar/pulmonologist" class="btn btn-secondary my-2 menu-button">Pulmonologist</a>
+                        <a href="calendar/oculist" class="btn btn-secondary my-2 menu-button mb-4">Oculist</a>
+
+                        <a href="/logout" class="btn btn-secondary my-2 menu-button">Logout</a>
+                        <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
+                    </div>
+                </div>
+                <div class="col-10 offset-2">
+                    <div class="row justify-content-center">
+                        <div class="bg-light col-8 mb-4">
+                            <div>
+                                <h2>Personal information</h2>
+                                <p>Name: </p>
+                                <p>Surname: </p>
+                                <p>PESEL: </p>
+                                <p>E-mail: </p>
+                                <div class="row justify-content-center">
+                                    <a href="panel/patient/edit-personal" class="btn btn-secondary my-2 menu-button mb-4">Edit Information</a>
+                                </div>
+                            </div>
+                            <hr>
+                            <div>
+                                <h2>Notes</h2>
+                                <div class="row justify-content-center text-center">
+                                    <textarea rows="6" placeholder="Describe your health condition and list of pills your are taking here." name="note"></textarea>
+                                    <a href="panel/patient/append-note" class="btn btn-secondary my-2 menu-button mb-4">Append Note</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="visits">
+                            <table>
+                                <tr>
+                                    <td>Scheduled | Internist Tadeusz Kowalczyk | visit at 9:40 14.03.2020</td>
+                                    <td><a href="panel/patient/cancel-visit">Cancel Visit</a></td>
+                                    <td><a href="panel/patient/visit-info" class="btn btn-secondary my-2 menu-button">Visit Info</a></td>
+                                </tr>
+                                <tr>
+                                    <td>Scheduled | Internist Tadeusz Kowalczyk | visit at 9:40 14.03.2020</td>
+                                    <td><a href="panel/patient/cancel-visit">Cancel Visit</a></td>
+                                    <td><a href="panel/patient/visit-info" class="btn btn-secondary my-2 menu-button">Visit Info</a></td>
+                                </tr>
+                                <tr>
+                                    <td>Scheduled | Internist Tadeusz Kowalczyk | visit at 9:40 14.03.2020</td>
+                                    <td><a href="panel/patient/cancel-visit">Cancel Visit</a></td>
+                                    <td><a href="panel/patient/visit-info" class="btn btn-secondary my-2 menu-button">Visit Info</a></td>
+                                </tr>
+                                <tr>
+                                    <td>Scheduled | Internist Tadeusz Kowalczyk | visit at 9:40 14.03.2020</td>
+                                    <td><a href="panel/patient/cancel-visit">Cancel Visit</a></td>
+                                    <td><a href="panel/patient/visit-info" class="btn btn-secondary my-2 menu-button">Visit Info</a></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,4 +1,39 @@
+<%c++
+    auto registrationStatus= @@.get<int>("registrationStatus");
+    if (registrationStatus)
+    {
+        std::ostringstream message;
+        message << "<div>";
+        message << "<div>";
+        switch (registrationStatus)
+        {
+        case 1:
+            message << "Registration failure: incorrect password format";
+            break;
+        case 2:
+            message << "Registration failure: your passwords are different";
+            break;
+        case 3:
+            message << "Registration failure: incorrect email format";
+            break;
+        case 4:
+            message << "Registration failure: incorrect pesel format";
+            break;
+        case 5:
+            message << "<p>Your request has been registered</p>"
+                "<p>You will get email soon with the result of your request</p>";
+            break;
+        default:
+            message << "Something went wrong";
+            break;
+        }
+        message << "</div>";
+        message << "<a href=\"/\"><input type=\"button\" value=\"Return\"></a>";
+        message << "</div>";
 
+        $$ << message.str();
+    }
+%>
 <!DOCTYPE html>
 <html>
     <head>
