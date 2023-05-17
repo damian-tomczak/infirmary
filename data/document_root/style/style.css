@@ -1,16 +1,36 @@
-.hello {
-    color: red;
-}
-
-form ul {
+.login form ul {
     display: table;
 }
 
-form li {
+.login form li {
     display: table-row;
 }
 
-form label, form input, form textarea {
+.login form label, .login form input, .login form textarea {
     display: table-cell;
     vertical-align: text-top;
+}
+
+.menu-button {
+    width: 75%;
+}
+
+.visits {
+    padding: 0;
+}
+
+.visits table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.visits td {
+    border: 0px;
+    text-align: left;
+    padding: 8px;
+}
+
+.visits tr:nth-child(odd) {
+    background-color: #dddddd;
 }

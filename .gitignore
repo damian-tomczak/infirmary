@@ -1,2 +1,3 @@
 build
 .vscode
+src/server/views/debug.csp

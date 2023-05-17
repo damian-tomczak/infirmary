@@ -106,8 +106,55 @@ void Panel::patientPersonal(const drogon::HttpRequestPtr& pReq,
         return;
     }
 
+    tsrpp::Database database;
+    auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
     drogon::HttpViewData data;
+    data.insert("firstName", pUser->first_name);
+    data.insert("lastName", pUser->last_name);
+    data.insert("pesel", pUser->pesel);
+    data.insert("email", pUser->email);
+    auto visits{database.getVisitsByPatient(pUser->pesel)};
+    std::vector<int> statuses;
+    std::vector<int> doctorsType;
+    std::vector<std::string> doctorsFirstName;
+    std::vector<std::string> doctorsLastName;
+    for (auto it{visits.begin()}; it != visits.end(); ++it)
+    {
+        statuses.emplace_back(static_cast<int>(it->status));
+        doctorsType.emplace_back(static_cast<int>(database.getUserbyId(it->doctor_id)->type));
+        doctorsFirstName.emplace_back(database.getUserbyId(it->doctor_id)->first_name);
+        doctorsLastName.emplace_back(database.getUserbyId(it->doctor_id)->last_name);
+    }
+    data.insert("statuses", statuses);
+    data.insert("doctorsType", doctorsType);
+    data.insert("doctorsFirstName", doctorsFirstName);
+    data.insert("doctorsLastName", doctorsLastName);
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_patient_personal", data);
+    callback(pResp);
+}
+catch(const std::exception& e)
+{
+    ERROR_PAGE;
+}
+
+void Panel::patientEditPersonal(const drogon::HttpRequestPtr& pReq,
+    std::function<void(const drogon::HttpResponsePtr&)>&& callback) try
+{
+    drogon::HttpResponsePtr pResp;
+
+    if (!LoginSystemController::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::PATIENT))
+    {
+        callback(pResp);
+        return;
+    }
+
+    auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+    drogon::HttpViewData data;
+    data.insert("firstName", pUser->first_name);
+    data.insert("lastName", pUser->last_name);
+    data.insert("pesel", pUser->pesel);
+    data.insert("email", pUser->email);
+    pResp = drogon::HttpResponse::newHttpViewResponse("panel_patient_edit_personal", data);
     callback(pResp);
 }
 catch(const std::exception& e)

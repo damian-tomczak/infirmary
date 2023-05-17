@@ -41,7 +41,7 @@
         <div>
             <h1>Login panel</h1>
         </div>
-        <div>
+        <div class="login">
             <form action="login" method="post">
                 <ul>
                     <li>

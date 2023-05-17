@@ -21,14 +21,20 @@ public:
     {}
     ~Database() = default;
 
-    struct User
+    struct User final
     {
         enum class Role
         {
-            INVALID = -1,
             PATIENT,
             DOCTOR,
             RECEPTIONIST
+        };
+        enum class Type
+        {
+            INTERNIST,
+            GASTROENTEROLOGIST,
+            PULMONOLOGIST,
+            OCULIST
         };
 
         std::int32_t id;
@@ -39,9 +45,30 @@ public:
         std::string email;
         std::string note;
         Role role;
+        Type type;
     };
     bool addUser(const User& user);
-    std::optional<Database::User> getUser(const std::string& pesel);
+    std::optional<Database::User> getUserbyPesel(const std::string& pesel);
+    std::optional<Database::User> getUserbyId(const std::uint32_t id);
+
+    struct Visit final
+    {
+        enum class Status
+        {
+            REQUESTED,
+            REJECTED,
+            CANCELLED,
+            SCHEDULED,
+            COMPLETED
+        };
+        std::int32_t id;
+        std::int32_t patient_id;
+        std::int32_t doctor_id;
+        Status status;
+        std::string date;
+        std::string time;
+    };
+    std::vector<Visit> getVisitsByPatient(const std::string& pesel);
 
 private:
     std::unique_ptr<SQLite::Database> mpDatabase;

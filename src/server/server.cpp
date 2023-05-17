@@ -44,6 +44,17 @@ void Server::run()
 #ifdef NDEBUG
         .setSSLFiles("", "") // TODO: fix ssl
 #endif
+#ifndef NDEBUG
+        .registerHandler(
+        "/debug",
+        [](const drogon::HttpRequestPtr&,
+            std::function<void(const drogon::HttpResponsePtr&)>&& callback)
+        {
+            auto pResp = drogon::HttpResponse::newHttpViewResponse("debug");
+            callback(pResp);
+        },
+        {drogon::Get})
+#endif
         .addListener(IP, PORT)
         .run();
 }
