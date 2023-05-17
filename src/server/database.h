@@ -69,6 +69,7 @@ public:
         std::string time;
     };
     std::vector<Visit> getVisitsByPatient(const std::string& pesel);
+    void updateVisitStatus(const std::uint32_t visitId, const Visit::Status status);
 
 private:
     std::unique_ptr<SQLite::Database> mpDatabase;

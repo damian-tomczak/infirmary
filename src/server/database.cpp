@@ -34,7 +34,7 @@ bool Database::addUser(const User& user)
 std::optional<Database::User> Database::getUserbyPesel(const std::string& pesel)
 {
     std::optional<Database::User> result;
-    SQLite::Statement q{*mpDatabase, "SELECT * FROM users WHERE pesel=:pesel LIMIT 1"};
+    SQLite::Statement q{*mpDatabase, "SELECT * FROM users WHERE pesel = :pesel LIMIT 1"};
 
     q.bind(":pesel", pesel);
 
@@ -59,7 +59,7 @@ std::optional<Database::User> Database::getUserbyPesel(const std::string& pesel)
 std::optional<Database::User> Database::getUserbyId(const std::uint32_t id)
 {
     std::optional<Database::User> result;
-    SQLite::Statement q{*mpDatabase, "SELECT * FROM users WHERE id=:id LIMIT 1"};
+    SQLite::Statement q{*mpDatabase, "SELECT * FROM users WHERE id = :id LIMIT 1"};
 
     q.bind(":id", id);
 
@@ -87,7 +87,7 @@ std::vector<Database::Visit> Database::getVisitsByPatient(const std::string& pes
 
     std::optional<std::uint32_t> pPatientid;
     {
-        SQLite::Statement q{*mpDatabase, "SELECT id FROM users WHERE pesel=:pesel LIMIT 1"};
+        SQLite::Statement q{*mpDatabase, "SELECT id FROM users WHERE pesel = :pesel LIMIT 1"};
         q.bind(":pesel", pesel);
 
         if (q.executeStep())
@@ -97,7 +97,7 @@ std::vector<Database::Visit> Database::getVisitsByPatient(const std::string& pes
     }
 
     {
-        SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE patient_id=:patient_id"};
+        SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE patient_id = :patient_id"};
         q.bind(":patient_id", *pPatientid);
 
         while (q.executeStep())
@@ -107,11 +107,21 @@ std::vector<Database::Visit> Database::getVisitsByPatient(const std::string& pes
                 q.getColumn("patient_id").getInt(),
                 q.getColumn("doctor_id").getInt(),
                 Visit::Status{q.getColumn("status").getInt()},
-                q.getColumn("date")
+                q.getColumn("date"),
+                q.getColumn("time")
             });
         }
     }
 
     return result;
+}
+
+void Database::updateVisitStatus(const std::uint32_t visitId, const Database::Visit::Status status)
+{
+    SQLite::Statement q{*mpDatabase, "UPDATE visits SET status = :status WHERE id = :id"};
+    q.bind(":status", static_cast<uint32_t>(status));
+    q.bind(":id", visitId);
+
+    q.executeStep();
 }
 }

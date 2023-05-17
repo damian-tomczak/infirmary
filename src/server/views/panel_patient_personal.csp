@@ -3,10 +3,13 @@
     auto lastName=@@.get<std::string>("lastName");
     auto pesel=@@.get<std::string>("pesel");
     auto email=@@.get<std::string>("email");
+    auto ids=@@.get<std::vector<int>>("ids");
     auto statuses=@@.get<std::vector<int>>("statuses");
     auto doctorsType=@@.get<std::vector<int>>("doctorsType");
     auto doctorsFirstName=@@.get<std::vector<std::string>>("doctorsFirstName");
     auto doctorsLastName=@@.get<std::vector<std::string>>("doctorsLastName");
+    auto dates=@@.get<std::vector<std::string>>("dates");
+    auto times=@@.get<std::vector<std::string>>("times");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -72,11 +75,11 @@ for (size_t i = 0; i < statuses.size(); ++i)
     }
     else if (status == 1)
     {
-        $$<<"Cancelled";
+        $$<<"Rejected";
     }
     else if (status == 2)
     {
-        $$<<"Rejected";
+        $$<<"Cancelled";
     }
     else if (status == 3)
     {
@@ -108,16 +111,18 @@ for (size_t i = 0; i < statuses.size(); ++i)
     $$<<doctorsFirstName.at(i) << " ";
     $$<<doctorsLastName.at(i);
     $$<<" | ";
+    $$<<dates.at(i) << " ";
+    $$<<times.at(i);
     $$<<"</td>";
-    if (status != 1)
+    if (status != 2)
     {
-        $$<<"<td><a href=\"panel/patient/cancel-visit\">Cancel Visit</a></td>";
+        $$<<"<td><a href=\"?cancelVisit=" << ids.at(i) << "\">Cancel Visit</a></td>";
     }
     else
     {
         $$<<"<td></td>";
     }
-    $$<<"<td><a href=\"panel/patient/visit-info\" class=\"btn btn-secondary my-2 menu-button\">Visit Info</a></td>";
+    $$<<"<td><a href=\"/visit-info=" << ids.at(i) << "\" class=\"btn btn-secondary my-2 menu-button\">Visit Info</a></td>";
     $$<<"</tr>";
 }
 %>
