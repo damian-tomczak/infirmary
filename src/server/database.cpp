@@ -155,7 +155,7 @@ bool Database::updateVisitStatus(const std::uint32_t visitId, const Database::Vi
 }
 
 Database::VisitAvailabilityStatus Database::checkAvailabilityOfVisit(const std::int32_t patientId,
-    const std::string& profession,
+    const std::int32_t profession,
     const std::string& date,
     const std::string time)
 {

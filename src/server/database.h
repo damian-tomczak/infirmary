@@ -37,6 +37,27 @@ public:
             PULMONOLOGIST,
             OCULIST
         };
+        static std::int32_t roleString2Int(const std::string& profession)
+        {
+            if (profession == "internist")
+            {
+                return 0;
+            }
+            else if (profession == "gastroenterologist")
+            {
+                return 1;
+            }
+            else if (profession == "pulmonologist")
+            {
+                return 2;
+            }
+            else if (profession == "oculist")
+            {
+                return 3;
+            }
+
+            return -1;
+        }
 
         std::int32_t id;
         std::string pesel;
@@ -82,7 +103,7 @@ public:
         YOUR_VISIT
     };
     VisitAvailabilityStatus checkAvailabilityOfVisit(const std::int32_t patientId,
-        const std::string& profession,
+        const std::int32_t profession,
         const std::string& date,
         const std::string time);
 

@@ -80,7 +80,7 @@
         }
     }
 %>
-                        <form class="text-center">
+                        <form class="text-center" action="">
                             <input type="hidden" value="<%c++ $$<<doctorProfession; %>" name="doctorProfession"></input>
                             <p><input type="date" value="<%c++ $$<<date; %>" name="date"></input></p>
                             <p><input type="submit" value="Go to date"></input></p>

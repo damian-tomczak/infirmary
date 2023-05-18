@@ -281,6 +281,7 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
     {
         throw std::runtime_error{"doctorProfession should be specified"};
     }
+    std::int32_t profession{tsrpp::Database::User::roleString2Int(*pDoctorProfession)};
 
     std::string date;
     auto pDateParameter{pReq->getOptionalParameter<std::string>("date")};
@@ -336,7 +337,7 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
     for (auto it{hours.begin()}; it != hours.end(); ++it)
     {
         availability.emplace_back(static_cast<int>(
-            database.checkAvailabilityOfVisit(pUser->id, *pDoctorProfession, date, *it)));
+            database.checkAvailabilityOfVisit(pUser->id, profession, date, *it)));
     }
 
     data.insert("date", date);
