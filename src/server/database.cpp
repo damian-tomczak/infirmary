@@ -106,6 +106,28 @@ std::optional<Database::User> Database::getUserbyId(const std::uint32_t id)
     return result;
 }
 
+bool Database::addVisit(const std::int32_t patientId,
+    const std::int32_t doctorId,
+    const std::string& date,
+    const std::string& time)
+{
+    SQLite::Statement q{*mpDatabase, "INSERT INTO visits(patient_id, doctor_id, status, date, time)"
+        "VALUES (:patient_id, :doctor_id, :status, :date, :time)"};
+
+    q.bind(":patient_id", patientId);
+    q.bind(":doctor_id", doctorId);
+    q.bind(":status", static_cast<std::int32_t>(Visit::Status::REQUESTED));
+    q.bind(":date", date);
+    q.bind(":time", time);
+
+    if (q.exec() == 1)
+    {
+        return true;
+    }
+
+    return false;
+}
+
 std::vector<Database::Visit> Database::getVisitsByPatient(const std::string& pesel)
 {
     std::vector<Database::Visit> result;
@@ -154,11 +176,12 @@ bool Database::updateVisitStatus(const std::uint32_t visitId, const Database::Vi
     return false;
 }
 
-Database::VisitAvailabilityStatus Database::checkAvailabilityOfVisit(const std::int32_t patientId,
+Database::VisitAvailability Database::checkAvailabilityOfVisit(const std::int32_t patientId,
     const std::int32_t profession,
     const std::string& date,
     const std::string time)
 {
+    VisitAvailability result{};
     std::uint32_t numberOfDoctorsWithProfession{};
     {
         SQLite::Statement q{*mpDatabase, "SELECT COUNT(*) FROM users WHERE role = :role AND type = :type"};
@@ -185,21 +208,50 @@ Database::VisitAvailabilityStatus Database::checkAvailabilityOfVisit(const std::
         auto visitPatientId{q.getColumn("patient_id").getInt()};
         if (visitPatientId == patientId)
         {
-            return VisitAvailabilityStatus::YOUR_VISIT;
+            result.status = VisitAvailability::Status::YOUR_VISIT;
         }
 
         auto status{static_cast<Visit::Status>(q.getColumn("status").getInt())};
         if ((status != Visit::Status::REQUESTED) && (status != Visit::Status::SCHEDULED) && (status != Visit::Status::COMPLETED))
         {
             takenCounter++;
+            result.takenDoctorsIds.emplace_back(q.getColumn("doctor_id").getInt());
         }
     }
 
     if (takenCounter >= numberOfDoctorsWithProfession)
     {
-        return VisitAvailabilityStatus::TAKEN;
+        result.status = VisitAvailability::Status::TAKEN;
     }
 
-    return VisitAvailabilityStatus::FREE;
+    return result;
+}
+
+std::optional<std::int32_t> Database::getFreeDoctor(const std::int32_t& profession,
+    const std::vector<std::int32_t> takenDoctorsIds)
+{
+    std::optional<std::int32_t> result;
+
+    std::string takenDoctorsStr;
+    for (auto& id : takenDoctorsIds)
+    {
+        takenDoctorsStr += std::to_string(id) + ',';
+    }
+    if (takenDoctorsStr.length() != 0)
+    {
+        takenDoctorsStr.pop_back();
+    }
+
+    SQLite::Statement q{*mpDatabase, "SELECT id FROM users "
+        "WHERE type = :type AND id NOT IN (" + takenDoctorsStr + ")"};
+
+    q.bind(":type", profession);
+
+    if (q.executeStep())
+    {
+        result = q.getColumn("id");
+    }
+
+    return result;
 }
 }

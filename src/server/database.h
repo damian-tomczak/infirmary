@@ -93,19 +93,29 @@ public:
         std::string time;
         std::string receipt;
     };
+    bool addVisit(const std::int32_t patientId,
+        const std::int32_t doctorId,
+        const std::string& date, const std::string& time);
     std::vector<Visit> getVisitsByPatient(const std::string& pesel);
     bool updateVisitStatus(const std::uint32_t visitId, const Visit::Status status);
 
-    enum class VisitAvailabilityStatus
+    struct VisitAvailability final
     {
-        FREE,
-        TAKEN,
-        YOUR_VISIT
+        enum class Status
+        {
+            FREE,
+            TAKEN,
+            YOUR_VISIT
+        } status;
+
+        std::vector<std::int32_t> takenDoctorsIds;
     };
-    VisitAvailabilityStatus checkAvailabilityOfVisit(const std::int32_t patientId,
+    VisitAvailability checkAvailabilityOfVisit(const std::int32_t patientId,
         const std::int32_t profession,
         const std::string& date,
         const std::string time);
+
+    std::optional<std::int32_t> getFreeDoctor(const std::int32_t& profession, const std::vector<std::int32_t> takenDcotorsIds);
 
 private:
     std::unique_ptr<SQLite::Database> mpDatabase;

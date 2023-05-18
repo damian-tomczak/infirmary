@@ -55,7 +55,7 @@
             }
             else
             {
-                $$<<"<a href=\"?doctorProfession=" << doctorProfession << "&register=" << date << hour << " class=\"btn btn-secondary my-2\">Reserve</a>";
+                $$<<"<a href=\"?doctorProfession=" << doctorProfession << "&register=" << date << " " << hour << "\" class=\"btn btn-secondary my-2\">Reserve</a>";
             }
             $$<<"</div>";
         }
@@ -76,7 +76,7 @@
         $$<<"</div>";
         if (i % 6 == 5)
         {
-            $$<<"</div";
+            $$<<"</div>";
         }
     }
 %>

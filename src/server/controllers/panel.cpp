@@ -312,15 +312,9 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
         date = ss.str();
     }
 
-    auto pRegister{pReq->getOptionalParameter<std::string>("register")};
-    if (pRegister != std::nullopt)
-    {
-        std::cout << "dupa\n";
-        std::cout << *pRegister << "\n";
-    }
-
     drogon::HttpViewData data;
     std::vector<std::string> hours;
+    // TODO: RETARD ALARM
     hours.emplace_back("09:00");
     hours.emplace_back("09:40");
     hours.emplace_back("10:20");
@@ -337,7 +331,33 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
     for (auto it{hours.begin()}; it != hours.end(); ++it)
     {
         availability.emplace_back(static_cast<int>(
-            database.checkAvailabilityOfVisit(pUser->id, profession, date, *it)));
+            database.checkAvailabilityOfVisit(pUser->id, profession, date, *it).status));
+    }
+
+    auto pRegister{pReq->getOptionalParameter<std::string>("register")};
+    if (pRegister != std::nullopt)
+    {
+        // TODO: Pity for the lack of std::views feature
+        std::string registrationDate, registrationTime;
+        std::istringstream ss(*pRegister);
+        std::getline(ss, registrationDate, ' ');
+        std::getline(ss, registrationTime, ' ');
+
+        auto takenDoctorsIds{database.checkAvailabilityOfVisit(
+            pUser->id,
+            profession,
+            registrationDate,
+            registrationTime
+        ).takenDoctorsIds};
+        auto pFreeDoctorId{database.getFreeDoctor(profession, takenDoctorsIds)};
+        if ((pFreeDoctorId != std::nullopt) && (database.addVisit(pUser->id, *pFreeDoctorId, registrationDate, registrationTime)))
+        {
+            std::cout << "visitsuccess\n";
+        }
+        else
+        {
+            std::cout << "visitfailure\n";
+        }
     }
 
     data.insert("date", date);
