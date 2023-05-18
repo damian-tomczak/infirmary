@@ -4,6 +4,8 @@
 #include <drogon/HttpSimpleController.h>
 #include <drogon/HttpResponse.h>
 
+#include <regex>
+
 class LoginSystemController
 {
 public:
@@ -36,18 +38,59 @@ public:
         return true;
     }
 
-protected:
-    bool isAlreadyLogged(const drogon::HttpRequestPtr& pReq, drogon::HttpResponsePtr& pResp)
+    static bool validPesel(const std::string& pesel)
     {
-        auto user{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
-        if (user)
+        std::regex regex(R"(^\d{11}$)");
+        if (!std::regex_match(pesel, regex))
         {
-            pResp = drogon::HttpResponse::newRedirectionResponse(tsrpp::createUrl("/panel"));
-            return true;
+            return false;
+        }
+        std::array<int, 10> weights{1, 3, 7, 9, 1, 3, 7, 9, 1, 3};
+        int sum{};
+        for (size_t i{0}; i < weights.size(); ++i)
+        {
+            sum += weights.at(i) * (pesel.at(i) - '0');
+        }
+        auto peselLastDigit{pesel.back() - '0'};
+        auto sumLastDigit{sum % 10};
+        if ((peselLastDigit != 0) && ((10 - (sumLastDigit) != peselLastDigit)))
+        {
+            return false;
+        }
+        else if ((peselLastDigit == 0) && (sumLastDigit != peselLastDigit))
+        {
+            return false;
         }
 
-        return false;
+        return true;
     }
+
+    static bool validPassword(const std::string& password)
+    {
+        std::regex regex(R"(^(?=.*\d).{9,}$)");
+        return std::regex_match(password, regex);
+    }
+
+    static bool validFirstName(const std::string& firstName)
+    {
+        std::regex regex(R"(^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ]{4,}$)");
+        return std::regex_match(firstName, regex);
+    }
+
+    static bool validLastName(const std::string& lastName)
+    {
+        std::regex regex(R"(^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ]{4,}$)");
+        return std::regex_match(lastName, regex);
+    }
+
+    static bool validEmail(const std::string& email)
+    {
+        std::regex regex(R"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})");
+        return std::regex_match(email, regex);
+    }
+
+protected:
+    bool isAlreadyLogged(const drogon::HttpRequestPtr& pReq, drogon::HttpResponsePtr& pResp);
 };
 
 class LoginController final : public drogon::HttpSimpleController<LoginController>, public LoginSystemController

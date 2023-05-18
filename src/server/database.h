@@ -48,6 +48,7 @@ public:
         Type type;
     };
     bool addUser(const User& user);
+    bool updateUser(const User& user);
     std::optional<Database::User> getUserbyPesel(const std::string& pesel);
     std::optional<Database::User> getUserbyId(const std::uint32_t id);
 
@@ -67,9 +68,10 @@ public:
         Status status;
         std::string date;
         std::string time;
+        std::string receipt;
     };
     std::vector<Visit> getVisitsByPatient(const std::string& pesel);
-    void updateVisitStatus(const std::uint32_t visitId, const Visit::Status status);
+    bool updateVisitStatus(const std::uint32_t visitId, const Visit::Status status);
 
 private:
     std::unique_ptr<SQLite::Database> mpDatabase;

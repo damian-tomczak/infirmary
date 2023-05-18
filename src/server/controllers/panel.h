@@ -12,6 +12,8 @@ public:
     METHOD_ADD(::Panel::doctor, "doctor");
     METHOD_ADD(::Panel::receptionist, "receptionist");
 
+    METHOD_ADD(::Panel::visitInformation, "visit-information");
+
     METHOD_ADD(::Panel::patientPersonal, "patient/personal");
     METHOD_ADD(::Panel::patientEditPersonal, "patient/edit-personal");
 
@@ -31,6 +33,9 @@ public:
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 
     // MEAT
+    void visitInformation(const drogon::HttpRequestPtr& pReq,
+        std::function<void(const drogon::HttpResponsePtr&)>&& callback);
+
     // Patient
     void patientPersonal(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);

@@ -30,6 +30,31 @@ bool Database::addUser(const User& user)
     return false;
 }
 
+bool Database::updateUser(const User& user)
+{
+    SQLite::Statement q{*mpDatabase, "UPDATE users SET "
+        "first_name = :first_name,"
+        "last_name = :last_name,"
+        "pesel = :pesel,"
+        "email = :email,"
+        "note = :note "
+        "WHERE id = :id"
+    };
+    q.bind(":id", user.id);
+    q.bind(":first_name", user.first_name);
+    q.bind(":last_name", user.last_name);
+    q.bind(":pesel", user.pesel);
+    q.bind(":email", user.email);
+    q.bind(":note", user.note);
+
+    // TODO: add validation
+    if (q.exec() == 1)
+    {
+        return true;
+    }
+
+    return false;
+}
 
 std::optional<Database::User> Database::getUserbyPesel(const std::string& pesel)
 {
@@ -108,7 +133,8 @@ std::vector<Database::Visit> Database::getVisitsByPatient(const std::string& pes
                 q.getColumn("doctor_id").getInt(),
                 Visit::Status{q.getColumn("status").getInt()},
                 q.getColumn("date"),
-                q.getColumn("time")
+                q.getColumn("time"),
+                q.getColumn("receipt")
             });
         }
     }
@@ -116,12 +142,17 @@ std::vector<Database::Visit> Database::getVisitsByPatient(const std::string& pes
     return result;
 }
 
-void Database::updateVisitStatus(const std::uint32_t visitId, const Database::Visit::Status status)
+bool Database::updateVisitStatus(const std::uint32_t visitId, const Database::Visit::Status status)
 {
     SQLite::Statement q{*mpDatabase, "UPDATE visits SET status = :status WHERE id = :id"};
     q.bind(":status", static_cast<uint32_t>(status));
     q.bind(":id", visitId);
 
-    q.executeStep();
+    if (q.exec() == 1)
+    {
+        return true;
+    }
+
+    return false;
 }
 }

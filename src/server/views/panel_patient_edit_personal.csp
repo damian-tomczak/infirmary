@@ -37,17 +37,15 @@
                         <h2>Personal information</h2>
                         <form action="edit-personal" method="post">
                             <div class="row text-center">
-                                <div>
-                                    <p>First Name: <input type="text" name="firstName" value="<%c++ $$<<firstName; %>"">
-                                    <p>Last Name: <input type="text" name="lastName" value="<%c++ $$<<lastName; %>">
-                                    <p>PESEL: <input type="text" name="pesel" value="<%c++ $$<<pesel; %>">
-                                    <p>Email:<input type="text" name="email" value="<%c++ $$<<email; %>">
-                                    <!-- TODO: PASSWORDS -->
-                                    <p>
-                                        <a href="/panel/patient"><input class="btn btn-secondary" value="Cancel changes"></a>
-                                        <input type="submit" class="btn btn-primary" value="Save changes">
-                                    </p>
-                                </div>
+                                <p>First Name: <input type="text" name="firstName" value="<%c++ $$<<firstName; %>"">
+                                <p>Last Name: <input type="text" name="lastName" value="<%c++ $$<<lastName; %>">
+                                <p>PESEL: <input type="text" name="pesel" value="<%c++ $$<<pesel; %>">
+                                <p>Email:<input type="text" name="email" value="<%c++ $$<<email; %>">
+                                <!-- TODO: PASSWORDS -->
+                                <p>
+                                    <a href="/panel/patient"><input class="btn btn-secondary" value="Cancel changes"></a>
+                                    <input type="submit" class="btn btn-primary" value="Save changes">
+                                </p>
                             </div>
                         </form>
                     </div>
