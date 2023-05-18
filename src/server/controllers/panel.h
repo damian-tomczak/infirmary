@@ -2,6 +2,9 @@
 
 #include <drogon/HttpController.h>
 
+#include <iomanip>
+#include <chrono>
+
 class Panel final : public drogon::HttpController<Panel>
 {
 public:
@@ -16,6 +19,7 @@ public:
 
     METHOD_ADD(::Panel::patientPersonal, "patient/personal");
     METHOD_ADD(::Panel::patientEditPersonal, "patient/edit-personal");
+    METHOD_ADD(::Panel::patientCalendar, "patient/calendar");
 
     METHOD_ADD(::Panel::doctorPersonal, "doctor/personal");
 
@@ -40,6 +44,8 @@ public:
     void patientPersonal(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
     void patientEditPersonal(const drogon::HttpRequestPtr& pReq,
+        std::function<void(const drogon::HttpResponsePtr&)>&& callback);
+    void patientCalendar(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 
     // Doctor

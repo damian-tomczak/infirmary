@@ -262,6 +262,59 @@ catch(const std::exception& e)
     ERROR_PAGE;
 }
 
+void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
+    std::function<void(const drogon::HttpResponsePtr&)>&& callback) try
+{
+    drogon::HttpResponsePtr pResp;
+
+    if (!LoginSystemController::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::PATIENT))
+    {
+        callback(pResp);
+        return;
+    }
+
+    tsrpp::Database database{SQLite::OPEN_READWRITE};
+    auto pDoctorProfession{pReq->getOptionalParameter<std::string>("doctorProfession")};
+    if (pDoctorProfession == std::nullopt)
+    {
+        throw std::runtime_error{"doctorProfession should be specified"};
+    }
+
+    std::string date;
+    auto pDateParameter{pReq->getOptionalParameter<std::string>("date")};
+    if (pDateParameter != std::nullopt)
+    {
+        date = *pDateParameter;
+    }
+    else
+    {
+        auto now{std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())};
+        std::tm buffer;
+        localtime_r(&now, &buffer);
+        std::stringstream ss;
+        ss << std::put_time(&buffer, "%Y-%m-%d");
+        date = ss.str();
+    }
+
+    auto pRegister{pReq->getOptionalParameter<std::string>("register")};
+    if (pRegister != std::nullopt)
+    {
+        std::cout << "dupa\n";
+        std::cout << *pRegister << "\n";
+    }
+
+    drogon::HttpViewData data;
+    data.insert("date", date);
+    data.insert("doctorProfession", *pDoctorProfession);
+
+    pResp = drogon::HttpResponse::newHttpViewResponse("panel_patient_calendar", data);
+    callback(pResp);
+}
+catch(const std::exception& e)
+{
+    ERROR_PAGE;
+}
+
 void Panel::doctorPersonal(const drogon::HttpRequestPtr& pReq,
     std::function<void(const drogon::HttpResponsePtr&)>&& callback) try
 {

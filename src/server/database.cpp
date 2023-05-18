@@ -74,7 +74,7 @@ std::optional<Database::User> Database::getUserbyPesel(const std::string& pesel)
             .email{q.getColumn("email").getString()},
             .note{q.getColumn("note").getString()},
             .role{User::Role{q.getColumn("role").getInt()}},
-            .type{User::Type{q.getColumn("type").getInt()}}
+            .type{User::Profession{q.getColumn("type").getInt()}}
         });
     }
 
@@ -99,7 +99,7 @@ std::optional<Database::User> Database::getUserbyId(const std::uint32_t id)
             .email{q.getColumn("email").getString()},
             .note{q.getColumn("note").getString()},
             .role{User::Role{q.getColumn("role").getInt()}},
-            .type{User::Type{q.getColumn("type").getInt()}}
+            .type{User::Profession{q.getColumn("type").getInt()}}
         });
     }
 

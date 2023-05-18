@@ -29,7 +29,7 @@ public:
             DOCTOR,
             RECEPTIONIST
         };
-        enum class Type
+        enum class Profession
         {
             INTERNIST,
             GASTROENTEROLOGIST,
@@ -45,7 +45,7 @@ public:
         std::string email;
         std::string note;
         Role role;
-        Type type;
+        Profession type;
     };
     bool addUser(const User& user);
     bool updateUser(const User& user);
