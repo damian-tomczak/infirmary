@@ -121,22 +121,20 @@ std::vector<Database::Visit> Database::getVisitsByPatient(const std::string& pes
         }
     }
 
-    {
-        SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE patient_id = :patient_id"};
-        q.bind(":patient_id", *pPatientid);
+    SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE patient_id = :patient_id"};
+    q.bind(":patient_id", *pPatientid);
 
-        while (q.executeStep())
-        {
-            result.emplace_back(Visit{
-                q.getColumn("id"),
-                q.getColumn("patient_id").getInt(),
-                q.getColumn("doctor_id").getInt(),
-                Visit::Status{q.getColumn("status").getInt()},
-                q.getColumn("date"),
-                q.getColumn("time"),
-                q.getColumn("receipt")
-            });
-        }
+    while (q.executeStep())
+    {
+        result.emplace_back(Visit{
+            q.getColumn("id"),
+            q.getColumn("patient_id").getInt(),
+            q.getColumn("doctor_id").getInt(),
+            Visit::Status{q.getColumn("status").getInt()},
+            q.getColumn("date"),
+            q.getColumn("time"),
+            q.getColumn("receipt")
+        });
     }
 
     return result;
@@ -154,5 +152,54 @@ bool Database::updateVisitStatus(const std::uint32_t visitId, const Database::Vi
     }
 
     return false;
+}
+
+Database::VisitAvailabilityStatus Database::checkAvailabilityOfVisit(const std::int32_t patientId,
+    const std::string& profession,
+    const std::string& date,
+    const std::string time)
+{
+    std::uint32_t numberOfDoctorsWithProfession{};
+    {
+        SQLite::Statement q{*mpDatabase, "SELECT COUNT(*) FROM users WHERE role = :role AND type = :type"};
+        q.bind(":role", static_cast<int>(User::Role::DOCTOR));
+        q.bind(":type", profession);
+
+        if (q.executeStep())
+        {
+            numberOfDoctorsWithProfession = q.getColumn(0);
+        }
+    }
+
+    SQLite::Statement q{*mpDatabase,
+        "SELECT patient_id, doctor_id, status FROM visits "
+        "JOIN users ON doctor_id = users.id "
+        "WHERE date = :date AND time = :time AND type = :type"};
+    q.bind(":type", profession);
+    q.bind(":date", date);
+    q.bind(":time", time);
+
+    std::uint32_t takenCounter{};
+    while (q.executeStep())
+    {
+        auto visitPatientId{q.getColumn("patient_id").getInt()};
+        if (visitPatientId == patientId)
+        {
+            return VisitAvailabilityStatus::YOUR_VISIT;
+        }
+
+        auto status{static_cast<Visit::Status>(q.getColumn("status").getInt())};
+        if ((status != Visit::Status::REQUESTED) && (status != Visit::Status::SCHEDULED) && (status != Visit::Status::COMPLETED))
+        {
+            takenCounter++;
+        }
+    }
+
+    if (takenCounter >= numberOfDoctorsWithProfession)
+    {
+        return VisitAvailabilityStatus::TAKEN;
+    }
+
+    return VisitAvailabilityStatus::FREE;
 }
 }

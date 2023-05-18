@@ -273,6 +273,8 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
         return;
     }
 
+    auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+
     tsrpp::Database database{SQLite::OPEN_READWRITE};
     auto pDoctorProfession{pReq->getOptionalParameter<std::string>("doctorProfession")};
     if (pDoctorProfession == std::nullopt)
@@ -282,9 +284,22 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
 
     std::string date;
     auto pDateParameter{pReq->getOptionalParameter<std::string>("date")};
+    bool isPastSelected{};
     if (pDateParameter != std::nullopt)
     {
         date = *pDateParameter;
+
+        std::tm tm{};
+        std::stringstream ss(date);
+        ss >> std::get_time(&tm, "%Y-%m-%d");
+
+        std::time_t inputTimeT = mktime(&tm);
+        std::time_t nowTimeT = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+        if (inputTimeT < nowTimeT)
+        {
+            isPastSelected = true;
+        }
     }
     else
     {
@@ -304,9 +319,31 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
     }
 
     drogon::HttpViewData data;
+    std::vector<std::string> hours;
+    hours.emplace_back("09:00");
+    hours.emplace_back("09:40");
+    hours.emplace_back("10:20");
+    hours.emplace_back("11:00");
+    hours.emplace_back("11:40");
+    hours.emplace_back("12:20");
+    hours.emplace_back("13:00");
+    hours.emplace_back("13:40");
+    hours.emplace_back("14:20");
+    hours.emplace_back("15:00");
+    hours.emplace_back("15:40");
+    hours.emplace_back("16:20");
+    std::vector<int> availability;
+    for (auto it{hours.begin()}; it != hours.end(); ++it)
+    {
+        availability.emplace_back(static_cast<int>(
+            database.checkAvailabilityOfVisit(pUser->id, *pDoctorProfession, date, *it)));
+    }
+
     data.insert("date", date);
     data.insert("doctorProfession", *pDoctorProfession);
-
+    data.insert("isPastSelected", isPastSelected);
+    data.insert("hours", hours);
+    data.insert("availability", availability);
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_patient_calendar", data);
     callback(pResp);
 }

@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <functional>
 #include <optional>
+#include <queue>
 
 namespace tsrpp
 {
@@ -62,6 +63,7 @@ public:
             SCHEDULED,
             COMPLETED
         };
+
         std::int32_t id;
         std::int32_t patient_id;
         std::int32_t doctor_id;
@@ -72,6 +74,17 @@ public:
     };
     std::vector<Visit> getVisitsByPatient(const std::string& pesel);
     bool updateVisitStatus(const std::uint32_t visitId, const Visit::Status status);
+
+    enum class VisitAvailabilityStatus
+    {
+        FREE,
+        TAKEN,
+        YOUR_VISIT
+    };
+    VisitAvailabilityStatus checkAvailabilityOfVisit(const std::int32_t patientId,
+        const std::string& profession,
+        const std::string& date,
+        const std::string time);
 
 private:
     std::unique_ptr<SQLite::Database> mpDatabase;

@@ -89,7 +89,7 @@ RegisterController::RegistrationStatus RegisterController::postRegister(const dr
     }
 
     auto repeatedPassword{pReq->getOptionalParameter<std::string>("repeatedPassword")};
-    if (password != repeatedPassword)
+    if (*password != *repeatedPassword)
     {
         return RegistrationStatus::DIFFERENT_PASSWORDS;
     }
