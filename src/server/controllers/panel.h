@@ -55,4 +55,24 @@ public:
     // Receptionist
     void receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
+
+private:
+    template<tsrpp::Database::User::Role role>
+    bool appendNote(const std::string& currentNote, const std::string& newNote)
+    {
+        if constexpr (role == tsrpp::Database::User::Role::PATIENT)
+        {
+            if (newNote.length() > currentNote.length())
+            {
+                std::string_view origin(newNote.data(), currentNote.length());
+
+                if (origin == currentNote)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
 };

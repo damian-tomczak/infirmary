@@ -2,11 +2,14 @@
     auto id=@@.get<std::string>("id");
     auto status=@@.get<std::string>("status");
     auto date=@@.get<std::string>("date");
+    auto time=@@.get<std::string>("date");
+    auto receipt=@@.get<std::string>("receipt");
 
     auto patientFirstName=@@.get<std::string>("patientFirstName");
     auto patientLastName=@@.get<std::string>("patientLastName");
     auto patientPesel=@@.get<std::string>("patientPesel");
     auto patientEmail=@@.get<std::string>("patientEmail");
+    auto patientNote=@@.get<std::string>("patientNote");
 
     auto doctorFirstName=@@.get<std::string>("doctorFirstName");
     auto doctorLastName=@@.get<std::string>("doctorLastName");
@@ -50,6 +53,7 @@
                                 <h2>Visit information</h2>
                                 <p>Status: <%c++ $$<<status; %></p>
                                 <p>Data: <%c++ $$<<date; %></p>
+                                <p>Time: <%c++ $$<<time; %></p>
                             </div>
                             <hr>
                             <div class="padding">
@@ -69,18 +73,18 @@
                             <hr>
                             <div>
                                 <h2 class="padding">Patient's Notes</h2>
-                                <div class="row d-flex justify-content-center">
-                                    <textarea rows="10" placeholder="Describe your health condition and list of pills your are taking here." class="ta"></textarea>
-                                </div>
                                 <div class="col text-center">
-                                    <a href="panel/patient/append-note" class="btn btn-secondary my-4 menu-button">Append Note</a>
+                                    <form method="post" class="row justify-content-center">
+                                        <textarea rows="6" placeholder="Describe your health condition and list of pills your are taking here." class="ta" name="note"><%c++ $$<<patientNote; %></textarea>
+                                        <input type="submit" value="Append Note" class="btn btn-secondary my-2 menu-button mb-4"></input>
+                                    </form>
                                 </div>
                             </div>
                             <hr>
                             <div>
                                 <h2 class="padding">Receipt</h2>
                                 <div class="row justify-content-center">
-                                    <textarea rows="10" placeholder="Receipts given during visit" class="ta"></textarea>
+                                    <textarea rows="10" placeholder="Receipts given during visit" class="ta"><%c++ $$<<receipt; %></textarea>
                                 </div>
                             </div>
                             <hr>

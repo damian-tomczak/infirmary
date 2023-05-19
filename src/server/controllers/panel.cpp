@@ -105,8 +105,28 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
         return;
     }
 
-    auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
     tsrpp::Database database{SQLite::OPEN_READWRITE};
+    tsrpp::PostAction postAction;
+    if (pReq->method() == drogon::HttpMethod::Post)
+    {
+        postAction = tsrpp::PostAction::REQUESTED_FAILURE;
+        auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+        auto pNote{pReq->getOptionalParameter<std::string>("note")};
+        if ((pUser != std::nullopt) && (pNote != std::nullopt) &&
+            appendNote<tsrpp::Database::User::Role::PATIENT>(pUser->note, *pNote))
+        {
+            pUser->note = *pNote;
+            if (database.updateUser(*pUser))
+            {
+                postAction = tsrpp::PostAction::REQUESTED_SUCCESS;
+                pReq->getSession()->modify<tsrpp::Database::User>("user", [&pUser](tsrpp::Database::User& sessionUser) {
+                    sessionUser = *pUser;
+                });
+            }
+        }
+    }
+
+    auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
     auto pCancelVisitId{pReq->getOptionalParameter<std::int32_t>("cancelVisit")};
     if (pCancelVisitId != std::nullopt)
     {
@@ -139,16 +159,20 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     data.insert("id", std::to_string(pVisit->id));
     data.insert("status", tsrpp::Database::Visit::statusInt2Str(pVisit->status));
     data.insert("date", pVisit->date);
+    data.insert("time", pVisit->time);
+    data.insert("receipt", pVisit->receipt);
 
     data.insert("patientFirstName", pPatient->first_name);
     data.insert("patientLastName", pPatient->last_name);
     data.insert("patientPesel", pPatient->pesel);
     data.insert("patientEmail", pPatient->email);
+    data.insert("patientNote", pPatient->note);
 
     data.insert("doctorFirstName", pDoctor->first_name);
     data.insert("doctorLastName", pDoctor->last_name);
     data.insert("doctorPesel", pDoctor->pesel);
     data.insert("doctorEmail", pDoctor->email);
+    (void) postAction;
 
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_patient_visit_information", data);
     callback(pResp);
@@ -176,22 +200,21 @@ void Panel::patientPersonal(const drogon::HttpRequestPtr& pReq,
         database.updateVisitStatus(*cancelVisit, tsrpp::Database::Visit::Status::CANCELLED);
     }
 
-    // TODO: complex note
     tsrpp::PostAction postAction;
     if (pReq->method() == drogon::HttpMethod::Post)
     {
         postAction = tsrpp::PostAction::REQUESTED_FAILURE;
         auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
         auto pNote{pReq->getOptionalParameter<std::string>("note")};
-        if ((pUser != std::nullopt) && (pNote != std::nullopt))
+        if ((pUser != std::nullopt) && (pNote != std::nullopt) &&
+            appendNote<tsrpp::Database::User::Role::PATIENT>(pUser->note, *pNote))
         {
-            auto user{*pUser};
-            user.note = *pNote;
-            if (database.updateUser(user))
+            pUser->note = *pNote;
+            if (database.updateUser(*pUser))
             {
                 postAction = tsrpp::PostAction::REQUESTED_SUCCESS;
-                pReq->getSession()->modify<tsrpp::Database::User>("user", [&user](tsrpp::Database::User& sessionUser) {
-                    sessionUser = user;
+                pReq->getSession()->modify<tsrpp::Database::User>("user", [&pUser](tsrpp::Database::User& sessionUser) {
+                    sessionUser = *pUser;
                 });
             }
         }
