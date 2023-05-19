@@ -163,7 +163,7 @@ public:
     }
     catch(const std::exception& e)
     {
-        ERROR_PAGE;
+        ERROR_PAGE(e);
     }
 
 
@@ -240,7 +240,7 @@ public:
     }
     catch(const std::exception& e)
     {
-        ERROR_PAGE;
+        ERROR_PAGE(e);
     }
 
 

@@ -32,7 +32,7 @@ void Panel::index(const drogon::HttpRequestPtr& pReq,
 }
 catch(const std::exception& e)
 {
-    ERROR_PAGE;
+    ERROR_PAGE(e);
 }
 
 void Panel::patient(const drogon::HttpRequestPtr& pReq,
@@ -52,7 +52,7 @@ void Panel::patient(const drogon::HttpRequestPtr& pReq,
 }
 catch(const std::exception& e)
 {
-    ERROR_PAGE;
+    ERROR_PAGE(e);
 }
 
 void Panel::doctor(const drogon::HttpRequestPtr& pReq,
@@ -72,7 +72,7 @@ void Panel::doctor(const drogon::HttpRequestPtr& pReq,
 }
 catch(const std::exception& e)
 {
-    ERROR_PAGE;
+    ERROR_PAGE(e);
 }
 
 void Panel::receptionist(const drogon::HttpRequestPtr& pReq,
@@ -92,14 +92,13 @@ void Panel::receptionist(const drogon::HttpRequestPtr& pReq,
 }
 catch(const std::exception& e)
 {
-    ERROR_PAGE;
+    ERROR_PAGE(e);
 }
 
 void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     std::function<void(const drogon::HttpResponsePtr&)>&& callback) try
 {
     drogon::HttpResponsePtr pResp;
-
     if (!LoginSystemController::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::PATIENT))
     {
         callback(pResp);
@@ -156,7 +155,7 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
 }
 catch(const std::exception& e)
 {
-    ERROR_PAGE;
+    ERROR_PAGE(e);
 }
 
 void Panel::patientPersonal(const drogon::HttpRequestPtr& pReq,
@@ -184,7 +183,7 @@ void Panel::patientPersonal(const drogon::HttpRequestPtr& pReq,
         postAction = tsrpp::PostAction::REQUESTED_FAILURE;
         auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
         auto pNote{pReq->getOptionalParameter<std::string>("note")};
-        if (pUser != std::nullopt && pNote != std::nullopt)
+        if ((pUser != std::nullopt) && (pNote != std::nullopt))
         {
             auto user{*pUser};
             user.note = *pNote;
@@ -236,7 +235,7 @@ void Panel::patientPersonal(const drogon::HttpRequestPtr& pReq,
 }
 catch(const std::exception& e)
 {
-    ERROR_PAGE;
+    ERROR_PAGE(e);
 }
 
 void Panel::patientEditPersonal(const drogon::HttpRequestPtr& pReq,
@@ -296,7 +295,7 @@ void Panel::patientEditPersonal(const drogon::HttpRequestPtr& pReq,
 }
 catch(const std::exception& e)
 {
-    ERROR_PAGE;
+    ERROR_PAGE(e);
 }
 
 void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
@@ -402,7 +401,7 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
 }
 catch(const std::exception& e)
 {
-    ERROR_PAGE;
+    ERROR_PAGE(e);
 }
 
 void Panel::doctorPersonal(const drogon::HttpRequestPtr& pReq,
@@ -422,7 +421,7 @@ void Panel::doctorPersonal(const drogon::HttpRequestPtr& pReq,
 }
 catch(const std::exception& e)
 {
-    ERROR_PAGE;
+    ERROR_PAGE(e);
 }
 
 void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
@@ -442,5 +441,5 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
 }
 catch(const std::exception& e)
 {
-    ERROR_PAGE;
+    ERROR_PAGE(e);
 }
