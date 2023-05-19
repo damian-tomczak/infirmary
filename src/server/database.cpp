@@ -56,9 +56,9 @@ bool Database::updateUser(const User& user)
     return false;
 }
 
-std::optional<Database::User> Database::getUserbyPesel(const std::string& pesel)
+std::optional<Database::User> Database::getUserByPesel(const std::string& pesel)
 {
-    std::optional<Database::User> result;
+    std::optional<User> result;
     SQLite::Statement q{*mpDatabase, "SELECT * FROM users WHERE pesel = :pesel LIMIT 1"};
 
     q.bind(":pesel", pesel);
@@ -81,9 +81,9 @@ std::optional<Database::User> Database::getUserbyPesel(const std::string& pesel)
     return result;
 }
 
-std::optional<Database::User> Database::getUserbyId(const std::uint32_t id)
+std::optional<Database::User> Database::getUserById(const std::int32_t id)
 {
-    std::optional<Database::User> result;
+    std::optional<User> result;
     SQLite::Statement q{*mpDatabase, "SELECT * FROM users WHERE id = :id LIMIT 1"};
 
     q.bind(":id", id);
@@ -130,7 +130,7 @@ bool Database::addVisit(const std::int32_t patientId,
 
 std::vector<Database::Visit> Database::getVisitsByPatient(const std::string& pesel)
 {
-    std::vector<Database::Visit> result;
+    std::vector<Visit> result;
 
     std::optional<std::uint32_t> pPatientid;
     {
@@ -162,10 +162,10 @@ std::vector<Database::Visit> Database::getVisitsByPatient(const std::string& pes
     return result;
 }
 
-bool Database::updateVisitStatus(const std::uint32_t visitId, const Database::Visit::Status status)
+bool Database::updateVisitStatus(const std::int32_t visitId, const Database::Visit::Status status)
 {
     SQLite::Statement q{*mpDatabase, "UPDATE visits SET status = :status WHERE id = :id"};
-    q.bind(":status", static_cast<uint32_t>(status));
+    q.bind(":status", static_cast<std::int32_t>(status));
     q.bind(":id", visitId);
 
     if (q.exec() == 1)
@@ -174,6 +174,29 @@ bool Database::updateVisitStatus(const std::uint32_t visitId, const Database::Vi
     }
 
     return false;
+}
+
+std::optional<Database::Visit> Database::getVisitById(const std::int32_t id)
+{
+    std::optional<Visit> result;
+    SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE id = :id LIMIT 1"};
+
+    q.bind(":id", id);
+
+    if (q.executeStep())
+    {
+        result = std::make_optional(Visit{
+            .id{q.getColumn("id")},
+            .patient_id{q.getColumn("patient_id").getInt()},
+            .doctor_id{q.getColumn("doctor_id").getInt()},
+            .status{static_cast<Visit::Status>(q.getColumn("status").getInt())},
+            .date{q.getColumn("date").getString()},
+            .time{q.getColumn("time").getString()},
+            .receipt{q.getColumn("receipt").getString()}
+        });
+    }
+
+    return result;
 }
 
 Database::VisitAvailability Database::checkAvailabilityOfVisit(const std::int32_t patientId,
@@ -212,14 +235,14 @@ Database::VisitAvailability Database::checkAvailabilityOfVisit(const std::int32_
         }
 
         auto status{static_cast<Visit::Status>(q.getColumn("status").getInt())};
-        if ((status != Visit::Status::REQUESTED) && (status != Visit::Status::SCHEDULED) && (status != Visit::Status::COMPLETED))
+        if ((status == Visit::Status::REQUESTED) || (status == Visit::Status::SCHEDULED) || (status == Visit::Status::COMPLETED))
         {
             takenCounter++;
             result.takenDoctorsIds.emplace_back(q.getColumn("doctor_id").getInt());
         }
     }
 
-    if (takenCounter >= numberOfDoctorsWithProfession)
+    if ((result.status != VisitAvailability::Status::YOUR_VISIT) && (takenCounter >= numberOfDoctorsWithProfession))
     {
         result.status = VisitAvailability::Status::TAKEN;
     }

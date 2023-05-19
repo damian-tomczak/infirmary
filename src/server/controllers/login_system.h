@@ -129,7 +129,7 @@ public:
             {
                 tsrpp::Database database{SQLite::OPEN_READWRITE};
                 pResp = drogon::HttpResponse::newRedirectionResponse(tsrpp::createUrl("/panel"));
-#ifdef NDEBUG
+#ifndef NDEBUG
     auto pesel{pReq->getOptionalParameter<std::string>("pesel")};
 #else
     std::optional<std::string> pesel{"00302800690"};
@@ -138,7 +138,7 @@ public:
                 {
                     throw std::runtime_error{"login was successful, after which the pesel couldn't be found"};
                 }
-                auto user{database.getUserbyPesel(*pesel)};
+                auto user{database.getUserByPesel(*pesel)};
                 if (!user)
                 {
                     throw std::runtime_error{"login was successful, after which the user couldn't be found"};

@@ -106,14 +106,51 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
         return;
     }
 
+    auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
     tsrpp::Database database{SQLite::OPEN_READWRITE};
-    auto pCancelVisit{pReq->getOptionalParameter<std::uint32_t>("cancelVisit")};
-    if (pCancelVisit != std::nullopt)
+    auto pCancelVisitId{pReq->getOptionalParameter<std::int32_t>("cancelVisit")};
+    if (pCancelVisitId != std::nullopt)
     {
-        database.updateVisitStatus(*pCancelVisit, tsrpp::Database::Visit::Status::CANCELLED);
+        database.updateVisitStatus(*pCancelVisitId, tsrpp::Database::Visit::Status::CANCELLED);
     }
-    auto pVisit{pReq->getSession()->getOptional<tsrpp::Database::Visit>("visit")};
+
+    auto pVisitId{pReq->getOptionalParameter<std::string>("id")};
+    if (pVisitId == std::nullopt)
+    {
+        throw std::runtime_error{"visit id should be specified"};
+    }
+    auto visitId{std::stoi(*pVisitId)};
+    auto pVisit{database.getVisitById(visitId)};
+    if (pVisit->patient_id != pUser->id)
+    {
+        throw std::runtime_error{"you are not allowed to see that"};
+    }
+    auto pPatient{database.getUserById(pVisit->patient_id)};
+    if (pPatient == std::nullopt)
+    {
+        throw std::runtime_error{"patient doesn't exist"};
+    }
+    auto pDoctor{database.getUserById(pVisit->doctor_id)};
+    if (pDoctor == std::nullopt)
+    {
+        throw std::runtime_error{"doctor doesn't exist"};
+    }
+
     drogon::HttpViewData data;
+    data.insert("id", std::to_string(pVisit->id));
+    data.insert("status", tsrpp::Database::Visit::statusInt2Str(pVisit->status));
+    data.insert("date", pVisit->date);
+
+    data.insert("patientFirstName", pPatient->first_name);
+    data.insert("patientLastName", pPatient->last_name);
+    data.insert("patientPesel", pPatient->pesel);
+    data.insert("patientEmail", pPatient->email);
+
+    data.insert("doctorFirstName", pDoctor->first_name);
+    data.insert("doctorLastName", pDoctor->last_name);
+    data.insert("doctorPesel", pDoctor->pesel);
+    data.insert("doctorEmail", pDoctor->email);
+
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_patient_visit_information", data);
     callback(pResp);
 }
@@ -181,9 +218,9 @@ void Panel::patientPersonal(const drogon::HttpRequestPtr& pReq,
     {
         ids.emplace_back(static_cast<int>(it->id));
         statuses.emplace_back(static_cast<int>(it->status));
-        doctorsType.emplace_back(static_cast<int>(database.getUserbyId(it->doctor_id)->type));
-        doctorsFirstName.emplace_back(database.getUserbyId(it->doctor_id)->first_name);
-        doctorsLastName.emplace_back(database.getUserbyId(it->doctor_id)->last_name);
+        doctorsType.emplace_back(static_cast<int>(database.getUserById(it->doctor_id)->type));
+        doctorsFirstName.emplace_back(database.getUserById(it->doctor_id)->first_name);
+        doctorsLastName.emplace_back(database.getUserById(it->doctor_id)->last_name);
         dates.emplace_back(it->date);
         times.emplace_back(it->time);
     }
@@ -312,6 +349,28 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
         date = ss.str();
     }
 
+    auto pRegister{pReq->getOptionalParameter<std::string>("register")};
+    if (pRegister != std::nullopt)
+    {
+        // TODO: Pity for the lack of std::views feature
+        std::string registrationDate, registrationTime;
+        std::istringstream ss(*pRegister);
+        std::getline(ss, registrationDate, ' ');
+        std::getline(ss, registrationTime, ' ');
+
+        auto takenDoctorsIds{database.checkAvailabilityOfVisit(
+            pUser->id,
+            profession,
+            registrationDate,
+            registrationTime
+        ).takenDoctorsIds};
+        auto pFreeDoctorId{database.getFreeDoctor(profession, takenDoctorsIds)};
+        if (pFreeDoctorId != std::nullopt)
+        {
+            database.addVisit(pUser->id, *pFreeDoctorId, registrationDate, registrationTime);
+        }
+    }
+
     drogon::HttpViewData data;
     std::vector<std::string> hours;
     // TODO: RETARD ALARM
@@ -333,33 +392,6 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
         availability.emplace_back(static_cast<int>(
             database.checkAvailabilityOfVisit(pUser->id, profession, date, *it).status));
     }
-
-    auto pRegister{pReq->getOptionalParameter<std::string>("register")};
-    if (pRegister != std::nullopt)
-    {
-        // TODO: Pity for the lack of std::views feature
-        std::string registrationDate, registrationTime;
-        std::istringstream ss(*pRegister);
-        std::getline(ss, registrationDate, ' ');
-        std::getline(ss, registrationTime, ' ');
-
-        auto takenDoctorsIds{database.checkAvailabilityOfVisit(
-            pUser->id,
-            profession,
-            registrationDate,
-            registrationTime
-        ).takenDoctorsIds};
-        auto pFreeDoctorId{database.getFreeDoctor(profession, takenDoctorsIds)};
-        if ((pFreeDoctorId != std::nullopt) && (database.addVisit(pUser->id, *pFreeDoctorId, registrationDate, registrationTime)))
-        {
-            std::cout << "visitsuccess\n";
-        }
-        else
-        {
-            std::cout << "visitfailure\n";
-        }
-    }
-
     data.insert("date", date);
     data.insert("doctorProfession", *pDoctorProfession);
     data.insert("isPastSelected", isPastSelected);

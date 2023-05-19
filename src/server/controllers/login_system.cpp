@@ -16,7 +16,7 @@ LoginController::LoginStatus LoginController::postLogin(const drogon::HttpReques
 {
     tsrpp::Database database{SQLite::OPEN_READWRITE};
 
-#ifdef NDEBUG
+#ifndef NDEBUG
     auto pesel{pReq->getOptionalParameter<std::string>("pesel")};
 #else
     std::optional<std::string> pesel{"00302800690"};
@@ -26,7 +26,7 @@ LoginController::LoginStatus LoginController::postLogin(const drogon::HttpReques
         return LoginStatus::INCORRECT_PESEL;
     }
 
-#ifdef NDEBUG
+#ifndef NDEBUG
     auto password{pReq->getOptionalParameter<std::string>("password")};
 #else
     std::optional<std::string> password{"password123"};
@@ -36,7 +36,7 @@ LoginController::LoginStatus LoginController::postLogin(const drogon::HttpReques
         return LoginStatus::INCORRECT_PASSWORD;
     }
 
-    auto user{database.getUserbyPesel(*pesel)};
+    auto user{database.getUserByPesel(*pesel)};
     if (user)
     {
         if (tsrpp::verifyPassword(*password, user->password))
@@ -82,7 +82,7 @@ RegisterController::RegistrationStatus RegisterController::postRegister(const dr
         return RegistrationStatus::INCORRECT_PASSWORD;
     }
 
-    auto hasUser{database.getUserbyPesel(pesel.value())};
+    auto hasUser{database.getUserByPesel(pesel.value())};
     if (hasUser)
     {
         return RegistrationStatus::ALREADY_EXISTS;

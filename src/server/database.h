@@ -71,8 +71,8 @@ public:
     };
     bool addUser(const User& user);
     bool updateUser(const User& user);
-    std::optional<Database::User> getUserbyPesel(const std::string& pesel);
-    std::optional<Database::User> getUserbyId(const std::uint32_t id);
+    std::optional<Database::User> getUserByPesel(const std::string& pesel);
+    std::optional<Database::User> getUserById(const std::int32_t id);
 
     struct Visit final
     {
@@ -84,6 +84,18 @@ public:
             SCHEDULED,
             COMPLETED
         };
+        static std::string statusInt2Str(const Status status)
+        {
+            switch(status)
+            {
+                case Status::REQUESTED: return "Requested";
+                case Status::REJECTED: return "Requested";
+                case Status::CANCELLED: return "Cancelled";
+                case Status::SCHEDULED: return "Scheduled";
+                case Status::COMPLETED: return "Completed";
+                default: throw std::runtime_error{"invalid status"};
+            }
+        }
 
         std::int32_t id;
         std::int32_t patient_id;
@@ -97,7 +109,8 @@ public:
         const std::int32_t doctorId,
         const std::string& date, const std::string& time);
     std::vector<Visit> getVisitsByPatient(const std::string& pesel);
-    bool updateVisitStatus(const std::uint32_t visitId, const Visit::Status status);
+    bool updateVisitStatus(const std::int32_t visitId, const Visit::Status status);
+    std::optional<Database::Visit> getVisitById(const std::int32_t id);
 
     struct VisitAvailability final
     {
