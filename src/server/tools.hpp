@@ -45,6 +45,13 @@ inline constexpr std::string_view response{
 
 namespace tsrpp
 {
+enum class PostAction
+{
+    NOT_REQUESTED,
+    REQUESTED_FAILURE,
+    REQUESTED_SUCCESS
+};
+
 inline constexpr std::string_view salt{"tsrpp"};
 
 inline std::string hashPassword(const std::string& password)

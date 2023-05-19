@@ -31,6 +31,14 @@
     padding: 8px;
 }
 
+.visit-info .padding {
+    padding-left:180px;
+}
+
 .visits tr:nth-child(odd) {
     background-color: #dddddd;
+}
+
+.ta {
+    width: 60%
 }

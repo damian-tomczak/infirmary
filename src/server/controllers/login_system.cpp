@@ -1,12 +1,16 @@
 #include "login_system.h"
 
-#include <regex>
+bool LoginSystemController::isAlreadyLogged(const drogon::HttpRequestPtr& pReq, drogon::HttpResponsePtr& pResp)
+{
+    auto user{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+    if (user)
+    {
+        pResp = drogon::HttpResponse::newRedirectionResponse(tsrpp::createUrl("/panel"));
+        return true;
+    }
 
-bool validFirstName(const std::string& firstName);
-bool validLastName(const std::string& lastName);
-bool validPesel(const std::string& pesel);
-bool validEmail(const std::string& email);
-bool validPassword(const std::string& password);
+    return false;
+}
 
 LoginController::LoginStatus LoginController::postLogin(const drogon::HttpRequestPtr& pReq)
 {
@@ -85,7 +89,7 @@ RegisterController::RegistrationStatus RegisterController::postRegister(const dr
     }
 
     auto repeatedPassword{pReq->getOptionalParameter<std::string>("repeatedPassword")};
-    if (password != repeatedPassword)
+    if (*password != *repeatedPassword)
     {
         return RegistrationStatus::DIFFERENT_PASSWORDS;
     }
@@ -106,55 +110,4 @@ RegisterController::RegistrationStatus RegisterController::postRegister(const dr
     }
 
     return RegistrationStatus::SUCCESS;
-}
-
-bool validPesel(const std::string& pesel)
-{
-    std::regex regex(R"(^\d{11}$)");
-    if (!std::regex_match(pesel, regex))
-    {
-        return false;
-    }
-    std::array<int, 10> weights{1, 3, 7, 9, 1, 3, 7, 9, 1, 3};
-    int sum{};
-    for (size_t i{0}; i < weights.size(); ++i)
-    {
-        sum += weights.at(i) * (pesel.at(i) - '0');
-    }
-    auto peselLastDigit{pesel.back() - '0'};
-    auto sumLastDigit{sum % 10};
-    if ((peselLastDigit != 0) && ((10 - (sumLastDigit) != peselLastDigit)))
-    {
-        return false;
-    }
-    else if ((peselLastDigit == 0) && (sumLastDigit != peselLastDigit))
-    {
-        return false;
-    }
-
-    return true;
-}
-
-bool validPassword(const std::string& password)
-{
-    std::regex regex(R"(^(?=.*\d).{9,}$)");
-    return std::regex_match(password, regex);
-}
-
-bool validFirstName(const std::string& firstName)
-{
-    std::regex regex(R"(^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ]{4,}$)");
-    return std::regex_match(firstName, regex);
-}
-
-bool validLastName(const std::string& lastName)
-{
-    std::regex regex(R"(^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ]{4,}$)");
-    return std::regex_match(lastName, regex);
-}
-
-bool validEmail(const std::string& email)
-{
-    std::regex regex(R"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})");
-    return std::regex_match(email, regex);
 }

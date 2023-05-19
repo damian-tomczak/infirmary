@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <functional>
 #include <optional>
+#include <queue>
 
 namespace tsrpp
 {
@@ -29,13 +30,34 @@ public:
             DOCTOR,
             RECEPTIONIST
         };
-        enum class Type
+        enum class Profession
         {
             INTERNIST,
             GASTROENTEROLOGIST,
             PULMONOLOGIST,
             OCULIST
         };
+        static std::int32_t roleString2Int(const std::string& profession)
+        {
+            if (profession == "internist")
+            {
+                return 0;
+            }
+            else if (profession == "gastroenterologist")
+            {
+                return 1;
+            }
+            else if (profession == "pulmonologist")
+            {
+                return 2;
+            }
+            else if (profession == "oculist")
+            {
+                return 3;
+            }
+
+            return -1;
+        }
 
         std::int32_t id;
         std::string pesel;
@@ -45,9 +67,10 @@ public:
         std::string email;
         std::string note;
         Role role;
-        Type type;
+        Profession type;
     };
     bool addUser(const User& user);
+    bool updateUser(const User& user);
     std::optional<Database::User> getUserbyPesel(const std::string& pesel);
     std::optional<Database::User> getUserbyId(const std::uint32_t id);
 
@@ -61,14 +84,38 @@ public:
             SCHEDULED,
             COMPLETED
         };
+
         std::int32_t id;
         std::int32_t patient_id;
         std::int32_t doctor_id;
         Status status;
         std::string date;
         std::string time;
+        std::string receipt;
     };
+    bool addVisit(const std::int32_t patientId,
+        const std::int32_t doctorId,
+        const std::string& date, const std::string& time);
     std::vector<Visit> getVisitsByPatient(const std::string& pesel);
+    bool updateVisitStatus(const std::uint32_t visitId, const Visit::Status status);
+
+    struct VisitAvailability final
+    {
+        enum class Status
+        {
+            FREE,
+            TAKEN,
+            YOUR_VISIT
+        } status;
+
+        std::vector<std::int32_t> takenDoctorsIds;
+    };
+    VisitAvailability checkAvailabilityOfVisit(const std::int32_t patientId,
+        const std::int32_t profession,
+        const std::string& date,
+        const std::string time);
+
+    std::optional<std::int32_t> getFreeDoctor(const std::int32_t& profession, const std::vector<std::int32_t> takenDcotorsIds);
 
 private:
     std::unique_ptr<SQLite::Database> mpDatabase;

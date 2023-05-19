@@ -30,11 +30,36 @@ bool Database::addUser(const User& user)
     return false;
 }
 
+bool Database::updateUser(const User& user)
+{
+    SQLite::Statement q{*mpDatabase, "UPDATE users SET "
+        "first_name = :first_name,"
+        "last_name = :last_name,"
+        "pesel = :pesel,"
+        "email = :email,"
+        "note = :note "
+        "WHERE id = :id"
+    };
+    q.bind(":id", user.id);
+    q.bind(":first_name", user.first_name);
+    q.bind(":last_name", user.last_name);
+    q.bind(":pesel", user.pesel);
+    q.bind(":email", user.email);
+    q.bind(":note", user.note);
+
+    // TODO: add validation
+    if (q.exec() == 1)
+    {
+        return true;
+    }
+
+    return false;
+}
 
 std::optional<Database::User> Database::getUserbyPesel(const std::string& pesel)
 {
     std::optional<Database::User> result;
-    SQLite::Statement q{*mpDatabase, "SELECT * FROM users WHERE pesel=:pesel LIMIT 1"};
+    SQLite::Statement q{*mpDatabase, "SELECT * FROM users WHERE pesel = :pesel LIMIT 1"};
 
     q.bind(":pesel", pesel);
 
@@ -49,7 +74,7 @@ std::optional<Database::User> Database::getUserbyPesel(const std::string& pesel)
             .email{q.getColumn("email").getString()},
             .note{q.getColumn("note").getString()},
             .role{User::Role{q.getColumn("role").getInt()}},
-            .type{User::Type{q.getColumn("type").getInt()}}
+            .type{User::Profession{q.getColumn("type").getInt()}}
         });
     }
 
@@ -59,7 +84,7 @@ std::optional<Database::User> Database::getUserbyPesel(const std::string& pesel)
 std::optional<Database::User> Database::getUserbyId(const std::uint32_t id)
 {
     std::optional<Database::User> result;
-    SQLite::Statement q{*mpDatabase, "SELECT * FROM users WHERE id=:id LIMIT 1"};
+    SQLite::Statement q{*mpDatabase, "SELECT * FROM users WHERE id = :id LIMIT 1"};
 
     q.bind(":id", id);
 
@@ -74,11 +99,33 @@ std::optional<Database::User> Database::getUserbyId(const std::uint32_t id)
             .email{q.getColumn("email").getString()},
             .note{q.getColumn("note").getString()},
             .role{User::Role{q.getColumn("role").getInt()}},
-            .type{User::Type{q.getColumn("type").getInt()}}
+            .type{User::Profession{q.getColumn("type").getInt()}}
         });
     }
 
     return result;
+}
+
+bool Database::addVisit(const std::int32_t patientId,
+    const std::int32_t doctorId,
+    const std::string& date,
+    const std::string& time)
+{
+    SQLite::Statement q{*mpDatabase, "INSERT INTO visits(patient_id, doctor_id, status, date, time)"
+        "VALUES (:patient_id, :doctor_id, :status, :date, :time)"};
+
+    q.bind(":patient_id", patientId);
+    q.bind(":doctor_id", doctorId);
+    q.bind(":status", static_cast<std::int32_t>(Visit::Status::REQUESTED));
+    q.bind(":date", date);
+    q.bind(":time", time);
+
+    if (q.exec() == 1)
+    {
+        return true;
+    }
+
+    return false;
 }
 
 std::vector<Database::Visit> Database::getVisitsByPatient(const std::string& pesel)
@@ -87,7 +134,7 @@ std::vector<Database::Visit> Database::getVisitsByPatient(const std::string& pes
 
     std::optional<std::uint32_t> pPatientid;
     {
-        SQLite::Statement q{*mpDatabase, "SELECT id FROM users WHERE pesel=:pesel LIMIT 1"};
+        SQLite::Statement q{*mpDatabase, "SELECT id FROM users WHERE pesel = :pesel LIMIT 1"};
         q.bind(":pesel", pesel);
 
         if (q.executeStep())
@@ -96,20 +143,113 @@ std::vector<Database::Visit> Database::getVisitsByPatient(const std::string& pes
         }
     }
 
-    {
-        SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE patient_id=:patient_id"};
-        q.bind(":patient_id", *pPatientid);
+    SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE patient_id = :patient_id"};
+    q.bind(":patient_id", *pPatientid);
 
-        while (q.executeStep())
+    while (q.executeStep())
+    {
+        result.emplace_back(Visit{
+            q.getColumn("id"),
+            q.getColumn("patient_id").getInt(),
+            q.getColumn("doctor_id").getInt(),
+            Visit::Status{q.getColumn("status").getInt()},
+            q.getColumn("date"),
+            q.getColumn("time"),
+            q.getColumn("receipt")
+        });
+    }
+
+    return result;
+}
+
+bool Database::updateVisitStatus(const std::uint32_t visitId, const Database::Visit::Status status)
+{
+    SQLite::Statement q{*mpDatabase, "UPDATE visits SET status = :status WHERE id = :id"};
+    q.bind(":status", static_cast<uint32_t>(status));
+    q.bind(":id", visitId);
+
+    if (q.exec() == 1)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+Database::VisitAvailability Database::checkAvailabilityOfVisit(const std::int32_t patientId,
+    const std::int32_t profession,
+    const std::string& date,
+    const std::string time)
+{
+    VisitAvailability result{};
+    std::uint32_t numberOfDoctorsWithProfession{};
+    {
+        SQLite::Statement q{*mpDatabase, "SELECT COUNT(*) FROM users WHERE role = :role AND type = :type"};
+        q.bind(":role", static_cast<int>(User::Role::DOCTOR));
+        q.bind(":type", profession);
+
+        if (q.executeStep())
         {
-            result.emplace_back(Visit{
-                q.getColumn("id"),
-                q.getColumn("patient_id").getInt(),
-                q.getColumn("doctor_id").getInt(),
-                Visit::Status{q.getColumn("status").getInt()},
-                q.getColumn("date")
-            });
+            numberOfDoctorsWithProfession = q.getColumn(0);
         }
+    }
+
+    SQLite::Statement q{*mpDatabase,
+        "SELECT patient_id, doctor_id, status FROM visits "
+        "JOIN users ON doctor_id = users.id "
+        "WHERE date = :date AND time = :time AND type = :type"};
+    q.bind(":type", profession);
+    q.bind(":date", date);
+    q.bind(":time", time);
+
+    std::uint32_t takenCounter{};
+    while (q.executeStep())
+    {
+        auto visitPatientId{q.getColumn("patient_id").getInt()};
+        if (visitPatientId == patientId)
+        {
+            result.status = VisitAvailability::Status::YOUR_VISIT;
+        }
+
+        auto status{static_cast<Visit::Status>(q.getColumn("status").getInt())};
+        if ((status != Visit::Status::REQUESTED) && (status != Visit::Status::SCHEDULED) && (status != Visit::Status::COMPLETED))
+        {
+            takenCounter++;
+            result.takenDoctorsIds.emplace_back(q.getColumn("doctor_id").getInt());
+        }
+    }
+
+    if (takenCounter >= numberOfDoctorsWithProfession)
+    {
+        result.status = VisitAvailability::Status::TAKEN;
+    }
+
+    return result;
+}
+
+std::optional<std::int32_t> Database::getFreeDoctor(const std::int32_t& profession,
+    const std::vector<std::int32_t> takenDoctorsIds)
+{
+    std::optional<std::int32_t> result;
+
+    std::string takenDoctorsStr;
+    for (auto& id : takenDoctorsIds)
+    {
+        takenDoctorsStr += std::to_string(id) + ',';
+    }
+    if (takenDoctorsStr.length() != 0)
+    {
+        takenDoctorsStr.pop_back();
+    }
+
+    SQLite::Statement q{*mpDatabase, "SELECT id FROM users "
+        "WHERE type = :type AND id NOT IN (" + takenDoctorsStr + ")"};
+
+    q.bind(":type", profession);
+
+    if (q.executeStep())
+    {
+        result = q.getColumn("id");
     }
 
     return result;

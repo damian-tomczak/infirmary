@@ -23,10 +23,10 @@
                         <h1><a href="/">Welcome to Infirmary</a></h1>
                         <a href="personal" class="btn btn-primary my-2 menu-button mb-4">Personal information</a>
 
-                        <a href="calendar/internist" class="btn btn-secondary my-2 menu-button">Internist</a>
-                        <a href="calendar/gastroenterologist" class="btn btn-secondary my-2 menu-button">Gastroenterologist</a>
-                        <a href="calendar/pulmonologist" class="btn btn-secondary my-2 menu-button">Pulmonologist</a>
-                        <a href="calendar/oculist" class="btn btn-secondary my-2 menu-button mb-4">Oculist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=internist" class="btn btn-secondary my-2 menu-button">Internist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=gastroenterologist" class="btn btn-secondary my-2 menu-button">Gastroenterologist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=pulmonologist" class="btn btn-secondary my-2 menu-button">Pulmonologist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=oculist" class="btn btn-secondary my-2 menu-button mb-4">Oculist</a>
 
                         <a href="/logout" class="btn btn-secondary my-2 menu-button">Logout</a>
                         <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
@@ -37,17 +37,15 @@
                         <h2>Personal information</h2>
                         <form action="edit-personal" method="post">
                             <div class="row text-center">
-                                <div>
-                                    <p>First Name: <input type="text" name="firstName" value="<%c++ $$<<firstName; %>"">
-                                    <p>Last Name: <input type="text" name="lastName" value="<%c++ $$<<lastName; %>">
-                                    <p>PESEL: <input type="text" name="pesel" value="<%c++ $$<<pesel; %>">
-                                    <p>Email:<input type="text" name="email" value="<%c++ $$<<email; %>">
-                                    <!-- TODO: PASSWORDS -->
-                                    <p>
-                                        <a href="/panel/patient"><input class="btn btn-secondary" value="Cancel changes"></a>
-                                        <input type="submit" class="btn btn-primary" value="Save changes">
-                                    </p>
-                                </div>
+                                <p>First Name: <input type="text" name="firstName" value="<%c++ $$<<firstName; %>"">
+                                <p>Last Name: <input type="text" name="lastName" value="<%c++ $$<<lastName; %>">
+                                <p>PESEL: <input type="text" name="pesel" value="<%c++ $$<<pesel; %>">
+                                <p>Email:<input type="text" name="email" value="<%c++ $$<<email; %>">
+                                <!-- TODO: PASSWORDS -->
+                                <p>
+                                    <a href="/panel/patient"><input class="btn btn-secondary" value="Cancel changes"></a>
+                                    <input type="submit" class="btn btn-primary" value="Save changes">
+                                </p>
                             </div>
                         </form>
                     </div>
