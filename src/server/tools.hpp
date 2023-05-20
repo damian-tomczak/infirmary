@@ -35,8 +35,10 @@ NOT_MOVEABLE(TypeName)
     drogon::HttpResponsePtr pResp;                                                                   \
     fmt::print(std::cerr, fmt::format(fmt::fg(fmt::color::red), "tsrpp::exception {}\n", e.what())); \
     pResp = drogon::HttpResponse::newHttpResponse();                                                 \
-    pResp->setBody("<p>Something went wrong... " + std::string{exception.what()} + "</p>"            \
-        "<p><a href=\"" MAIN_URL "\">Return to the Welcome Page</a></p>");                           \
+    auto body{"<p>Something went wrong... " + std::string{exception.what()} + "</p>"                 \
+        R"(<p><a href="mailto:contact@damian-tomczak.pl">Technical Support</a></p>)"                 \
+        R"(<p><a href=")" MAIN_URL R"(">Return to the Welcome Page</a></p>)"};                       \
+    pResp->setBody(body);                                                                            \
     callback(pResp);
 
 namespace tsrpp

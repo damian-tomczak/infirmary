@@ -25,13 +25,7 @@ public:
         {
             if (user->role != role)
             {
-                static constexpr std::string_view response{
-                    "<p>You are not allowed to see that</p>"
-                    "<p><a href=\"" MAIN_URL "\">Return to the Welcome Page</a></p>"
-                };
-                pResp = drogon::HttpResponse::newHttpResponse();
-                pResp->setBody(std::string{response});
-                return false;
+                throw std::runtime_error{"you are not allowed to see that"};
             }
         }
 

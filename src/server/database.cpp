@@ -128,7 +128,7 @@ bool Database::addVisit(const std::int32_t patientId,
     return false;
 }
 
-std::vector<Database::Visit> Database::getVisitsByPatient(const std::string& pesel)
+std::vector<Database::Visit> Database::getVisitsByPatientPesel(const std::string& pesel)
 {
     std::vector<Visit> result;
 
@@ -145,6 +145,30 @@ std::vector<Database::Visit> Database::getVisitsByPatient(const std::string& pes
 
     SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE patient_id = :patient_id"};
     q.bind(":patient_id", *pPatientid);
+
+    while (q.executeStep())
+    {
+        result.emplace_back(Visit{
+            q.getColumn("id"),
+            q.getColumn("patient_id").getInt(),
+            q.getColumn("doctor_id").getInt(),
+            Visit::Status{q.getColumn("status").getInt()},
+            q.getColumn("date"),
+            q.getColumn("time"),
+            q.getColumn("receipt")
+        });
+    }
+
+    return result;
+}
+
+std::vector<Database::Visit> Database::getVisitsByDoctorIdAndDate(const std::int32_t id, const std::string& date)
+{
+    std::vector<Visit> result;
+
+    SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE doctor_id = :doctor_id AND date = :date"};
+    q.bind(":doctor_id", id);
+    q.bind(":date", date);
 
     while (q.executeStep())
     {
