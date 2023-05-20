@@ -21,7 +21,11 @@ public:
     METHOD_ADD(::Panel::patientEditPersonal, "patient/edit-personal");
     METHOD_ADD(::Panel::patientCalendar, "patient/calendar");
 
+    METHOD_ADD(::Panel::patientInformation, "doctor/patient-information");
+    METHOD_ADD(::Panel::patientInformation, "receptionist/patient-information");
+
     METHOD_ADD(::Panel::doctorPersonal, "doctor/personal");
+    METHOD_ADD(::Panel::doctorEditPersonal, "doctor/edit-personal");
 
     METHOD_ADD(::Panel::receptionistPendingRequests, "receptionist/pending_requests");
     METHOD_LIST_END
@@ -48,8 +52,14 @@ public:
     void patientCalendar(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 
+    // Doctor && Receptionist
+    void patientInformation(const drogon::HttpRequestPtr& pReq,
+        std::function<void(const drogon::HttpResponsePtr&)>&& callback);
+
     // Doctor
     void doctorPersonal(const drogon::HttpRequestPtr& pReq,
+        std::function<void(const drogon::HttpResponsePtr&)>&& callback);
+    void doctorEditPersonal(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 
     // Receptionist
@@ -57,22 +67,5 @@ public:
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 
 private:
-    template<tsrpp::Database::User::Role role>
-    bool appendNote(const std::string& currentNote, const std::string& newNote)
-    {
-        if constexpr (role == tsrpp::Database::User::Role::PATIENT)
-        {
-            if (newNote.length() > currentNote.length())
-            {
-                std::string_view origin(newNote.data(), currentNote.length());
-
-                if (origin == currentNote)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-    }
+    bool appendNote(const tsrpp::Database::User::Role role, const std::string& currentNote, const std::string& newNote);
 };

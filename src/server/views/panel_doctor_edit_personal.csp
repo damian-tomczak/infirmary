@@ -1,0 +1,54 @@
+<%c++
+    auto firstName=@@.get<std::string>("firstName");
+    auto lastName=@@.get<std::string>("lastName");
+    auto pesel=@@.get<std::string>("pesel");
+    auto email=@@.get<std::string>("email");
+    auto profession=@@.get<std::string>("profession");
+%>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Infirmary</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+        <meta name="theme-color" content="#712cf9">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="../../../style/style.css">
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-2 bg-light position-fixed h-100">
+                    <div class="row justify-content-center text-center">
+                        <h1><a href="/">Welcome to Infirmary</a></h1>
+                        <a href="/panel/doctor/personal" class="btn btn-primary my-2 menu-button">Personal information</a>
+                        <a href="/panel/doctor/patient-information" class="btn btn-secondary my-2 menu-button mb-4">Patient information</a>
+
+                        <a href="/logout" class="btn btn-secondary my-2 menu-button">Logout</a>
+                        <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
+                    </div>
+                </div>
+                <div class="col-10 offset-2">
+                    <div class="row justify-content-center text-center">
+                        <h2>Personal information</h2>
+                        <form action="edit-personal" method="post">
+                            <div class="row text-center">
+                                <p>First Name: <input type="text" name="firstName" value="<%c++ $$<<firstName; %>"">
+                                <p>Last Name: <input type="text" name="lastName" value="<%c++ $$<<lastName; %>">
+                                <p>PESEL: <input type="text" name="pesel" value="<%c++ $$<<pesel; %>">
+                                <p>Email:<input type="text" name="email" value="<%c++ $$<<email; %>">
+                                <p>Profession:<input type="text" name="email" value="<%c++ $$<<profession; %>">
+                                <!-- TODO: PASSWORDS -->
+                                <p>
+                                    <a href="/panel/doctor"><input class="btn btn-secondary" value="Cancel changes"></a>
+                                    <input type="submit" class="btn btn-primary" value="Save changes">
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

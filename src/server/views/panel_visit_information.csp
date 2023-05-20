@@ -1,4 +1,5 @@
 <%c++
+    auto role=@@.get<int>("role");
     auto id=@@.get<std::string>("id");
     auto status=@@.get<std::string>("status");
     auto date=@@.get<std::string>("date");
@@ -36,12 +37,30 @@
                     <div class="row justify-content-center text-center">
                         <h1><a href="/">Welcome to Infirmary</a></h1>
                         <a href="/panel/patient/personal" class="btn btn-primary my-2 menu-button mb-4">Personal information</a>
-
+<%c++
+if (role == 0)
+{
+%>
                         <a href="/panel/patient/calendar?doctorProfession=internist" class="btn btn-secondary my-2 menu-button">Internist</a>
                         <a href="/panel/patient/calendar?doctorProfession=gastroenterologist" class="btn btn-secondary my-2 menu-button">Gastroenterologist</a>
                         <a href="/panel/patient/calendar?doctorProfession=pulmonologist" class="btn btn-secondary my-2 menu-button">Pulmonologist</a>
                         <a href="/panel/patient/calendar?doctorProfession=oculist" class="btn btn-secondary my-2 menu-button mb-4">Oculist</a>
-
+<%c++
+}
+else if (role == 1)
+{
+%>
+                        <a href="/panel/doctor/personal" class="btn btn-primary my-2 menu-button">Personal information</a>
+                        <a href="/panel/doctor/patient-information" class="btn btn-secondary my-2 menu-button mb-4">Patient information</a>
+<%c++
+}
+else if (role == 2)
+{
+%>
+                        <p>TODO: Menu for receptionist</p>
+<%c++
+}
+%>
                         <a href="/logout" class="btn btn-secondary my-2 menu-button">Logout</a>
                         <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
                     </div>

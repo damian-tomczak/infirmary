@@ -6,30 +6,32 @@
 
 #include <regex>
 
-class LoginSystemController
+class LoginSystem
 {
 public:
-    template <bool isOnlyLogged = false>
+    template <bool isTrowException = true>
     static bool isUserShouldSeeThis(
         const drogon::HttpRequestPtr& pReq,
         drogon::HttpResponsePtr& pResp,
-        const tsrpp::Database::User::Role& role = tsrpp::Database::User::Role::PATIENT)
+        const tsrpp::Database::User::Role& role)
     {
-        auto user{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
-        if (!user)
+        auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+        if (pUser == std::nullopt)
         {
             pResp = drogon::HttpResponse::newRedirectionResponse(tsrpp::createUrl("/login"));
             return false;
         }
-        if constexpr (!isOnlyLogged)
+        else if (pUser->role == role)
         {
-            if (user->role != role)
-            {
-                throw std::runtime_error{"you are not allowed to see that"};
-            }
+            return true;
         }
 
-        return true;
+        if constexpr (isTrowException)
+        {
+            throw std::runtime_error{"you are not allowed to see this"};
+        }
+
+        return false;
     }
 
     static bool validPesel(const std::string& pesel)
@@ -87,7 +89,7 @@ protected:
     bool isAlreadyLogged(const drogon::HttpRequestPtr& pReq, drogon::HttpResponsePtr& pResp);
 };
 
-class LoginController final : public drogon::HttpSimpleController<LoginController>, public LoginSystemController
+class LoginController final : public drogon::HttpSimpleController<LoginController>, public LoginSystem
 {
 public:
     PATH_LIST_BEGIN
@@ -164,7 +166,7 @@ public:
     LoginStatus postLogin(const drogon::HttpRequestPtr& pReq);
 };
 
-class LogoutController final : public drogon::HttpSimpleController<LogoutController>, public LoginSystemController
+class LogoutController final : public drogon::HttpSimpleController<LogoutController>, public LoginSystem
 {
 public:
     PATH_LIST_BEGIN
@@ -182,7 +184,7 @@ public:
     }
 };
 
-class RegisterController : public drogon::HttpSimpleController<RegisterController>, public LoginSystemController
+class RegisterController : public drogon::HttpSimpleController<RegisterController>, public LoginSystem
 {
 public:
     PATH_LIST_BEGIN

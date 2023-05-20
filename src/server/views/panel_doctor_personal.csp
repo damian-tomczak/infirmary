@@ -10,6 +10,7 @@
     auto statuses=@@.get<std::vector<std::string>>("statuses");
     auto patientFirstNames=@@.get<std::vector<std::string>>("patientFirstNames");
     auto patientLastNames=@@.get<std::vector<std::string>>("patientLastNames");
+    auto patientPesels=@@.get<std::vector<std::string>>("patientPesels");
     auto times=@@.get<std::vector<std::string>>("times");
 %>
 <!DOCTYPE html>
@@ -49,32 +50,40 @@
                                 <a href="edit-personal" class="btn btn-secondary my-2 menu-button">Edit Information</a>
                             </div>
                         </div>
-                        <div class="visits bg-light">
-                            <div>
-                                Select day:
-                                <form class="text-center" action="">
+                        <div class="visits">
+                            <div class="d-flex justify-content-end bg-dark">
+                                <label for="date" class="me-3 text-light">Select day: </label>
+                                <form>
                                     <input type="date" value="<%c++ $$<<date; %>" name="date"></input>
-                                    <input type="submit" value="Go to date"></input>
+                                    <input type="submit" class="me-3" value="Go to date"></input>
                                 </form>
                             </div>
-                            <table>
 <%c++
-$$<<"<tr>";
-for (size_t i = 0; i < statuses.size(); ++i)
+if (statuses.size() > 0)
 {
-    $$<<"<td>";
-    $$<<statuses.at(i);
-    $$<<" | ";
-    $$<<patientFirstNames.at(i) << " ";
-    $$<<patientLastNames.at(i);
-    $$<<" | ";
-    $$<<times.at(i);
-    $$<<"</td>";
-    $$<<"<td><a href=\"/panel/visit-information?id=" << ids.at(i) << "\" class=\"btn btn-secondary my-2 menu-button\">Visit Info</a></td>";
-    $$<<"</tr>";
+        $$<<"<table class=\"bg-light\">";
+        $$<<"<tr>";
+        for (size_t i = 0; i < statuses.size(); ++i)
+        {
+            $$<<"<td>";
+            $$<<statuses.at(i);
+            $$<<" | ";
+            $$<<patientFirstNames.at(i) << " ";
+            $$<<patientLastNames.at(i) << " ";
+            $$<<patientPesels.at(i);
+            $$<<" | ";
+            $$<<times.at(i);
+            $$<<"</td>";
+            $$<<"<td><a href=\"/panel/visit-information?id=" << ids.at(i) << "\" class=\"btn btn-secondary my-2 menu-button\">Visit Info</a></td>";
+            $$<<"</tr>";
+        }
+        $$<<"</table>";
+}
+else
+{
+    $$<<"<p>There is no visit for this day.</p>";
 }
 %>
-                            </table>
                         </div>
                     </div>
                 </div>

@@ -1,6 +1,6 @@
 #include "login_system.h"
 
-bool LoginSystemController::isAlreadyLogged(const drogon::HttpRequestPtr& pReq, drogon::HttpResponsePtr& pResp)
+bool LoginSystem::isAlreadyLogged(const drogon::HttpRequestPtr& pReq, drogon::HttpResponsePtr& pResp)
 {
     auto user{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
     if (user)

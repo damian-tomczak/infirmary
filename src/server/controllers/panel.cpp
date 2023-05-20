@@ -5,11 +5,14 @@ void Panel::index(const drogon::HttpRequestPtr& pReq,
 {
     drogon::HttpResponsePtr pResp;
 
-    if (!LoginSystemController::isUserShouldSeeThis<true>(pReq, pResp))
+    auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+    if (pUser == std::nullopt)
     {
+        pResp = drogon::HttpResponse::newRedirectionResponse(tsrpp::createUrl("/login"));
         callback(pResp);
         return;
     }
+
     auto user{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
     if (user->role == tsrpp::Database::User::Role::PATIENT)
     {
@@ -40,7 +43,7 @@ void Panel::patient(const drogon::HttpRequestPtr& pReq,
 {
     drogon::HttpResponsePtr pResp;
 
-    if (!LoginSystemController::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::PATIENT))
+    if (!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::PATIENT))
     {
         callback(pResp);
         return;
@@ -60,7 +63,7 @@ void Panel::doctor(const drogon::HttpRequestPtr& pReq,
 {
     drogon::HttpResponsePtr pResp;
 
-    if (!LoginSystemController::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::DOCTOR))
+    if (!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::DOCTOR))
     {
         callback(pResp);
         return;
@@ -80,7 +83,7 @@ void Panel::receptionist(const drogon::HttpRequestPtr& pReq,
 {
     drogon::HttpResponsePtr pResp;
 
-    if (!LoginSystemController::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::RECEPTIONIST))
+    if (!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::RECEPTIONIST))
     {
         callback(pResp);
         return;
@@ -99,10 +102,20 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     std::function<void(const drogon::HttpResponsePtr&)>&& callback) try
 {
     drogon::HttpResponsePtr pResp;
-    if (!LoginSystemController::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::PATIENT))
+
+    if ((!LoginSystem::isUserShouldSeeThis<false>(pReq, pResp, tsrpp::Database::User::Role::PATIENT)) &&
+        (!LoginSystem::isUserShouldSeeThis<false>(pReq, pResp, tsrpp::Database::User::Role::DOCTOR)) &&
+        (!LoginSystem::isUserShouldSeeThis<false>(pReq, pResp, tsrpp::Database::User::Role::RECEPTIONIST)))
     {
-        callback(pResp);
-        return;
+        if (pReq->getSession()->getOptional<tsrpp::Database::User>("user") == std::nullopt)
+        {
+            callback(pResp);
+            return;
+        }
+        else
+        {
+            throw std::runtime_error{"you are not allowed to see this"};
+        }
     }
 
     tsrpp::Database database{SQLite::OPEN_READWRITE};
@@ -113,7 +126,7 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
         auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
         auto pNote{pReq->getOptionalParameter<std::string>("note")};
         if ((pUser != std::nullopt) && (pNote != std::nullopt) &&
-            appendNote<tsrpp::Database::User::Role::PATIENT>(pUser->note, *pNote))
+            appendNote(pUser->role, pUser->note, *pNote))
         {
             pUser->note = *pNote;
             if (database.updateUser(*pUser))
@@ -140,7 +153,7 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     }
     auto visitId{std::stoi(*pVisitId)};
     auto pVisit{database.getVisitById(visitId)};
-    if (pVisit->patient_id != pUser->id)
+    if ((pUser->role == tsrpp::Database::User::Role::PATIENT) && (pVisit->patient_id != pUser->id))
     {
         throw std::runtime_error{"you are not allowed to see that"};
     }
@@ -156,6 +169,7 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     }
 
     drogon::HttpViewData data;
+    data.insert("role", static_cast<int>(pUser->role));
     data.insert("id", std::to_string(pVisit->id));
     data.insert("status", tsrpp::Database::Visit::status2Str(static_cast<tsrpp::Database::Visit::Status>(pVisit->status)));
     data.insert("date", pVisit->date);
@@ -174,7 +188,7 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     data.insert("doctorEmail", pDoctor->email);
     (void) postAction;
 
-    pResp = drogon::HttpResponse::newHttpViewResponse("panel_patient_visit_information", data);
+    pResp = drogon::HttpResponse::newHttpViewResponse("panel_visit_information", data);
     callback(pResp);
 }
 catch(const std::exception& e)
@@ -187,7 +201,7 @@ void Panel::patientPersonal(const drogon::HttpRequestPtr& pReq,
 {
     drogon::HttpResponsePtr pResp;
 
-    if (!LoginSystemController::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::PATIENT))
+    if (!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::PATIENT))
     {
         callback(pResp);
         return;
@@ -207,7 +221,7 @@ void Panel::patientPersonal(const drogon::HttpRequestPtr& pReq,
         auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
         auto pNote{pReq->getOptionalParameter<std::string>("note")};
         if ((pUser != std::nullopt) && (pNote != std::nullopt) &&
-            appendNote<tsrpp::Database::User::Role::PATIENT>(pUser->note, *pNote))
+            appendNote(pUser->role, pUser->note, *pNote))
         {
             pUser->note = *pNote;
             if (database.updateUser(*pUser))
@@ -266,7 +280,7 @@ void Panel::patientEditPersonal(const drogon::HttpRequestPtr& pReq,
 {
     drogon::HttpResponsePtr pResp;
 
-    if (!LoginSystemController::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::PATIENT))
+    if (!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::PATIENT))
     {
         callback(pResp);
         return;
@@ -285,10 +299,10 @@ void Panel::patientEditPersonal(const drogon::HttpRequestPtr& pReq,
         // TODO: passwords
 
         if (pUser != std::nullopt &&
-            pFirstName != std::nullopt && LoginSystemController::validFirstName(*pFirstName) &&
-            pLastName != std::nullopt && LoginSystemController::validLastName(*pLastName) &&
-            pPesel != std::nullopt && LoginSystemController::validPesel(*pPesel) &&
-            pEmail != std::nullopt && LoginSystemController::validEmail(*pEmail))
+            pFirstName != std::nullopt && LoginSystem::validFirstName(*pFirstName) &&
+            pLastName != std::nullopt && LoginSystem::validLastName(*pLastName) &&
+            pPesel != std::nullopt && LoginSystem::validPesel(*pPesel) &&
+            pEmail != std::nullopt && LoginSystem::validEmail(*pEmail))
         {
             tsrpp::Database database{SQLite::OPEN_READWRITE};
             auto user{*pUser};
@@ -326,14 +340,13 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
 {
     drogon::HttpResponsePtr pResp;
 
-    if (!LoginSystemController::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::PATIENT))
+    if (!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::PATIENT))
     {
         callback(pResp);
         return;
     }
 
     auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
-
     tsrpp::Database database{SQLite::OPEN_READWRITE};
     auto pDoctorProfession{pReq->getOptionalParameter<std::string>("doctorProfession")};
     if (pDoctorProfession == std::nullopt)
@@ -427,12 +440,106 @@ catch(const std::exception& e)
     ERROR_PAGE(e);
 }
 
+void Panel::patientInformation(const drogon::HttpRequestPtr& pReq,
+    std::function<void(const drogon::HttpResponsePtr&)>&& callback) try
+{
+    drogon::HttpResponsePtr pResp;
+
+    if ((!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::DOCTOR)) &&
+        (!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::RECEPTIONIST)))
+    {
+        if (pReq->getSession()->getOptional<tsrpp::Database::User>("user") == std::nullopt)
+        {
+            callback(pResp);
+            return;
+        }
+        else
+        {
+            throw std::runtime_error{"you are not allowed to see this"};
+        }
+    }
+
+    enum class ErrorCode
+    {
+        PESEL_NOT_SPECIFIED,
+        PESEL_CORRECT,
+        PESEL_EMPTY,
+        PESEL_INCORRECT,
+        PESEL_USER_DOESNT_EXIST,
+        PESEL_ISNT_PATIENT
+    } errorCode{};
+
+    auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+    std::vector<tsrpp::Database::Visit> visits;
+    tsrpp::Database database{SQLite::OPEN_READWRITE};
+    auto pPesel{pReq->getOptionalParameter<std::string>("pesel")};
+    if (pPesel != std::nullopt)
+    {
+        if (pPesel->length() == 0)
+        {
+            errorCode = ErrorCode::PESEL_EMPTY;
+        }
+        else if (!LoginSystem::validPesel(*pPesel))
+        {
+            errorCode = ErrorCode::PESEL_INCORRECT;
+        }
+        else
+        {
+            visits = database.getVisitsByPatientPesel(*pPesel);
+            auto pTmpUser{database.getUserByPesel(*pPesel)};
+            if (pTmpUser == std::nullopt)
+            {
+                errorCode = ErrorCode::PESEL_USER_DOESNT_EXIST;
+            }
+            if (pTmpUser->role != tsrpp::Database::User::Role::PATIENT)
+            {
+                errorCode = ErrorCode::PESEL_ISNT_PATIENT;
+            }
+            errorCode = ErrorCode::PESEL_CORRECT;
+        }
+    }
+    drogon::HttpViewData data;
+    data.insert("pesel", *pPesel);
+    data.insert("role", static_cast<int>(pUser->role));
+    data.insert("errorCode", static_cast<int>(errorCode));
+    std::vector<int> ids;
+    std::vector<std::string> statuses;
+    std::vector<std::string> patientFirstNames;
+    std::vector<std::string> patientLastNames;
+    std::vector<std::string> patientPesels;
+    std::vector<std::string> dates;
+    std::vector<std::string> times;
+    for (auto it{visits.begin()}; it != visits.end(); ++it)
+    {
+        ids.emplace_back(static_cast<int>(it->id));
+        statuses.emplace_back(tsrpp::Database::Visit::status2Str(static_cast<tsrpp::Database::Visit::Status>(it->status)));
+        auto pVisitUser{database.getUserById(it->patient_id)};
+        patientFirstNames.emplace_back(pVisitUser->first_name);
+        patientLastNames.emplace_back(pVisitUser->last_name);
+        dates.emplace_back(it->date);
+        times.emplace_back(it->time);
+    }
+    data.insert("ids", ids);
+    data.insert("statuses", statuses);
+    data.insert("patientFirstNames", patientFirstNames);
+    data.insert("patientLastNames", patientLastNames);
+    data.insert("patientPesels", patientPesels);
+    data.insert("dates", dates);
+    data.insert("times", times);
+    pResp = drogon::HttpResponse::newHttpViewResponse("panel_patient_information", data);
+    callback(pResp);
+}
+catch(const std::exception& e)
+{
+    ERROR_PAGE(e);
+}
+
 void Panel::doctorPersonal(const drogon::HttpRequestPtr& pReq,
     std::function<void(const drogon::HttpResponsePtr&)>&& callback) try
 {
     drogon::HttpResponsePtr pResp;
 
-    if (!LoginSystemController::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::DOCTOR))
+    if (!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::DOCTOR))
     {
         callback(pResp);
         return;
@@ -468,6 +575,7 @@ void Panel::doctorPersonal(const drogon::HttpRequestPtr& pReq,
     std::vector<std::string> statuses;
     std::vector<std::string> patientFirstNames;
     std::vector<std::string> patientLastNames;
+    std::vector<std::string> patientPesels;
     std::vector<std::string> dates;
     std::vector<std::string> times;
     for (auto it{visits.begin()}; it != visits.end(); ++it)
@@ -476,15 +584,73 @@ void Panel::doctorPersonal(const drogon::HttpRequestPtr& pReq,
         statuses.emplace_back(tsrpp::Database::Visit::status2Str(static_cast<tsrpp::Database::Visit::Status>(it->status)));
         patientFirstNames.emplace_back(database.getUserById(it->patient_id)->first_name);
         patientLastNames.emplace_back(database.getUserById(it->patient_id)->last_name);
+        patientPesels.emplace_back(database.getUserById(it->patient_id)->pesel);
         times.emplace_back(it->time);
     }
     data.insert("ids", ids);
     data.insert("statuses", statuses);
     data.insert("patientFirstNames", patientFirstNames);
     data.insert("patientLastNames", patientLastNames);
+    data.insert("patientPesels", patientPesels);
     data.insert("dates", dates);
     data.insert("times", times);
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_doctor_personal", data);
+    callback(pResp);
+}
+catch(const std::exception& e)
+{
+    ERROR_PAGE(e);
+}
+
+void Panel::doctorEditPersonal(const drogon::HttpRequestPtr& pReq,
+    std::function<void(const drogon::HttpResponsePtr&)>&& callback) try
+{
+    drogon::HttpResponsePtr pResp;
+
+    if (!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::DOCTOR))
+    {
+        callback(pResp);
+        return;
+    }
+
+    tsrpp::PostAction postAction{};
+
+    if (pReq->method() == drogon::HttpMethod::Post)
+    {
+        postAction = tsrpp::PostAction::REQUESTED_FAILURE;
+        auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+        auto pFirstName{pReq->getOptionalParameter<std::string>("firstName")};
+        auto pLastName{pReq->getOptionalParameter<std::string>("lastName")};
+        auto pPesel{pReq->getOptionalParameter<std::string>("pesel")};
+        auto pEmail{pReq->getOptionalParameter<std::string>("email")};
+        // TODO: passwords
+
+        if (pUser != std::nullopt &&
+            pFirstName != std::nullopt && LoginSystem::validFirstName(*pFirstName) &&
+            pLastName != std::nullopt && LoginSystem::validLastName(*pLastName) &&
+            pPesel != std::nullopt && LoginSystem::validPesel(*pPesel) &&
+            pEmail != std::nullopt && LoginSystem::validEmail(*pEmail))
+        {
+            tsrpp::Database database{SQLite::OPEN_READWRITE};
+            if (database.updateUser(*pUser))
+            {
+                postAction = tsrpp::PostAction::REQUESTED_SUCCESS;
+                pReq->getSession()->modify<tsrpp::Database::User>("user", [&pUser](tsrpp::Database::User& sessionUser) {
+                    sessionUser = *pUser;
+                });
+            }
+        }
+    }
+
+    auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+    drogon::HttpViewData data;
+    data.insert("firstName", pUser->first_name);
+    data.insert("lastName", pUser->last_name);
+    data.insert("pesel", pUser->pesel);
+    data.insert("email", pUser->email);
+    data.insert("profession", pUser->type);
+    (void)postAction;
+    pResp = drogon::HttpResponse::newHttpViewResponse("panel_doctor_edit_personal", data);
     callback(pResp);
 }
 catch(const std::exception& e)
@@ -497,7 +663,7 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
 {
     drogon::HttpResponsePtr pResp;
 
-    if (!LoginSystemController::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::RECEPTIONIST))
+    if (!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::RECEPTIONIST))
     {
         callback(pResp);
         return;
@@ -510,4 +676,26 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
 catch(const std::exception& e)
 {
     ERROR_PAGE(e);
+}
+
+bool Panel::appendNote(const tsrpp::Database::User::Role role, const std::string& currentNote, const std::string& newNote)
+{
+    if (role == tsrpp::Database::User::Role::PATIENT)
+    {
+        if (newNote.length() > currentNote.length())
+        {
+            std::string_view origin(newNote.data(), currentNote.length());
+
+            if (origin == currentNote)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    else
+    {
+        return true;
+    }
 }
