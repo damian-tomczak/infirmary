@@ -388,6 +388,15 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
         std::time_t inputTimeT = mktime(&tm);
         std::time_t nowTimeT = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
+        std::tm* nowTm{std::localtime(&nowTimeT)};
+
+        std::tm yearMonthDayOnlyTm{};
+        yearMonthDayOnlyTm.tm_year = nowTm->tm_year;
+        yearMonthDayOnlyTm.tm_mon = nowTm->tm_mon;
+        yearMonthDayOnlyTm.tm_mday = nowTm->tm_mday;
+
+        nowTimeT = std::mktime(&yearMonthDayOnlyTm);
+
         if (inputTimeT < nowTimeT)
         {
             isPastSelected = true;

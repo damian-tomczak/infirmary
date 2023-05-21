@@ -57,8 +57,9 @@
                             <hr>
                             <div>
                                 <h2>Notes</h2>
-                                <form method="post" class="row justify-content-center">
+                                <form method="post" class="row justify-content-center text-center">
                                     <textarea rows="6" placeholder="Describe your health condition and list of pills your are taking here." class="ta" name="note"><%c++ $$<<note; %></textarea>
+                                    <p>You can not modify already written note</p>
                                     <input type="submit" value="Append Note" class="btn btn-secondary my-2 menu-button mb-4"></input>
                                 </form>
                             </div>
