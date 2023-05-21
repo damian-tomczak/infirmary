@@ -37,6 +37,10 @@ public:
             PULMONOLOGIST,
             OCULIST
         };
+        static bool isValidProfession(const Profession profession)
+        {
+            return (profession >= Profession::INTERNIST) && (profession <= Profession::OCULIST);
+        }
         static std::int32_t professionStr2Int(const std::string& profession)
         {
             if (profession == "internist")

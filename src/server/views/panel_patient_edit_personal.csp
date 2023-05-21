@@ -3,6 +3,23 @@
     auto lastName=@@.get<std::string>("lastName");
     auto pesel=@@.get<std::string>("pesel");
     auto email=@@.get<std::string>("email");
+    auto errorCode=@@.get<int>("errorCode");
+
+    // TODDO: redundant code
+    if (errorCode == 1)
+    {
+        $$<<"<script>";
+        $$<<"window.onload = function() {";
+        $$<<"alert(\"Something went wrong while editing the user\")}";
+        $$<<"</script>";
+    }
+    else if (errorCode == 2)
+    {
+        $$<<"<script>";
+        $$<<"window.onload = function() {";
+        $$<<"alert(\"Success\")}";
+        $$<<"</script>";
+    }
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -41,9 +58,11 @@
                                 <p>Last Name: <input type="text" name="lastName" value="<%c++ $$<<lastName; %>">
                                 <p>PESEL: <input type="text" name="pesel" value="<%c++ $$<<pesel; %>">
                                 <p>Email:<input type="text" name="email" value="<%c++ $$<<email; %>">
-                                <!-- TODO: PASSWORDS -->
+                                <p>Current Password: <input type="password" name="currentPassword"></p>
+                                <p>New Password: <input type="password" name="newPassword"></p>
+                                <p>Repeated New Password: <input type="password" name="repeatedNewPassword"></p>
                                 <p>
-                                    <a href="/panel/patient"><input class="btn btn-secondary" value="Cancel changes"></a>
+                                    <a href="/panel/patient"><input class="btn btn-secondary" value="Return"></a>
                                     <input type="submit" class="btn btn-primary" value="Save changes">
                                 </p>
                             </div>

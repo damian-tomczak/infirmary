@@ -82,16 +82,16 @@ RegisterController::RegistrationStatus RegisterController::postRegister(const dr
         return RegistrationStatus::INCORRECT_PASSWORD;
     }
 
-    auto hasUser{database.getUserByPesel(pesel.value())};
-    if (hasUser)
-    {
-        return RegistrationStatus::ALREADY_EXISTS;
-    }
-
     auto repeatedPassword{pReq->getOptionalParameter<std::string>("repeatedPassword")};
     if (*password != *repeatedPassword)
     {
         return RegistrationStatus::DIFFERENT_PASSWORDS;
+    }
+
+    auto hasUser{database.getUserByPesel(pesel.value())};
+    if (hasUser)
+    {
+        return RegistrationStatus::ALREADY_EXISTS;
     }
 
     auto hashedPassword = tsrpp::hashPassword(*password);

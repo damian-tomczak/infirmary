@@ -47,6 +47,7 @@ public:
     // Patient
     void patientPersonal(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
+    // TODO: patientEditPersonal and doctorEditPersonal should be connected
     void patientEditPersonal(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
     void patientCalendar(const drogon::HttpRequestPtr& pReq,
