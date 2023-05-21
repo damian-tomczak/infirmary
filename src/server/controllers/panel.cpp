@@ -705,8 +705,10 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
         return;
     }
 
-    pResp = drogon::HttpResponse::newHttpResponse();
-    pResp->setBody("receptionistPendingRequests()");
+    tsrpp::Database database{SQLite::OPEN_READWRITE};
+    auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+    drogon::HttpViewData data;
+    pResp = drogon::HttpResponse::newHttpViewResponse("panel_receptionist_pending_requests", data);
     callback(pResp);
 }
 catch(const std::exception& e)
