@@ -22,12 +22,12 @@
                 <div class="col-2 bg-light position-fixed h-100">
                     <div class="row justify-content-center text-center">
                         <h1><a href="/">Welcome to Infirmary</a></h1>
-                        <a href="personal" class="btn btn-primary my-2 menu-button mb-4">Personal information</a>
+                        <a href="/panel/patient/personal" class="btn btn-secondary my-2 menu-button mb-4">Personal information</a>
 
-                        <a href="/panel/patient/calendar?doctorProfession=internist" class="btn btn-secondary my-2 menu-button">Internist</a>
-                        <a href="/panel/patient/calendar?doctorProfession=gastroenterologist" class="btn btn-secondary my-2 menu-button">Gastroenterologist</a>
-                        <a href="/panel/patient/calendar?doctorProfession=pulmonologist" class="btn btn-secondary my-2 menu-button">Pulmonologist</a>
-                        <a href="/panel/patient/calendar?doctorProfession=oculist" class="btn btn-secondary my-2 menu-button mb-4">Oculist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=internist" class="btn <%c++ if (doctorProfession == "internist") $$<<"btn-primary"; else $$<<"btn-secondary"; %> my-2 menu-button">Internist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=gastroenterologist" class="btn <%c++ if (doctorProfession == "gastroenterologist") $$<<"btn-primary"; else $$<<"btn-secondary"; %> my-2 menu-button">Gastroenterologist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=pulmonologist" class="btn <%c++ if (doctorProfession == "pulmonologist") $$<<"btn-primary"; else $$<<"btn-secondary"; %> my-2 menu-button">Pulmonologist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=oculist" class="btn <%c++ if (doctorProfession == "oculist") $$<<"btn-primary"; else $$<<"btn-secondary"; %> my-2 menu-button mb-4">Oculist</a>
 
                         <a href="/logout" class="btn btn-secondary my-2 menu-button">Logout</a>
                         <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
@@ -63,14 +63,26 @@
         {
             $$<<"<div class=\"btn col-12 bg-info\">";
             $$<<"<h3 class=\"pb-5\">" << hour << "</h3>";
-            $$<<"<div class=\"btn my-2\">Taken</div>";
+            if (isPastSelected)
+            {
+                $$<<"<div class=\"btn my-2\">In the past</div>";
+            }
+            else
+            {
+                $$<<"<div class=\"btn my-2\">Taken</div>";
+            }
             $$<<"</div>";
         }
         else if (status == 2)
         {
             $$<<"<div class=\"btn col-12 bg-warning\">";
             $$<<"<h3 class=\"pb-5\">" << hour << "</h3>";
-            $$<<"<div class=\"btn my-2\">Your visit</div>";
+            $$<<"<div class=\"btn col-12 my-2\">Your visit";
+            if (isPastSelected)
+            {
+                $$<<" (In the past)";
+            }
+            $$<<"</div>";
             $$<<"</div>";
         }
         $$<<"</div>";

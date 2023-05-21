@@ -1,0 +1,100 @@
+<%c++
+    auto pesel=@@.get<std::string>("pesel");
+    auto role=@@.get<int>("role");
+    (void)role;
+    auto errorCode=@@.get<int>("errorCode");
+
+    auto ids=@@.get<std::vector<int>>("ids");
+    auto statuses=@@.get<std::vector<std::string>>("statuses");
+    auto patientFirstNames=@@.get<std::vector<std::string>>("patientFirstNames");
+    auto patientLastNames=@@.get<std::vector<std::string>>("patientLastNames");
+    auto dates=@@.get<std::vector<std::string>>("dates");
+    auto times=@@.get<std::vector<std::string>>("times");
+%>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Infirmary</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+        <meta name="theme-color" content="#712cf9">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="../../style/style.css">
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-2 bg-light position-fixed h-100">
+                    <div class="row justify-content-center text-center">
+                        <h1><a href="/">Welcome to Infirmary</a></h1>
+                        <a href="/panel/doctor/personal" class="btn btn-secondary my-2 menu-button">Personal information</a>
+                        <a href="/panel/doctor/patient-information" class="btn btn-primary my-2 menu-button mb-4">Patient information</a>
+
+                        <a href="/logout" class="btn btn-secondary my-2 menu-button">Logout</a>
+                        <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
+                    </div>
+                </div>
+                <div class="col-10 offset-2">
+                    <div class="row visits">
+                        <div class="d-flex justify-content-end bg-dark">
+                            <form>
+                                <input type="text" value="<%c++ $$<<pesel; %>" name="pesel" placeholder="Insert Pesel"></input>
+                                <input type="submit" class="me-3" value="Select Pesel"></input>
+                            </form>
+                        </div>
+<%c++
+if (errorCode == 0)
+{
+    $$<<"<p>Insert pesel</p>";
+}
+else if (errorCode == 1)
+{
+    if (statuses.size() > 0)
+    {
+            $$<<"<table class=\"bg-light\">";
+            $$<<"<tr>";
+            for (size_t i = 0; i < statuses.size(); ++i)
+            {
+                $$<<"<td>";
+                $$<<statuses.at(i);
+                $$<<" | ";
+                $$<<patientFirstNames.at(i) << " ";
+                $$<<patientLastNames.at(i) << " ";
+                $$<<" | ";
+                $$<<dates.at(i) << " ";
+                $$<<times.at(i);
+                $$<<"</td>";
+                $$<<"<td><a href=\"/panel/visit-information?id=" << ids.at(i) << "\" class=\"btn btn-secondary my-2 menu-button\">Visit Info</a></td>";
+                $$<<"</tr>";
+            }
+            $$<<"</table>";
+    }
+    else
+    {
+        $$<<"<p>This patient doesn't have visits yet.</p>";
+    }
+}
+else if (errorCode == 2)
+{
+    $$<<"<p>Pesel input is empty.</p>";
+}
+else if (errorCode == 3)
+{
+    $$<<"<p>Pesel format is incorrect.</p>";
+}
+else if (errorCode == 4)
+{
+    $$<<"<p>User with this pesel doesn't exist.</p>";
+}
+else if (errorCode == 5)
+{
+    $$<<"<p>Pesel belongs to the user that isn't patient.</p>";
+}
+%>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

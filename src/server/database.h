@@ -37,7 +37,11 @@ public:
             PULMONOLOGIST,
             OCULIST
         };
-        static std::int32_t roleString2Int(const std::string& profession)
+        static bool isValidProfession(const Profession profession)
+        {
+            return (profession >= Profession::INTERNIST) && (profession <= Profession::OCULIST);
+        }
+        static std::int32_t professionStr2Int(const std::string& profession)
         {
             if (profession == "internist")
             {
@@ -58,6 +62,17 @@ public:
 
             return -1;
         }
+        static std::string profession2Str(const Profession profession)
+        {
+            switch(profession)
+            {
+                case Profession::INTERNIST: return "Internist";
+                case Profession::GASTROENTEROLOGIST: return "Gastroenterologist";
+                case Profession::PULMONOLOGIST: return "Pulmonologist";
+                case Profession::OCULIST: return "Oculist";
+                default: throw std::runtime_error{"invalid profession"};
+            }
+        }
 
         std::int32_t id;
         std::string pesel;
@@ -71,8 +86,8 @@ public:
     };
     bool addUser(const User& user);
     bool updateUser(const User& user);
-    std::optional<Database::User> getUserbyPesel(const std::string& pesel);
-    std::optional<Database::User> getUserbyId(const std::uint32_t id);
+    std::optional<Database::User> getUserByPesel(const std::string& pesel);
+    std::optional<Database::User> getUserById(const std::int32_t id);
 
     struct Visit final
     {
@@ -84,6 +99,18 @@ public:
             SCHEDULED,
             COMPLETED
         };
+        static std::string status2Str(const Status status)
+        {
+            switch(status)
+            {
+                case Status::REQUESTED: return "Requested";
+                case Status::REJECTED: return "Rejected";
+                case Status::CANCELLED: return "Cancelled";
+                case Status::SCHEDULED: return "Scheduled";
+                case Status::COMPLETED: return "Completed";
+                default: throw std::runtime_error{"invalid status"};
+            }
+        }
 
         std::int32_t id;
         std::int32_t patient_id;
@@ -96,8 +123,10 @@ public:
     bool addVisit(const std::int32_t patientId,
         const std::int32_t doctorId,
         const std::string& date, const std::string& time);
-    std::vector<Visit> getVisitsByPatient(const std::string& pesel);
-    bool updateVisitStatus(const std::uint32_t visitId, const Visit::Status status);
+    std::vector<Visit> getVisitsByPatientPesel(const std::string& pesel);
+    std::vector<Visit> getVisitsByDoctorIdAndDate(const std::int32_t id, const std::string& date);
+    bool updateVisitStatus(const std::int32_t visitId, const Visit::Status status);
+    std::optional<Database::Visit> getVisitById(const std::int32_t id);
 
     struct VisitAvailability final
     {

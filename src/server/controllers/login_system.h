@@ -6,36 +6,32 @@
 
 #include <regex>
 
-class LoginSystemController
+class LoginSystem
 {
 public:
-    template <bool isOnlyLogged = false>
+    template <bool isTrowException = true>
     static bool isUserShouldSeeThis(
         const drogon::HttpRequestPtr& pReq,
         drogon::HttpResponsePtr& pResp,
-        const tsrpp::Database::User::Role& role = tsrpp::Database::User::Role::PATIENT)
+        const tsrpp::Database::User::Role& role)
     {
-        auto user{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
-        if (!user)
+        auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+        if (pUser == std::nullopt)
         {
             pResp = drogon::HttpResponse::newRedirectionResponse(tsrpp::createUrl("/login"));
             return false;
         }
-        if constexpr (!isOnlyLogged)
+        else if (pUser->role == role)
         {
-            if (user->role != role)
-            {
-                static constexpr std::string_view response{
-                    "<p>You are not allowed to see that</p>"
-                    "<p><a href=\"" MAIN_URL "\">Return to the Welcome Page</a></p>"
-                };
-                pResp = drogon::HttpResponse::newHttpResponse();
-                pResp->setBody(std::string{response});
-                return false;
-            }
+            return true;
         }
 
-        return true;
+        if constexpr (isTrowException)
+        {
+            throw std::runtime_error{"you are not allowed to see this"};
+        }
+
+        return false;
     }
 
     static bool validPesel(const std::string& pesel)
@@ -93,7 +89,7 @@ protected:
     bool isAlreadyLogged(const drogon::HttpRequestPtr& pReq, drogon::HttpResponsePtr& pResp);
 };
 
-class LoginController final : public drogon::HttpSimpleController<LoginController>, public LoginSystemController
+class LoginController final : public drogon::HttpSimpleController<LoginController>, public LoginSystem
 {
 public:
     PATH_LIST_BEGIN
@@ -129,7 +125,7 @@ public:
             {
                 tsrpp::Database database{SQLite::OPEN_READWRITE};
                 pResp = drogon::HttpResponse::newRedirectionResponse(tsrpp::createUrl("/panel"));
-#ifdef NDEBUG
+#ifndef NDEBUG
     auto pesel{pReq->getOptionalParameter<std::string>("pesel")};
 #else
     std::optional<std::string> pesel{"00302800690"};
@@ -138,7 +134,7 @@ public:
                 {
                     throw std::runtime_error{"login was successful, after which the pesel couldn't be found"};
                 }
-                auto user{database.getUserbyPesel(*pesel)};
+                auto user{database.getUserByPesel(*pesel)};
                 if (!user)
                 {
                     throw std::runtime_error{"login was successful, after which the user couldn't be found"};
@@ -163,14 +159,14 @@ public:
     }
     catch(const std::exception& e)
     {
-        ERROR_PAGE;
+        ERROR_PAGE(e);
     }
 
 
     LoginStatus postLogin(const drogon::HttpRequestPtr& pReq);
 };
 
-class LogoutController final : public drogon::HttpSimpleController<LogoutController>, public LoginSystemController
+class LogoutController final : public drogon::HttpSimpleController<LogoutController>, public LoginSystem
 {
 public:
     PATH_LIST_BEGIN
@@ -188,7 +184,7 @@ public:
     }
 };
 
-class RegisterController : public drogon::HttpSimpleController<RegisterController>, public LoginSystemController
+class RegisterController : public drogon::HttpSimpleController<RegisterController>, public LoginSystem
 {
 public:
     PATH_LIST_BEGIN
@@ -240,7 +236,7 @@ public:
     }
     catch(const std::exception& e)
     {
-        ERROR_PAGE;
+        ERROR_PAGE(e);
     }
 
 
