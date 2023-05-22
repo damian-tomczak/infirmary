@@ -1,41 +1,41 @@
 <%c++
-    auto registrationStatus = @@.get<int>("registrationStatus");
-    if (registrationStatus)
+auto registrationStatus = @@.get<int>("registrationStatus");
+if (registrationStatus)
+{
+    std::ostringstream message;
+    message << "<script>";
+    message << "window.onload = function() {";
+    message << "alert(\"";
+    switch (registrationStatus)
     {
-        std::ostringstream message;
-        message << "<script>";
-        message << "window.onload = function() {";
-        message << "alert(\"";
-        switch (registrationStatus)
-        {
-        case 1:
-            message << "Registration failure: incorrect pesel format";
-            break;
-        case 2:
-            message << "Registration failure: incorrect first name format";
-            break;
-        case 3:
-            message << "Registration failure: incorrect last name format";
-            break;
-        case 4:
-            message << "Registration failure: your password format";
-            break;
-        case 5:
-            message << "Registration failure: your passwords are different";
-            break;
-        case 6:
-            message << "Registration failure: incorrect email format";
-            break;
-        case 7:
-            message << "Registration failure: patient already exists";
-            break;
-        }
-        message << "\")";
-        message << "}";
-        message << "</script>";
-
-        $$ << message.str();
+    case 1:
+        message << "Registration failure: incorrect pesel format";
+        break;
+    case 2:
+        message << "Registration failure: incorrect first name format";
+        break;
+    case 3:
+        message << "Registration failure: incorrect last name format";
+        break;
+    case 4:
+        message << "Registration failure: your password format";
+        break;
+    case 5:
+        message << "Registration failure: your passwords are different";
+        break;
+    case 6:
+        message << "Registration failure: incorrect email format";
+        break;
+    case 7:
+        message << "Registration failure: patient already exists";
+        break;
     }
+    message << "\")";
+    message << "}";
+    message << "</script>";
+
+    $$ << message.str();
+}
 %>
 <!DOCTYPE html>
 <html lang="en">

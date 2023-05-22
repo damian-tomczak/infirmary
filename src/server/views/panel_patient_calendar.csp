@@ -1,9 +1,9 @@
 <%c++
-    auto date=@@.get<std::string>("date");
-    auto doctorProfession=@@.get<std::string>("doctorProfession");
-    auto isPastSelected=@@.get<bool>("isPastSelected");
-    auto hours=@@.get<std::array<std::string, 12>>("hours");
-    auto availability=@@.get<std::vector<int>>("availability");
+auto date=@@.get<std::string>("date");
+auto doctorProfession=@@.get<std::string>("doctorProfession");
+auto isPastSelected=@@.get<bool>("isPastSelected");
+auto hours=@@.get<std::array<std::string, 12>>("hours");
+auto availability=@@.get<std::vector<int>>("availability");
 %>
 <!DOCTYPE html>
 <html lang="en">

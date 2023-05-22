@@ -1,22 +1,22 @@
 <%c++
-    auto role=@@.get<int>("role");
-    auto id=@@.get<std::string>("id");
-    auto status=@@.get<std::string>("status");
-    auto date=@@.get<std::string>("date");
-    auto time=@@.get<std::string>("time");
-    auto receipt=@@.get<std::string>("receipt");
+auto role=@@.get<int>("role");
+auto id=@@.get<std::string>("id");
+auto status=@@.get<std::string>("status");
+auto date=@@.get<std::string>("date");
+auto time=@@.get<std::string>("time");
+auto receipt=@@.get<std::string>("receipt");
 
-    auto patientFirstName=@@.get<std::string>("patientFirstName");
-    auto patientLastName=@@.get<std::string>("patientLastName");
-    auto patientPesel=@@.get<std::string>("patientPesel");
-    auto patientEmail=@@.get<std::string>("patientEmail");
-    auto patientNote=@@.get<std::string>("patientNote");
+auto patientFirstName=@@.get<std::string>("patientFirstName");
+auto patientLastName=@@.get<std::string>("patientLastName");
+auto patientPesel=@@.get<std::string>("patientPesel");
+auto patientEmail=@@.get<std::string>("patientEmail");
+auto patientNote=@@.get<std::string>("patientNote");
 
-    auto doctorFirstName=@@.get<std::string>("doctorFirstName");
-    auto doctorLastName=@@.get<std::string>("doctorLastName");
-    auto doctorPesel=@@.get<std::string>("doctorPesel");
-    auto doctorEmail=@@.get<std::string>("doctorEmail");
-    auto doctorProfession=@@.get<std::string>("doctorProfession");
+auto doctorFirstName=@@.get<std::string>("doctorFirstName");
+auto doctorLastName=@@.get<std::string>("doctorLastName");
+auto doctorPesel=@@.get<std::string>("doctorPesel");
+auto doctorEmail=@@.get<std::string>("doctorEmail");
+auto doctorProfession=@@.get<std::string>("doctorProfession");
 %>
 <!DOCTYPE html>
 <html lang="en">

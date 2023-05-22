@@ -27,7 +27,7 @@ public:
     METHOD_ADD(::Panel::doctorPersonal, "doctor/personal");
     METHOD_ADD(::Panel::userEditPersonal, "doctor/edit-personal");
 
-    METHOD_ADD(::Panel::receptionistPendingRequests, "receptionist/pending_requests");
+    METHOD_ADD(::Panel::receptionistPendingRequests, "receptionist/pending-requests");
     METHOD_ADD(::Panel::doctorInformation, "receptionist/doctor-information");
     METHOD_LIST_END
 
@@ -72,5 +72,5 @@ public:
 
 private:
     bool appendNote(const tsrpp::Database::User::Role role, const std::string& currentNote, const std::string& newNote);
-    void doctorsListSideMenu(drogon::HttpViewData& data);
+    void appendDoctorsToSideMenu(drogon::HttpViewData& data);
 };

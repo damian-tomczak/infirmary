@@ -1,14 +1,19 @@
 <%c++
-    auto pesel=@@.get<std::string>("pesel");
-    auto role=@@.get<int>("role");
-    auto errorCode=@@.get<int>("errorCode");
+auto doctorIds=@@.get<std::vector<int>>("doctorIds");
+auto doctorFirstNames=@@.get<std::vector<std::string>>("doctorFirstNames");
+auto doctorLastNames=@@.get<std::vector<std::string>>("doctorLastNames");
+auto doctorProfessions=@@.get<std::vector<std::string>>("doctorProfessions");
 
-    auto ids=@@.get<std::vector<int>>("ids");
-    auto statuses=@@.get<std::vector<std::string>>("statuses");
-    auto patientFirstNames=@@.get<std::vector<std::string>>("patientFirstNames");
-    auto patientLastNames=@@.get<std::vector<std::string>>("patientLastNames");
-    auto dates=@@.get<std::vector<std::string>>("dates");
-    auto times=@@.get<std::vector<std::string>>("times");
+auto pesel=@@.get<std::string>("pesel");
+auto role=@@.get<int>("role");
+auto errorCode=@@.get<int>("errorCode");
+
+auto ids=@@.get<std::vector<int>>("ids");
+auto statuses=@@.get<std::vector<std::string>>("statuses");
+auto patientFirstNames=@@.get<std::vector<std::string>>("patientFirstNames");
+auto patientLastNames=@@.get<std::vector<std::string>>("patientLastNames");
+auto dates=@@.get<std::vector<std::string>>("dates");
+auto times=@@.get<std::vector<std::string>>("times");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -37,31 +42,22 @@ if (role == 1)
 }
 else if (role == 2)
 {
-%>
-                        <a href="/panel/receptionist/pending-requests" class="btn btn-secondary my-2 menu-button">Pending visit requests</a>
-                        <a href="/panel/receptionist/patient-information" class="btn btn-primary my-2 menu-button mb-4">Patient information</a>
-                        <!-- TODO: in theory, this is within the guidelines, but not very neat -->
-                        <a href="/panel/receptionist/doctor-information?doctorId=6" class="btn btn-secondary my-2 menu-button">
-                            Doctor 1<br>
-                            Internist
-                        </a>
-                        <a href="/panel/receptionist/doctor-information?doctorId=8" class="btn btn-secondary my-2 menu-button">
-                            Doctor 1<br>
-                            Internist
-                        </a>
-                        <a href="/panel/receptionist/doctor-information?doctorId=9" class="btn btn-secondary my-2 menu-button">
-                            Doctor 3<br>
-                            Gastroenterologist<br>
-                        </a>
-                        <a href="/panel/receptionist/doctor-information?doctorId=10" class="btn btn-secondary my-2 menu-button">
-                            Doctor 4<br>
-                            Pulmonologist<br>
-                        </a>
-                        <a href="/panel/receptionist/doctor-information?doctorId=11" class="btn btn-secondary my-2 menu-button mb-4">
-                            Doctor 5<br>
-                            Ophthalmologist<br>
-                        </a>
-<%c++
+    $$<<"<a href=\"/panel/receptionist/pending-requests\" class=\"btn btn-secondary my-2 menu-button\">Pending visit requests</a>";
+    $$<<"<a href=\"/panel/receptionist/patient-information\" class=\"btn btn-primary my-2 menu-button mb-4\">Patient information</a>";
+    if (doctorIds.size() > 0)
+    {
+            for (size_t i = 0; i < doctorIds.size(); ++i)
+            {
+                $$<<"<a href=\"/panel/receptionist/doctor-information?doctorId=" << doctorIds.at(i) << "\" class=\"btn btn-secondary my-2 menu-button\">";
+                    $$<<doctorFirstNames.at(i) << " " << doctorLastNames.at(i) << "<br>";
+                    $$<<doctorProfessions.at(i);
+                $$<<"</a>";
+            }
+    }
+    else
+    {
+        $$<<"<p>Doctors haven't been found</p>";
+    }
 }
 %>
 

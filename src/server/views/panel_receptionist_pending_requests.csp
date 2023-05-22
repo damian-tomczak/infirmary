@@ -1,5 +1,8 @@
 <%c++
-
+auto doctorIds=@@.get<std::vector<int>>("doctorIds");
+auto doctorFirstNames=@@.get<std::vector<std::string>>("doctorFirstNames");
+auto doctorLastNames=@@.get<std::vector<std::string>>("doctorLastNames");
+auto doctorProfessions=@@.get<std::vector<std::string>>("doctorProfessions");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -20,28 +23,22 @@
                         <h1><a href="/">Welcome to Infirmary</a></h1>
                         <a href="/panel/receptionist/pending-requests" class="btn btn-primary my-2 menu-button">Pending visit requests</a>
                         <a href="/panel/receptionist/patient-information" class="btn btn-secondary my-2 menu-button mb-4">Patient information</a>
-                        <!-- TODO: in theory, this is within the guidelines, but not very neat -->
-                        <a href="/panel/receptionist/doctor-information?doctorId=6" class="btn btn-secondary my-2 menu-button">
-                            Doctor 1<br>
-                            Internist
-                        </a>
-                        <a href="/panel/receptionist/doctor-information?doctorId=8" class="btn btn-secondary my-2 menu-button">
-                            Doctor 1<br>
-                            Internist
-                        </a>
-                        <a href="/panel/receptionist/doctor-information?doctorId=9" class="btn btn-secondary my-2 menu-button">
-                            Doctor 3<br>
-                            Gastroenterologist<br>
-                        </a>
-                        <a href="/panel/receptionist/doctor-information?doctorId=10" class="btn btn-secondary my-2 menu-button">
-                            Doctor 4<br>
-                            Pulmonologist<br>
-                        </a>
-                        <a href="/panel/receptionist/doctor-information?doctorId=11" class="btn btn-secondary my-2 menu-button mb-4">
-                            Doctor 5<br>
-                            Ophthalmologist<br>
-                        </a>
-
+<%c++
+if (doctorIds.size() > 0)
+{
+        for (size_t i = 0; i < doctorIds.size(); ++i)
+        {
+            $$<<"<a href=\"/panel/receptionist/doctor-information?doctorId=" << doctorIds.at(i) << "\" class=\"btn btn-secondary my-2 menu-button\">";
+                $$<<doctorFirstNames.at(i) << " " << doctorLastNames.at(i) << "<br>";
+                $$<<doctorProfessions.at(i);
+            $$<<"</a>";
+        }
+}
+else
+{
+    $$<<"<p>Doctors haven't been found</p>";
+}
+%>
                         <a href="/logout" class="btn btn-secondary my-2 menu-button">Logout</a>
                         <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
                     </div>

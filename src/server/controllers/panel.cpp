@@ -90,7 +90,7 @@ void Panel::receptionist(const drogon::HttpRequestPtr& pReq,
     }
 
     pResp = drogon::HttpResponse::newRedirectionResponse(
-        tsrpp::createUrl("/panel/receptionist/pending_requests"));
+        tsrpp::createUrl("/panel/receptionist/pending-requests"));
     callback(pResp);
 }
 catch(const std::exception& e)
@@ -543,6 +543,7 @@ void Panel::patientInformation(const drogon::HttpRequestPtr& pReq,
         }
     }
     drogon::HttpViewData data;
+    appendDoctorsToSideMenu(data);
     data.insert("pesel", *pPesel);
     data.insert("role", static_cast<int>(pUser->role));
     data.insert("errorCode", static_cast<int>(errorCode));
@@ -597,7 +598,9 @@ void Panel::doctorInformation(const drogon::HttpRequestPtr& pReq,
     {
         throw std::runtime_error{"doctorId wasn't specified"};
     }
+
     std::string date;
+    appendDoctorsToSideMenu(data);
     auto pDateParameter{pReq->getOptionalParameter<std::string>("date")};
     if (pDateParameter != std::nullopt)
     {
@@ -639,7 +642,7 @@ void Panel::doctorInformation(const drogon::HttpRequestPtr& pReq,
     data.insert("patientPesels", patientPesels);
     data.insert("dates", dates);
     data.insert("times", times);
-    pResp = drogon::HttpResponse::newHttpViewResponse("panel_receptionist_doctor_information", data);
+    pResp = drogon::HttpResponse::newHttpViewResponse("panel_doctor_information", data);
     callback(pResp);
 }
 catch(const std::exception& e)
@@ -729,6 +732,7 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
     tsrpp::Database database{SQLite::OPEN_READWRITE};
     auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
     drogon::HttpViewData data;
+    appendDoctorsToSideMenu(data);
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_receptionist_pending_requests", data);
     callback(pResp);
 }
@@ -759,7 +763,24 @@ bool Panel::appendNote(const tsrpp::Database::User::Role role, const std::string
     }
 }
 
-void doctorsListSideMenu(drogon::HttpViewData& data)
+void Panel::appendDoctorsToSideMenu(drogon::HttpViewData& data)
 {
+    tsrpp::Database database;
+    auto users{database.getUsersByRole(tsrpp::Database::User::Role::DOCTOR)};
 
+    std::vector<int> doctorIds;
+    std::vector<std::string> doctorFirstNames;
+    std::vector<std::string> doctorLastNames;
+    std::vector<std::string> doctorProfessions;
+    for (auto it{users.begin()}; it != users.end(); ++it)
+    {
+        doctorIds.emplace_back(it->id);
+        doctorFirstNames.emplace_back(it->first_name);
+        doctorLastNames.emplace_back(it->last_name);
+        doctorProfessions.emplace_back(tsrpp::Database::User::profession2Str(it->type));
+    }
+    data.insert("doctorIds", doctorIds);
+    data.insert("doctorFirstNames", doctorFirstNames);
+    data.insert("doctorLastNames", doctorLastNames);
+    data.insert("doctorProfessions", doctorProfessions);
 }

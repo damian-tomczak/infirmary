@@ -1,17 +1,17 @@
 <%c++
-    auto date=@@.get<std::string>("date");
-    auto firstName=@@.get<std::string>("firstName");
-    auto lastName=@@.get<std::string>("lastName");
-    auto pesel=@@.get<std::string>("pesel");
-    auto email=@@.get<std::string>("email");
-    auto profession=@@.get<std::string>("profession");
+auto date=@@.get<std::string>("date");
+auto firstName=@@.get<std::string>("firstName");
+auto lastName=@@.get<std::string>("lastName");
+auto pesel=@@.get<std::string>("pesel");
+auto email=@@.get<std::string>("email");
+auto profession=@@.get<std::string>("profession");
 
-    auto ids=@@.get<std::vector<int>>("ids");
-    auto statuses=@@.get<std::vector<std::string>>("statuses");
-    auto patientFirstNames=@@.get<std::vector<std::string>>("patientFirstNames");
-    auto patientLastNames=@@.get<std::vector<std::string>>("patientLastNames");
-    auto patientPesels=@@.get<std::vector<std::string>>("patientPesels");
-    auto times=@@.get<std::vector<std::string>>("times");
+auto ids=@@.get<std::vector<int>>("ids");
+auto statuses=@@.get<std::vector<std::string>>("statuses");
+auto patientFirstNames=@@.get<std::vector<std::string>>("patientFirstNames");
+auto patientLastNames=@@.get<std::vector<std::string>>("patientLastNames");
+auto patientPesels=@@.get<std::vector<std::string>>("patientPesels");
+auto times=@@.get<std::vector<std::string>>("times");
 %>
 <!DOCTYPE html>
 <html lang="en">

@@ -16,6 +16,8 @@ namespace tsrpp
 // TODO: use GLFS for database.db
 class Database final
 {
+    // TODO:: it would be a great idea to specify data types used by the database
+
 public:
     Database(const int flags = SQLite::OPEN_READONLY) :
         mpDatabase{std::make_unique<SQLite::Database>(DATABASE_PATH, flags)}

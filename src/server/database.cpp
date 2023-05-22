@@ -112,7 +112,23 @@ std::vector<Database::User> Database::getUsersByRole(const User::Role role)
 {
     std::vector<Database::User> result;
 
+    SQLite::Statement q{*mpDatabase, "SELECT * FROM users WHERE role = :role"};
+    q.bind(":role", static_cast<int32_t>(role));
 
+    while (q.executeStep())
+    {
+        result.emplace_back(User{
+            .id{q.getColumn("id")},
+            .pesel{q.getColumn("pesel").getString()},
+            .password{q.getColumn("password").getString()},
+            .first_name{q.getColumn("first_name").getString()},
+            .last_name{q.getColumn("last_name").getString()},
+            .email{q.getColumn("email").getString()},
+            .note{q.getColumn("note").getString()},
+            .role{User::Role{q.getColumn("role").getInt()}},
+            .type{User::Profession{q.getColumn("type").getInt()}}
+        });
+    }
 
     return result;
 }

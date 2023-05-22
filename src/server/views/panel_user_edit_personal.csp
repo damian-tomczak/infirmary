@@ -1,26 +1,24 @@
 <%c++
-    auto role=@@.get<int>("role");
-    auto firstName=@@.get<std::string>("firstName");
-    auto lastName=@@.get<std::string>("lastName");
-    auto email=@@.get<std::string>("email");
-    auto profession=@@.get<int>("profession");
-    auto errorCode=@@.get<int>("errorCode");
+auto role=@@.get<int>("role");
+auto firstName=@@.get<std::string>("firstName");
+auto lastName=@@.get<std::string>("lastName");
+auto email=@@.get<std::string>("email");
+auto profession=@@.get<int>("profession");
+auto errorCode=@@.get<int>("errorCode");
 
-    // TODDO: redundant code
-    if (errorCode == 1)
+if (errorCode)
+{
+    $$<<"<script>";
+    $$<<"window.onload = function() {";
+    $$<<"alert(\"";
+    switch (errorCode)
     {
-        $$<<"<script>";
-        $$<<"window.onload = function() {";
-        $$<<"alert(\"Something went wrong while editing the user\")}";
-        $$<<"</script>";
+        case 1: $$<<"Something went wrong while editing the user"; break;
+        case 2: $$<<"Success"; break;
     }
-    else if (errorCode == 2)
-    {
-        $$<<"<script>";
-        $$<<"window.onload = function() {";
-        $$<<"alert(\"Success\")}";
-        $$<<"</script>";
-    }
+    $$<<"\")}";
+    $$<<"</script>";
+}
 %>
 <!DOCTYPE html>
 <html lang="en">
