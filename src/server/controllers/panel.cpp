@@ -318,6 +318,7 @@ void Panel::userEditPersonal(const drogon::HttpRequestPtr& pReq,
         auto pFirstName{pReq->getOptionalParameter<std::string>("firstName")};
         auto pLastName{pReq->getOptionalParameter<std::string>("lastName")};
         auto pEmail{pReq->getOptionalParameter<std::string>("email")};
+        auto pProfession{pReq->getOptionalParameter<int32_t>("profession")};
         auto pCurrentPassword{pReq->getOptionalParameter<std::string>("currentPassword")};
         auto pNewPassword{pReq->getOptionalParameter<std::string>("newPassword")};
         auto pRepeatedNewPassword{pReq->getOptionalParameter<std::string>("repeatedNewPassword")};
@@ -326,6 +327,7 @@ void Panel::userEditPersonal(const drogon::HttpRequestPtr& pReq,
             (pFirstName != std::nullopt) && LoginSystem::validFirstName(*pFirstName) &&
             (pLastName != std::nullopt) && LoginSystem::validLastName(*pLastName) &&
             (pEmail != std::nullopt) && LoginSystem::validEmail(*pEmail) &&
+            (((pUser->role == tsrpp::Database::User::Role::DOCTOR) && (pProfession != std::nullopt)) || (pUser->role == tsrpp::Database::User::Role::PATIENT)) &&
             (pCurrentPassword != std::nullopt) && tsrpp::verifyPassword(*pCurrentPassword, database.getUserById(pUser->id)->password) &&
             (pNewPassword != std::nullopt) && (pRepeatedNewPassword != std::nullopt) &&
             (((pNewPassword->length() > 0) && LoginSystem::validPassword(*pNewPassword) && (*pNewPassword == *pRepeatedNewPassword)) ||
@@ -335,6 +337,10 @@ void Panel::userEditPersonal(const drogon::HttpRequestPtr& pReq,
             pUser->first_name = *pFirstName;
             pUser->last_name = *pLastName;
             pUser->email = *pEmail;
+            if (pUser->role == tsrpp::Database::User::Role::DOCTOR)
+            {
+                pUser->type = static_cast<tsrpp::Database::User::Profession>(*pProfession);
+            }
             if (pNewPassword->length() > 0)
             {
                 pUser->password = tsrpp::hashPassword(*pNewPassword);
@@ -350,9 +356,11 @@ void Panel::userEditPersonal(const drogon::HttpRequestPtr& pReq,
     }
 
     drogon::HttpViewData data;
+    data.insert("role", static_cast<int>(pUser->role));
     data.insert("firstName", pUser->first_name);
     data.insert("lastName", pUser->last_name);
     data.insert("email", pUser->email);
+    data.insert("profession", static_cast<int>(pUser->type));
     data.insert("errorCode", static_cast<int>(errorCode));
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_user_edit_personal", data);
     callback(pResp);
@@ -753,5 +761,5 @@ bool Panel::appendNote(const tsrpp::Database::User::Role role, const std::string
 
 void doctorsListSideMenu(drogon::HttpViewData& data)
 {
-    
+
 }

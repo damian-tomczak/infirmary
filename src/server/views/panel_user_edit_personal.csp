@@ -1,7 +1,9 @@
 <%c++
+    auto role=@@.get<int>("role");
     auto firstName=@@.get<std::string>("firstName");
     auto lastName=@@.get<std::string>("lastName");
     auto email=@@.get<std::string>("email");
+    auto profession=@@.get<int>("profession");
     auto errorCode=@@.get<int>("errorCode");
 
     // TODDO: redundant code
@@ -29,7 +31,7 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
         <meta name="theme-color" content="#712cf9">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="../../../style/style.css">
+        <link rel="stylesheet" href="/style/style.css">
     </head>
     <body>
         <div class="container-fluid">
@@ -37,13 +39,27 @@
                 <div class="col-2 bg-light position-fixed h-100">
                     <div class="row justify-content-center text-center">
                         <h1><a href="/">Welcome to Infirmary</a></h1>
+<%c++
+if (role == 0)
+{
+%>
                         <a href="/panel/patient/personal" class="btn btn-primary my-2 menu-button mb-4">Personal information</a>
 
                         <a href="/panel/patient/calendar?doctorProfession=internist" class="btn btn-secondary my-2 menu-button">Internist</a>
                         <a href="/panel/patient/calendar?doctorProfession=gastroenterologist" class="btn btn-secondary my-2 menu-button">Gastroenterologist</a>
                         <a href="/panel/patient/calendar?doctorProfession=pulmonologist" class="btn btn-secondary my-2 menu-button">Pulmonologist</a>
                         <a href="/panel/patient/calendar?doctorProfession=oculist" class="btn btn-secondary my-2 menu-button mb-4">Oculist</a>
+<%c++
+}
+else if (role == 1)
+{
+%>
+                        <a href="/panel/doctor/personal" class="btn btn-primary my-2 menu-button">Personal information</a>
+                        <a href="/panel/doctor/patient-information" class="btn btn-secondary my-2 menu-button mb-4">Patient information</a>
 
+<%c++
+}
+%>
                         <a href="/logout" class="btn btn-secondary my-2 menu-button">Logout</a>
                         <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
                     </div>
@@ -69,6 +85,24 @@
                                 <input type="text" class="form-control" name="email" value="<%c++ $$<<email; %>">
                             </div>
                         </div>
+<%c++
+if (role == 1)
+{
+%>
+                        <div class="form-group row justify-content-center">
+                            <label for="profession" class="col-2 col-form-label">Profession: </label>
+                            <div class="col-5">
+                                <select name="profession">
+                                        <option value="0" <%c++ if (profession == 0) $$<<"selected"; %>>Internist</option>
+                                        <option value="1" <%c++ if (profession == 1) $$<<"selected"; %>>Gastroenterologist</option>
+                                        <option value="2" <%c++ if (profession == 2) $$<<"selected"; %>>Pulmonologist</option>
+                                        <option value="3" <%c++ if (profession == 3) $$<<"selected"; %>>Oculist</option>
+                                </select>
+                            </div>
+                        </div>
+<%c++
+}
+%>
                         <div class="form-group row justify-content-center">
                             <label for="newPassword" class="col-2 col-form-label">New Password (you can leave it empty):</label>
                             <div class="col-5">
