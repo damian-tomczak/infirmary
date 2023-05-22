@@ -570,6 +570,75 @@ catch(const std::exception& e)
     ERROR_PAGE(e);
 }
 
+void Panel::doctorInformation(const drogon::HttpRequestPtr& pReq,
+    std::function<void(const drogon::HttpResponsePtr&)>&& callback) try
+{
+    drogon::HttpResponsePtr pResp;
+
+    if (!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::RECEPTIONIST))
+    {
+        callback(pResp);
+        return;
+    }
+
+    auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+    tsrpp::Database database{SQLite::OPEN_READWRITE};
+    drogon::HttpViewData data;
+    auto pDoctorId{pReq->getOptionalParameter<int32_t>("doctorId")};
+    if (pDoctorId == std::nullopt)
+    {
+        throw std::runtime_error{"doctorId wasn't specified"};
+    }
+    std::string date;
+    auto pDateParameter{pReq->getOptionalParameter<std::string>("date")};
+    if (pDateParameter != std::nullopt)
+    {
+        date = *pDateParameter;
+    }
+    else
+    {
+        auto now{std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())};
+        std::tm buffer;
+        localtime_r(&now, &buffer);
+        std::stringstream ss;
+        ss << std::put_time(&buffer, "%Y-%m-%d");
+        date = ss.str();
+    }
+    std::vector<tsrpp::Database::Visit> visits{database.getVisitsByDoctorIdAndDate(*pDoctorId, date)};
+    std::vector<int> ids;
+    std::vector<std::string> statuses;
+    std::vector<std::string> patientFirstNames;
+    std::vector<std::string> patientLastNames;
+    std::vector<std::string> patientPesels;
+    std::vector<std::string> dates;
+    std::vector<std::string> times;
+    for (auto it{visits.begin()}; it != visits.end(); ++it)
+    {
+        ids.emplace_back(static_cast<int>(it->id));
+        statuses.emplace_back(tsrpp::Database::Visit::status2Str(static_cast<tsrpp::Database::Visit::Status>(it->status)));
+        auto pVisitUser{database.getUserById(it->patient_id)};
+        patientFirstNames.emplace_back(pVisitUser->first_name);
+        patientLastNames.emplace_back(pVisitUser->last_name);
+        dates.emplace_back(it->date);
+        times.emplace_back(it->time);
+    }
+    data.insert("doctorId", *pDoctorId);
+    data.insert("date", date);
+    data.insert("ids", ids);
+    data.insert("statuses", statuses);
+    data.insert("patientFirstNames", patientFirstNames);
+    data.insert("patientLastNames", patientLastNames);
+    data.insert("patientPesels", patientPesels);
+    data.insert("dates", dates);
+    data.insert("times", times);
+    pResp = drogon::HttpResponse::newHttpViewResponse("panel_receptionist_doctor_information", data);
+    callback(pResp);
+}
+catch(const std::exception& e)
+{
+    ERROR_PAGE(e);
+}
+
 void Panel::doctorPersonal(const drogon::HttpRequestPtr& pReq,
     std::function<void(const drogon::HttpResponsePtr&)>&& callback) try
 {
@@ -680,4 +749,9 @@ bool Panel::appendNote(const tsrpp::Database::User::Role role, const std::string
     {
         return true;
     }
+}
+
+void doctorsListSideMenu(drogon::HttpViewData& data)
+{
+    
 }

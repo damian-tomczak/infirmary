@@ -28,6 +28,7 @@ public:
     METHOD_ADD(::Panel::userEditPersonal, "doctor/edit-personal");
 
     METHOD_ADD(::Panel::receptionistPendingRequests, "receptionist/pending_requests");
+    METHOD_ADD(::Panel::doctorInformation, "receptionist/doctor-information");
     METHOD_LIST_END
 
     // REDIRECTS
@@ -56,6 +57,8 @@ public:
     // Doctor && Receptionist
     void patientInformation(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
+    void doctorInformation(const drogon::HttpRequestPtr& pReq,
+        std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 
     // Doctor
     void doctorPersonal(const drogon::HttpRequestPtr& pReq,
@@ -65,6 +68,8 @@ public:
     void receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 
+
 private:
     bool appendNote(const tsrpp::Database::User::Role role, const std::string& currentNote, const std::string& newNote);
+    void doctorsListSideMenu(drogon::HttpViewData& data);
 };

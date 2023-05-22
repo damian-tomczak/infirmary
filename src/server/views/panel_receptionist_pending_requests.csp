@@ -20,24 +20,24 @@
                         <h1><a href="/">Welcome to Infirmary</a></h1>
                         <a href="/panel/receptionist/pending-requests" class="btn btn-primary my-2 menu-button">Pending visit requests</a>
                         <a href="/panel/receptionist/patient-information" class="btn btn-secondary my-2 menu-button mb-4">Patient information</a>
-
-                        <a href="/panel/receptionist/" class="btn btn-secondary my-2 menu-button">
+                        <!-- TODO: in theory, this is within the guidelines, but not very neat -->
+                        <a href="/panel/receptionist/doctor-information?doctorId=6" class="btn btn-secondary my-2 menu-button">
                             Doctor 1<br>
                             Internist
                         </a>
-                        <a href="/panel/receptionist/" class="btn btn-secondary my-2 menu-button">
+                        <a href="/panel/receptionist/doctor-information?doctorId=8" class="btn btn-secondary my-2 menu-button">
                             Doctor 1<br>
                             Internist
                         </a>
-                        <a href="/panel/receptionist/" class="btn btn-secondary my-2 menu-button">
+                        <a href="/panel/receptionist/doctor-information?doctorId=9" class="btn btn-secondary my-2 menu-button">
                             Doctor 3<br>
                             Gastroenterologist<br>
                         </a>
-                        <a href="/panel/receptionist/" class="btn btn-secondary my-2 menu-button">
+                        <a href="/panel/receptionist/doctor-information?doctorId=10" class="btn btn-secondary my-2 menu-button">
                             Doctor 4<br>
                             Pulmonologist<br>
                         </a>
-                        <a href="/panel/receptionist/" class="btn btn-secondary my-2 menu-button mb-4">
+                        <a href="/panel/receptionist/doctor-information?doctorId=11" class="btn btn-secondary my-2 menu-button mb-4">
                             Doctor 5<br>
                             Ophthalmologist<br>
                         </a>
