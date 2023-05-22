@@ -290,8 +290,8 @@ void Panel::userEditPersonal(const drogon::HttpRequestPtr& pReq,
 {
     drogon::HttpResponsePtr pResp;
 
-    if ((!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::PATIENT)) &&
-        (!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::DOCTOR)))
+    if ((!LoginSystem::isUserShouldSeeThis<false>(pReq, pResp, tsrpp::Database::User::Role::PATIENT)) &&
+        (!LoginSystem::isUserShouldSeeThis<false>(pReq, pResp, tsrpp::Database::User::Role::DOCTOR)))
     {
         if (pReq->getSession()->getOptional<tsrpp::Database::User>("user") == std::nullopt)
         {
@@ -443,20 +443,20 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
     }
 
     drogon::HttpViewData data;
-    std::vector<std::string> hours;
-    // TODO: RETARD ALARM
-    hours.emplace_back("09:00");
-    hours.emplace_back("09:40");
-    hours.emplace_back("10:20");
-    hours.emplace_back("11:00");
-    hours.emplace_back("11:40");
-    hours.emplace_back("12:20");
-    hours.emplace_back("13:00");
-    hours.emplace_back("13:40");
-    hours.emplace_back("14:20");
-    hours.emplace_back("15:00");
-    hours.emplace_back("15:40");
-    hours.emplace_back("16:20");
+    std::array<std::string, 12> hours {
+        "09:00",
+        "09:40",
+        "10:20",
+        "11:00",
+        "11:40",
+        "12:20",
+        "13:00",
+        "13:40",
+        "14:20",
+        "15:00",
+        "15:40",
+        "16:20",
+    };
     std::vector<int> availability;
     for (auto it{hours.begin()}; it != hours.end(); ++it)
     {
@@ -481,8 +481,8 @@ void Panel::patientInformation(const drogon::HttpRequestPtr& pReq,
 {
     drogon::HttpResponsePtr pResp;
 
-    if ((!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::DOCTOR)) &&
-        (!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::RECEPTIONIST)))
+    if ((!LoginSystem::isUserShouldSeeThis<false>(pReq, pResp, tsrpp::Database::User::Role::DOCTOR)) &&
+        (!LoginSystem::isUserShouldSeeThis<false>(pReq, pResp, tsrpp::Database::User::Role::RECEPTIONIST)))
     {
         if (pReq->getSession()->getOptional<tsrpp::Database::User>("user") == std::nullopt)
         {

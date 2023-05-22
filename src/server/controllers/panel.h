@@ -25,6 +25,7 @@ public:
     METHOD_ADD(::Panel::patientInformation, "receptionist/patient-information");
 
     METHOD_ADD(::Panel::doctorPersonal, "doctor/personal");
+    METHOD_ADD(::Panel::userEditPersonal, "doctor/edit-personal");
 
     METHOD_ADD(::Panel::receptionistPendingRequests, "receptionist/pending_requests");
     METHOD_LIST_END

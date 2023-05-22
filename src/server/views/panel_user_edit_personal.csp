@@ -89,7 +89,7 @@
                         </div>
                         <div class="form-group row justify-content-center ">
                             <div class="col-5">
-                                <a href="/panel/patient" class="btn btn-secondary">Return</a>
+                                <a href="/panel" class="btn btn-secondary">Return</a>
                                 <input type="submit" class="btn btn-primary" value="Save changes">
                             </div>
                         </div>
