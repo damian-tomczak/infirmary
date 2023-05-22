@@ -82,6 +82,7 @@ public:
         std::string email;
         std::string note;
         Role role;
+        // TODO: it should be named profession in the database
         Profession type;
     };
     bool addUser(const User& user);
@@ -118,6 +119,7 @@ public:
         Status status;
         std::string date;
         std::string time;
+        // TODO: it should be named prescription
         std::string receipt;
     };
     bool addVisit(const std::int32_t patientId,

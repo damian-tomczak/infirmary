@@ -3,7 +3,6 @@
     auto lastName=@@.get<std::string>("lastName");
     auto pesel=@@.get<std::string>("pesel");
     auto email=@@.get<std::string>("email");
-    auto profession=@@.get<int>("profession");
     auto errorCode=@@.get<int>("errorCode");
 
     // TODDO: redundant code
@@ -55,14 +54,6 @@
                                 <p>Last Name: <input type="text" name="lastName" value="<%c++ $$<<lastName; %>"></p>
                                 <p>PESEL: <input type="text" name="pesel" value="<%c++ $$<<pesel; %>"></p>
                                 <p>Email: <input type="text" name="email" value="<%c++ $$<<email; %>"></p>
-                                <p>Profession:
-                                    <select name="profession">
-                                        <option value="0" <%c++ if (profession == 0) $$<<"selected"; %>>Internist</option>
-                                        <option value="1" <%c++ if (profession == 1) $$<<"selected"; %>>Gastroenterologist</option>
-                                        <option value="2" <%c++ if (profession == 2) $$<<"selected"; %>>Pulmonologist</option>
-                                        <option value="3" <%c++ if (profession == 3) $$<<"selected"; %>>Oculist</option>
-                                    </select>
-                                </p>
                                 <p>Current Password: <input type="password" name="currentPassword"></p>
                                 <p>New Password: <input type="password" name="newPassword"></p>
                                 <p>Repeated New Password: <input type="password" name="repeatedNewPassword"></p>

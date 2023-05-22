@@ -18,14 +18,13 @@ public:
     METHOD_ADD(::Panel::visitInformation, "visit-information");
 
     METHOD_ADD(::Panel::patientPersonal, "patient/personal");
-    METHOD_ADD(::Panel::patientEditPersonal, "patient/edit-personal");
+    METHOD_ADD(::Panel::userEditPersonal, "patient/edit-personal");
     METHOD_ADD(::Panel::patientCalendar, "patient/calendar");
 
     METHOD_ADD(::Panel::patientInformation, "doctor/patient-information");
     METHOD_ADD(::Panel::patientInformation, "receptionist/patient-information");
 
     METHOD_ADD(::Panel::doctorPersonal, "doctor/personal");
-    METHOD_ADD(::Panel::doctorEditPersonal, "doctor/edit-personal");
 
     METHOD_ADD(::Panel::receptionistPendingRequests, "receptionist/pending_requests");
     METHOD_LIST_END
@@ -48,7 +47,7 @@ public:
     void patientPersonal(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
     // TODO: patientEditPersonal and doctorEditPersonal should be connected
-    void patientEditPersonal(const drogon::HttpRequestPtr& pReq,
+    void userEditPersonal(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
     void patientCalendar(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
@@ -59,8 +58,6 @@ public:
 
     // Doctor
     void doctorPersonal(const drogon::HttpRequestPtr& pReq,
-        std::function<void(const drogon::HttpResponsePtr&)>&& callback);
-    void doctorEditPersonal(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 
     // Receptionist

@@ -285,15 +285,23 @@ catch(const std::exception& e)
     ERROR_PAGE(e);
 }
 
-void Panel::patientEditPersonal(const drogon::HttpRequestPtr& pReq,
+void Panel::userEditPersonal(const drogon::HttpRequestPtr& pReq,
     std::function<void(const drogon::HttpResponsePtr&)>&& callback) try
 {
     drogon::HttpResponsePtr pResp;
 
-    if (!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::PATIENT))
+    if ((!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::PATIENT)) &&
+        (!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::DOCTOR)))
     {
-        callback(pResp);
-        return;
+        if (pReq->getSession()->getOptional<tsrpp::Database::User>("user") == std::nullopt)
+        {
+            callback(pResp);
+            return;
+        }
+        else
+        {
+            throw std::runtime_error{"you are not allowed to see this"};
+        }
     }
 
     auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
@@ -309,7 +317,6 @@ void Panel::patientEditPersonal(const drogon::HttpRequestPtr& pReq,
         tsrpp::Database database{SQLite::OPEN_READWRITE};
         auto pFirstName{pReq->getOptionalParameter<std::string>("firstName")};
         auto pLastName{pReq->getOptionalParameter<std::string>("lastName")};
-        auto pPesel{pReq->getOptionalParameter<std::string>("pesel")};
         auto pEmail{pReq->getOptionalParameter<std::string>("email")};
         auto pCurrentPassword{pReq->getOptionalParameter<std::string>("currentPassword")};
         auto pNewPassword{pReq->getOptionalParameter<std::string>("newPassword")};
@@ -318,24 +325,26 @@ void Panel::patientEditPersonal(const drogon::HttpRequestPtr& pReq,
         if ((pUser != std::nullopt) &&
             (pFirstName != std::nullopt) && LoginSystem::validFirstName(*pFirstName) &&
             (pLastName != std::nullopt) && LoginSystem::validLastName(*pLastName) &&
-            (pPesel != std::nullopt) && LoginSystem::validPesel(*pPesel) &&
             (pEmail != std::nullopt) && LoginSystem::validEmail(*pEmail) &&
             (pCurrentPassword != std::nullopt) && tsrpp::verifyPassword(*pCurrentPassword, database.getUserById(pUser->id)->password) &&
-            (pNewPassword != std::nullopt) && LoginSystem::validPassword(*pNewPassword) &&
-            (pRepeatedNewPassword != std::nullopt) && (*pNewPassword == *pRepeatedNewPassword))
+            (pNewPassword != std::nullopt) && (pRepeatedNewPassword != std::nullopt) &&
+            (((pNewPassword->length() > 0) && LoginSystem::validPassword(*pNewPassword) && (*pNewPassword == *pRepeatedNewPassword)) ||
+            (pNewPassword->length() == 0)))
         {
             tsrpp::Database database{SQLite::OPEN_READWRITE};
             pUser->first_name = *pFirstName;
             pUser->last_name = *pLastName;
-            pUser->pesel = *pPesel;
             pUser->email = *pEmail;
-            pUser->password = tsrpp::hashPassword(*pNewPassword);
+            if (pNewPassword->length() > 0)
+            {
+                pUser->password = tsrpp::hashPassword(*pNewPassword);
+            }
             if (database.updateUser(*pUser))
             {
-                errorCode = ErrorCode::SUCCESS;
                 pReq->getSession()->modify<tsrpp::Database::User>("user", [&pUser](tsrpp::Database::User& sessionUser) {
                     sessionUser = *pUser;
                 });
+                errorCode = ErrorCode::SUCCESS;
             }
         }
     }
@@ -343,10 +352,9 @@ void Panel::patientEditPersonal(const drogon::HttpRequestPtr& pReq,
     drogon::HttpViewData data;
     data.insert("firstName", pUser->first_name);
     data.insert("lastName", pUser->last_name);
-    data.insert("pesel", pUser->pesel);
     data.insert("email", pUser->email);
     data.insert("errorCode", static_cast<int>(errorCode));
-    pResp = drogon::HttpResponse::newHttpViewResponse("panel_patient_edit_personal", data);
+    pResp = drogon::HttpResponse::newHttpViewResponse("panel_user_edit_personal", data);
     callback(pResp);
 }
 catch(const std::exception& e)
@@ -623,79 +631,6 @@ void Panel::doctorPersonal(const drogon::HttpRequestPtr& pReq,
     data.insert("dates", dates);
     data.insert("times", times);
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_doctor_personal", data);
-    callback(pResp);
-}
-catch(const std::exception& e)
-{
-    ERROR_PAGE(e);
-}
-
-void Panel::doctorEditPersonal(const drogon::HttpRequestPtr& pReq,
-    std::function<void(const drogon::HttpResponsePtr&)>&& callback) try
-{
-    drogon::HttpResponsePtr pResp;
-
-    if (!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::DOCTOR))
-    {
-        callback(pResp);
-        return;
-    }
-
-    auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
-    enum class ErrorCode
-    {
-        NOT_REQUESTED,
-        FAILURE,
-        SUCCESS
-    } errorCode{};
-    if (pReq->method() == drogon::HttpMethod::Post)
-    {
-        tsrpp::Database database{SQLite::OPEN_READWRITE};
-        errorCode = ErrorCode::FAILURE;
-        auto pFirstName{pReq->getOptionalParameter<std::string>("firstName")};
-        auto pLastName{pReq->getOptionalParameter<std::string>("lastName")};
-        auto pPesel{pReq->getOptionalParameter<std::string>("pesel")};
-        auto pEmail{pReq->getOptionalParameter<std::string>("email")};
-        auto pProfession{pReq->getOptionalParameter<std::int32_t>("profession")};
-        auto pCurrentPassword{pReq->getOptionalParameter<std::string>("currentPassword")};
-        auto pNewPassword{pReq->getOptionalParameter<std::string>("newPassword")};
-        auto pRepeatedNewPassword{pReq->getOptionalParameter<std::string>("repeatedNewPassword")};
-
-        if ((pUser != std::nullopt) &&
-            (pFirstName != std::nullopt) && LoginSystem::validFirstName(*pFirstName) &&
-            (pLastName != std::nullopt) && LoginSystem::validLastName(*pLastName) &&
-            (pPesel != std::nullopt) && LoginSystem::validPesel(*pPesel) &&
-            (pEmail != std::nullopt) && LoginSystem::validEmail(*pEmail) &&
-            (pProfession != std::nullopt) && tsrpp::Database::User::isValidProfession(
-                static_cast<tsrpp::Database::User::Profession>(*pProfession)) &&
-            (pCurrentPassword != std::nullopt) && tsrpp::verifyPassword(*pCurrentPassword, database.getUserById(pUser->id)->password) &&
-            (pNewPassword != std::nullopt) && LoginSystem::validPassword(*pNewPassword) &&
-            (pRepeatedNewPassword != std::nullopt) && (*pNewPassword == *pRepeatedNewPassword))
-        {
-            pUser->first_name = *pFirstName;
-            pUser->last_name = *pLastName;
-            pUser->pesel = *pPesel;
-            pUser->email = *pEmail;
-            pUser->type = static_cast<tsrpp::Database::User::Profession>(*pProfession);
-            pUser->password = tsrpp::hashPassword(*pNewPassword);
-            if (database.updateUser(*pUser))
-            {
-                errorCode = ErrorCode::SUCCESS;
-                pReq->getSession()->modify<tsrpp::Database::User>("user", [&pUser](tsrpp::Database::User& sessionUser) {
-                    sessionUser = *pUser;
-                });
-            }
-        }
-    }
-
-    drogon::HttpViewData data;
-    data.insert("firstName", pUser->first_name);
-    data.insert("lastName", pUser->last_name);
-    data.insert("pesel", pUser->pesel);
-    data.insert("email", pUser->email);
-    data.insert("profession", static_cast<int>(pUser->type));
-    data.insert("errorCode", static_cast<int>(errorCode));
-    pResp = drogon::HttpResponse::newHttpViewResponse("panel_doctor_edit_personal", data);
     callback(pResp);
 }
 catch(const std::exception& e)

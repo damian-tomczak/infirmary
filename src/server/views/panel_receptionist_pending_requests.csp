@@ -21,7 +21,6 @@
                         <a href="/panel/receptionist/pending-requests" class="btn btn-primary my-2 menu-button">Pending visit requests</a>
                         <a href="/panel/receptionist/patient-information" class="btn btn-secondary my-2 menu-button mb-4">Patient information</a>
 
-                        <!-- ACHTUNG DYNAMIC IS NEEDED HERE -->
                         <a href="/panel/receptionist/" class="btn btn-secondary my-2 menu-button">
                             Doctor 1<br>
                             Internist

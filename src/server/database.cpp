@@ -36,6 +36,7 @@ bool Database::updateUser(const User& user)
         "first_name = :first_name,"
         "last_name = :last_name,"
         "pesel = :pesel,"
+        "password = :password,"
         "email = :email,"
         "note = :note "
         "WHERE id = :id"
@@ -45,6 +46,7 @@ bool Database::updateUser(const User& user)
     q.bind(":last_name", user.last_name);
     q.bind(":pesel", user.pesel);
     q.bind(":email", user.email);
+    q.bind(":password", user.password);
     q.bind(":note", user.note);
 
     // TODO: add validation
