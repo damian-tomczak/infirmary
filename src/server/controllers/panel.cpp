@@ -145,7 +145,7 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     }
 
     auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
-    auto pCancelVisitId{pReq->getOptionalParameter<std::int32_t>("cancelVisit")};
+    auto pCancelVisitId{pReq->getOptionalParameter<int32_t>("cancelVisit")};
     if (pCancelVisitId != std::nullopt)
     {
         database.updateVisitStatus(*pCancelVisitId, tsrpp::Database::Visit::Status::CANCELLED);
@@ -388,7 +388,7 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
     {
         throw std::runtime_error{"doctorProfession should be specified"};
     }
-    std::int32_t profession{tsrpp::Database::User::professionStr2Int(*pDoctorProfession)};
+    int32_t profession{tsrpp::Database::User::professionStr2Int(*pDoctorProfession)};
 
     std::string date;
     auto pDateParameter{pReq->getOptionalParameter<std::string>("date")};

@@ -83,7 +83,7 @@ std::optional<Database::User> Database::getUserByPesel(const std::string& pesel)
     return result;
 }
 
-std::optional<Database::User> Database::getUserById(const std::int32_t id)
+std::optional<Database::User> Database::getUserById(const int32_t id)
 {
     std::optional<User> result;
     SQLite::Statement q{*mpDatabase, "SELECT * FROM users WHERE id = :id LIMIT 1"};
@@ -108,8 +108,17 @@ std::optional<Database::User> Database::getUserById(const std::int32_t id)
     return result;
 }
 
-bool Database::addVisit(const std::int32_t patientId,
-    const std::int32_t doctorId,
+std::vector<Database::User> Database::getUsersByRole(const User::Role role)
+{
+    std::vector<Database::User> result;
+
+
+
+    return result;
+}
+
+bool Database::addVisit(const int32_t patientId,
+    const int32_t doctorId,
     const std::string& date,
     const std::string& time)
 {
@@ -118,7 +127,7 @@ bool Database::addVisit(const std::int32_t patientId,
 
     q.bind(":patient_id", patientId);
     q.bind(":doctor_id", doctorId);
-    q.bind(":status", static_cast<std::int32_t>(Visit::Status::REQUESTED));
+    q.bind(":status", static_cast<int32_t>(Visit::Status::REQUESTED));
     q.bind(":date", date);
     q.bind(":time", time);
 
@@ -164,7 +173,7 @@ std::vector<Database::Visit> Database::getVisitsByPatientPesel(const std::string
     return result;
 }
 
-std::vector<Database::Visit> Database::getVisitsByDoctorIdAndDate(const std::int32_t id, const std::string& date)
+std::vector<Database::Visit> Database::getVisitsByDoctorIdAndDate(const int32_t id, const std::string& date)
 {
     std::vector<Visit> result;
 
@@ -188,10 +197,10 @@ std::vector<Database::Visit> Database::getVisitsByDoctorIdAndDate(const std::int
     return result;
 }
 
-bool Database::updateVisitStatus(const std::int32_t visitId, const Database::Visit::Status status)
+bool Database::updateVisitStatus(const int32_t visitId, const Database::Visit::Status status)
 {
     SQLite::Statement q{*mpDatabase, "UPDATE visits SET status = :status WHERE id = :id"};
-    q.bind(":status", static_cast<std::int32_t>(status));
+    q.bind(":status", static_cast<int32_t>(status));
     q.bind(":id", visitId);
 
     if (q.exec() == 1)
@@ -202,7 +211,7 @@ bool Database::updateVisitStatus(const std::int32_t visitId, const Database::Vis
     return false;
 }
 
-std::optional<Database::Visit> Database::getVisitById(const std::int32_t id)
+std::optional<Database::Visit> Database::getVisitById(const int32_t id)
 {
     std::optional<Visit> result;
     SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE id = :id LIMIT 1"};
@@ -225,8 +234,8 @@ std::optional<Database::Visit> Database::getVisitById(const std::int32_t id)
     return result;
 }
 
-Database::VisitAvailability Database::checkAvailabilityOfVisit(const std::int32_t patientId,
-    const std::int32_t profession,
+Database::VisitAvailability Database::checkAvailabilityOfVisit(const int32_t patientId,
+    const int32_t profession,
     const std::string& date,
     const std::string time)
 {
@@ -276,10 +285,10 @@ Database::VisitAvailability Database::checkAvailabilityOfVisit(const std::int32_
     return result;
 }
 
-std::optional<std::int32_t> Database::getFreeDoctor(const std::int32_t& profession,
-    const std::vector<std::int32_t> takenDoctorsIds)
+std::optional<int32_t> Database::getFreeDoctor(const int32_t& profession,
+    const std::vector<int32_t> takenDoctorsIds)
 {
-    std::optional<std::int32_t> result;
+    std::optional<int32_t> result;
 
     std::string takenDoctorsStr;
     for (auto& id : takenDoctorsIds)
