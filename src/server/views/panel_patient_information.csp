@@ -37,7 +37,7 @@ if (role == 1)
 {
 %>
                         <a href="/panel/doctor/personal" class="btn btn-secondary my-2 menu-button">Personal information</a>
-                        <a href="/panel/doctor/patient-information" class="btn btn-primary my-2 menu-button mb-4">Patient information</a>
+                        <a href="/panel/doctor/patient-information" class="btn btn-primary my-2 menu-button">Patient information</a>
 <%c++
 }
 else if (role == 2)
@@ -61,7 +61,7 @@ else if (role == 2)
 }
 %>
 
-                        <a href="/logout" class="btn btn-secondary my-2 menu-button">Logout</a>
+                        <a href="/logout" class="btn btn-secondary my-2 menu-button mt-4">Logout</a>
                         <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
                     </div>
                 </div>

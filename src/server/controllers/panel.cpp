@@ -174,6 +174,7 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     }
 
     drogon::HttpViewData data;
+    appendDoctorsToSideMenu(data);
     data.insert("role", static_cast<int>(pUser->role));
     data.insert("id", std::to_string(pVisit->id));
     data.insert("status", tsrpp::Database::Visit::status2Str(static_cast<tsrpp::Database::Visit::Status>(pVisit->status)));

@@ -33,7 +33,7 @@ auto availability=@@.get<std::vector<int>>("availability");
                         <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
                     </div>
                 </div>
-                <div class="container col-10 offset-2">
+                <div class="col-10 offset-2">
                     <div class="row text-center">
 <%c++
     for (size_t i{}; i < hours.size(); ++i)

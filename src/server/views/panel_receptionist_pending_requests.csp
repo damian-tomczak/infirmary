@@ -39,7 +39,7 @@ else
     $$<<"<p>Doctors haven't been found</p>";
 }
 %>
-                        <a href="/logout" class="btn btn-secondary my-2 menu-button">Logout</a>
+                        <a href="/logout" class="btn btn-secondary my-2 menu-button mt-4">Logout</a>
                         <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
                     </div>
                 </div>
