@@ -17,10 +17,12 @@ using namespace std::chrono_literals;
 
 namespace tsrpp
 {
-Server::Server()
+Server::Server(const std::string& mailLogin, const std::string& mailPassword)
 {
     fmt::print("SQlite3 version {} ({})\n", ::SQLite::VERSION, ::SQLite::getLibVersion());
     fmt::print("SQliteC++ version {}\n", SQLITECPP_VERSION);
+
+    Mailer::init(mailLogin, mailPassword);
 }
 
 void Server::run()

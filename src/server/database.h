@@ -16,6 +16,8 @@ namespace tsrpp
 // TODO: use GLFS for database.db
 class Database final
 {
+    // TODO:: it would be a great idea to specify data types used by the database
+
 public:
     Database(const int flags = SQLite::OPEN_READONLY) :
         mpDatabase{std::make_unique<SQLite::Database>(DATABASE_PATH, flags)}
@@ -41,7 +43,7 @@ public:
         {
             return (profession >= Profession::INTERNIST) && (profession <= Profession::OCULIST);
         }
-        static std::int32_t professionStr2Int(const std::string& profession)
+        static int32_t professionStr2Int(const std::string& profession)
         {
             if (profession == "internist")
             {
@@ -74,7 +76,7 @@ public:
             }
         }
 
-        std::int32_t id;
+        int32_t id;
         std::string pesel;
         std::string password;
         std::string first_name;
@@ -82,12 +84,14 @@ public:
         std::string email;
         std::string note;
         Role role;
+        // TODO: it should be named profession in the database
         Profession type;
     };
     bool addUser(const User& user);
     bool updateUser(const User& user);
-    std::optional<Database::User> getUserByPesel(const std::string& pesel);
-    std::optional<Database::User> getUserById(const std::int32_t id);
+    std::optional<User> getUserByPesel(const std::string& pesel);
+    std::optional<User> getUserById(const int32_t id);
+    std::vector<User> getUsersByRole(const User::Role role);
 
     struct Visit final
     {
@@ -112,21 +116,22 @@ public:
             }
         }
 
-        std::int32_t id;
-        std::int32_t patient_id;
-        std::int32_t doctor_id;
+        int32_t id;
+        int32_t patient_id;
+        int32_t doctor_id;
         Status status;
         std::string date;
         std::string time;
+        // TODO: it should be named prescription
         std::string receipt;
     };
-    bool addVisit(const std::int32_t patientId,
-        const std::int32_t doctorId,
+    bool addVisit(const int32_t patientId,
+        const int32_t doctorId,
         const std::string& date, const std::string& time);
     std::vector<Visit> getVisitsByPatientPesel(const std::string& pesel);
-    std::vector<Visit> getVisitsByDoctorIdAndDate(const std::int32_t id, const std::string& date);
-    bool updateVisitStatus(const std::int32_t visitId, const Visit::Status status);
-    std::optional<Database::Visit> getVisitById(const std::int32_t id);
+    std::vector<Visit> getVisitsByDoctorIdAndDate(const int32_t id, const std::string& date);
+    bool updateVisitStatus(const int32_t visitId, const Visit::Status status);
+    std::optional<Visit> getVisitById(const int32_t id);
 
     struct VisitAvailability final
     {
@@ -137,14 +142,14 @@ public:
             YOUR_VISIT
         } status;
 
-        std::vector<std::int32_t> takenDoctorsIds;
+        std::vector<int32_t> takenDoctorsIds;
     };
-    VisitAvailability checkAvailabilityOfVisit(const std::int32_t patientId,
-        const std::int32_t profession,
+    VisitAvailability checkAvailabilityOfVisit(const int32_t patientId,
+        const int32_t profession,
         const std::string& date,
         const std::string time);
 
-    std::optional<std::int32_t> getFreeDoctor(const std::int32_t& profession, const std::vector<std::int32_t> takenDcotorsIds);
+    std::optional<int32_t> getFreeDoctor(const int32_t& profession, const std::vector<int32_t> takenDcotorsIds);
 
 private:
     std::unique_ptr<SQLite::Database> mpDatabase;

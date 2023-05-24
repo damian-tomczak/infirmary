@@ -1,9 +1,9 @@
 <%c++
-    auto date=@@.get<std::string>("date");
-    auto doctorProfession=@@.get<std::string>("doctorProfession");
-    auto isPastSelected=@@.get<bool>("isPastSelected");
-    auto hours=@@.get<std::vector<std::string>>("hours");
-    auto availability=@@.get<std::vector<int>>("availability");
+auto date=@@.get<std::string>("date");
+auto doctorProfession=@@.get<std::string>("doctorProfession");
+auto isPastSelected=@@.get<bool>("isPastSelected");
+auto hours=@@.get<std::array<std::string, 12>>("hours");
+auto availability=@@.get<std::vector<int>>("availability");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,7 +33,7 @@
                         <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
                     </div>
                 </div>
-                <div class="container col-10 offset-2">
+                <div class="col-10 offset-2">
                     <div class="row text-center">
 <%c++
     for (size_t i{}; i < hours.size(); ++i)
@@ -55,7 +55,7 @@
             }
             else
             {
-                $$<<"<a href=\"?doctorProfession=" << doctorProfession << "&register=" << date << " " << hour << "\" class=\"btn btn-secondary my-2\">Reserve</a>";
+                $$<<"<a href=\"?doctorProfession=" << doctorProfession << "&register=" << date << " " << hour << "&date="<< date << "\" class=\"btn btn-secondary my-2\">Reserve</a>";
             }
             $$<<"</div>";
         }

@@ -10,3 +10,6 @@
 [submodule "external/SQLiteCpp"]
 	path = external/SQLiteCpp
 	url = https://github.com/SRombauts/SQLiteCpp.git
+[submodule "external/mailio"]
+	path = external/mailio
+	url = https://github.com/karastojko/mailio

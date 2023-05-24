@@ -15,7 +15,7 @@ jobs:
 
     steps:
     - name: Install dependencies
-      run: sudo apt-get install libjsoncpp-dev uuid-dev zlib1g-dev libssl-dev
+      run: sudo apt-get install libjsoncpp-dev uuid-dev zlib1g-dev libssl-dev libboost-all-dev
 
     - uses: actions/checkout@v3
 

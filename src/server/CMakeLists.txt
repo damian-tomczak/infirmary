@@ -43,4 +43,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     fmt::fmt
     drogon
     ssl
+    mailio
+    Boost::program_options
 )

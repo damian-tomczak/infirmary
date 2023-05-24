@@ -1,22 +1,27 @@
 <%c++
-    auto role=@@.get<int>("role");
-    auto id=@@.get<std::string>("id");
-    auto status=@@.get<std::string>("status");
-    auto date=@@.get<std::string>("date");
-    auto time=@@.get<std::string>("time");
-    auto receipt=@@.get<std::string>("receipt");
+auto doctorIds=@@.get<std::vector<int>>("doctorIds");
+auto doctorFirstNames=@@.get<std::vector<std::string>>("doctorFirstNames");
+auto doctorLastNames=@@.get<std::vector<std::string>>("doctorLastNames");
+auto doctorProfessions=@@.get<std::vector<std::string>>("doctorProfessions");
 
-    auto patientFirstName=@@.get<std::string>("patientFirstName");
-    auto patientLastName=@@.get<std::string>("patientLastName");
-    auto patientPesel=@@.get<std::string>("patientPesel");
-    auto patientEmail=@@.get<std::string>("patientEmail");
-    auto patientNote=@@.get<std::string>("patientNote");
+auto role=@@.get<int>("role");
+auto id=@@.get<std::string>("id");
+auto status=@@.get<std::string>("status");
+auto date=@@.get<std::string>("date");
+auto time=@@.get<std::string>("time");
+auto receipt=@@.get<std::string>("receipt");
 
-    auto doctorFirstName=@@.get<std::string>("doctorFirstName");
-    auto doctorLastName=@@.get<std::string>("doctorLastName");
-    auto doctorPesel=@@.get<std::string>("doctorPesel");
-    auto doctorEmail=@@.get<std::string>("doctorEmail");
-    auto doctorProfession=@@.get<std::string>("doctorProfession");
+auto patientFirstName=@@.get<std::string>("patientFirstName");
+auto patientLastName=@@.get<std::string>("patientLastName");
+auto patientPesel=@@.get<std::string>("patientPesel");
+auto patientEmail=@@.get<std::string>("patientEmail");
+auto patientNote=@@.get<std::string>("patientNote");
+
+auto doctorFirstName=@@.get<std::string>("doctorFirstName");
+auto doctorLastName=@@.get<std::string>("doctorLastName");
+auto doctorPesel=@@.get<std::string>("doctorPesel");
+auto doctorEmail=@@.get<std::string>("doctorEmail");
+auto doctorProfession=@@.get<std::string>("doctorProfession");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -39,29 +44,44 @@
 if (role == 0)
 {
 %>
-                        <a href="/panel/patient/personal" class="btn btn-primary my-2 menu-button mb-4">Personal information</a>
+                        <a href="/panel/patient/personal" class="btn btn-secondary my-2 menu-button mb-4">Personal information</a>
 
                         <a href="/panel/patient/calendar?doctorProfession=internist" class="btn btn-secondary my-2 menu-button">Internist</a>
                         <a href="/panel/patient/calendar?doctorProfession=gastroenterologist" class="btn btn-secondary my-2 menu-button">Gastroenterologist</a>
                         <a href="/panel/patient/calendar?doctorProfession=pulmonologist" class="btn btn-secondary my-2 menu-button">Pulmonologist</a>
-                        <a href="/panel/patient/calendar?doctorProfession=oculist" class="btn btn-secondary my-2 menu-button mb-4">Oculist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=oculist" class="btn btn-secondary my-2 menu-button">Oculist</a>
 <%c++
 }
 else if (role == 1)
 {
 %>
-                        <a href="/panel/doctor/personal" class="btn btn-primary my-2 menu-button">Personal information</a>
-                        <a href="/panel/doctor/patient-information" class="btn btn-secondary my-2 menu-button mb-4">Patient information</a>
+                        <a href="/panel/doctor/personal" class="btn btn-secondary my-2 menu-button">Personal information</a>
+                        <a href="/panel/doctor/patient-information" class="btn btn-secondary my-2 menu-button">Patient information</a>
 <%c++
 }
 else if (role == 2)
 {
 %>
-                        <p>TODO: Menu for receptionist</p>
+                        <a href="/panel/receptionist/pending-requests" class="btn btn-secondary my-2 menu-button">Pending visit requests</a>
+                        <a href="/panel/receptionist/patient-information" class="btn btn-secondary my-2 menu-button mb-4">Patient information</a>
 <%c++
+    if (doctorIds.size() > 0)
+    {
+            for (size_t i = 0; i < doctorIds.size(); ++i)
+            {
+                $$<<"<a href=\"/panel/receptionist/doctor-information?doctorId=" << doctorIds.at(i) << "\" class=\"btn btn-secondary my-2 menu-button\">";
+                    $$<<doctorFirstNames.at(i) << " " << doctorLastNames.at(i) << "<br>";
+                    $$<<doctorProfessions.at(i);
+                $$<<"</a>";
+            }
+    }
+    else
+    {
+        $$<<"<p>Doctors haven't been found</p>";
+    }
 }
 %>
-                        <a href="/logout" class="btn btn-secondary my-2 menu-button">Logout</a>
+                        <a href="/logout" class="btn btn-secondary my-2 menu-button mt-4">Logout</a>
                         <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
                     </div>
                 </div>
