@@ -55,8 +55,8 @@ if (role == 0)
 else if (role == 1)
 {
 %>
-                        <a href="/panel/doctor/personal" class="btn btn-secondary my-2 menu-button">Personal information</a>
-                        <a href="/panel/doctor/patient-information" class="btn btn-secondary my-2 menu-button">Patient information</a>
+                        <a href="/panel/receptionist/doctor-information" class="btn btn-primary my-2 menu-button">Personal information</a>
+                        <a href="/panel/receptionist/patient-information" class="btn  my-2 btn-secondary menu-button">Patient information</a>
 <%c++
 }
 else if (role == 2)

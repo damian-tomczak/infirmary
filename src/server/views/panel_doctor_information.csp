@@ -4,6 +4,15 @@ auto doctorFirstNames=@@.get<std::vector<std::string>>("doctorFirstNames");
 auto doctorLastNames=@@.get<std::vector<std::string>>("doctorLastNames");
 auto doctorProfessions=@@.get<std::vector<std::string>>("doctorProfessions");
 
+auto doctorDate=@@.get<std::string>("doctorDate");
+auto doctorFirstName=@@.get<std::string>("doctorFirstName");
+auto doctorLastName=@@.get<std::string>("doctorLastName");
+auto doctorPesel=@@.get<std::string>("doctorPesel");
+auto doctorEmail=@@.get<std::string>("doctorEmail");
+auto doctorProfession=@@.get<std::string>("doctorProfession");
+
+auto role=@@.get<int>("role");
+
 auto date=@@.get<std::string>("date");
 auto doctorId=@@.get<int>("doctorId");
 
@@ -31,22 +40,33 @@ auto times=@@.get<std::vector<std::string>>("times");
                 <div class="col-2 bg-light position-fixed h-100">
                     <div class="row justify-content-center text-center">
                         <h1><a href="/">Welcome to Infirmary</a></h1>
-                        <a href="/panel/receptionist/pending-requests" class="btn btn-secondary my-2 menu-button">Pending visit requests</a>
-                        <a href="/panel/receptionist/patient-information" class="btn btn-secondary my-2 menu-button mb-4">Patient information</a>
 <%c++
-if (doctorIds.size() > 0)
+if (role == 1)
 {
-        for (size_t i = 0; i < doctorIds.size(); ++i)
-        {
-            $$<<"<a href=\"/panel/receptionist/doctor-information?doctorId=" << doctorIds.at(i) << "\" class=\"btn " << ((doctorId == doctorIds.at(i)) ? "btn-primary" : "btn-secondary") << " my-2 menu-button\">";
-                $$<<doctorFirstNames.at(i) << " " << doctorLastNames.at(i) << "<br>";
-                $$<<doctorProfessions.at(i);
-            $$<<"</a>";
-        }
+%>
+                        <a href="/panel/receptionist/doctor-information" class="btn btn-primary my-2 menu-button">Personal information</a>
+                        <a href="/panel/receptionist/patient-information" class="btn  my-2 btn-secondary menu-button mb-4">Patient information</a>
+<%c++
 }
-else
+else if (role == 2)
 {
-    $$<<"<p>Doctors haven't been found</p>";
+    $$<<"<a href=\"/panel/receptionist/pending-requests\" class=\"btn btn-secondary my-2 menu-button\">Pending visit requests</a>";
+    $$<<"<a href=\"/panel/receptionist/patient-information\" class=\"btn btn-secondary my-2 menu-button mb-4\">Patient information</a>";
+    if (doctorIds.size() > 0)
+    {
+            for (size_t i = 0; i < doctorIds.size(); ++i)
+            {
+                $$<<"<a href=\"/panel/receptionist/doctor-information?doctorId=" << doctorIds.at(i) << "\" class=\"btn " <<
+                    ((doctorIds.at(i) == doctorId) ? "btn-primary" : "btn-secondary") << " my-2 menu-button\">";
+                    $$<<doctorFirstNames.at(i) << " " << doctorLastNames.at(i) << "<br>";
+                    $$<<doctorProfessions.at(i);
+                $$<<"</a>";
+            }
+    }
+    else
+    {
+        $$<<"<p>Doctors haven't been found</p>";
+    }
 }
 %>
 
@@ -55,7 +75,20 @@ else
                     </div>
                 </div>
                 <div class="col-10 offset-2">
-                    <div class="row visits">
+                    <div class="row justify-content-center">
+                        <div class="bg-light col-8 mb-4">
+                            <h2>Personal information</h2>
+                            <p>Name: <%c++ $$<<doctorFirstName; %></p>
+                            <p>Surname: <%c++ $$<<doctorLastName; %></p>
+                            <p>PESEL: <%c++ $$<<doctorPesel; %></p>
+                            <p>E-mail: <%c++ $$<<doctorEmail; %></p>
+                            <p>Profession: <%c++ $$<<doctorProfession; %></p>
+                            <div class="row justify-content-center">
+                                <a href="/panel/edit-personal" class="btn btn-secondary my-2 menu-button">Edit Information</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="visits">
                         <div class="d-flex justify-content-end bg-dark">
                             <form>
                                 <input type="hidden" value="<%c++ $$<<doctorId; %>" name="doctorId"></input>

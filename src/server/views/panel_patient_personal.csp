@@ -51,7 +51,7 @@ auto times=@@.get<std::vector<std::string>>("times");
                                 <p>PESEL: <%c++ $$<<pesel; %></p>
                                 <p>E-mail: <%c++ $$<<email; %></p>
                                 <div class="row justify-content-center">
-                                    <a href="edit-personal" class="btn btn-secondary my-2 menu-button">Edit Information</a>
+                                    <a href="/panel/edit-personal" class="btn btn-secondary my-2 menu-button">Edit Information</a>
                                 </div>
                             </div>
                             <hr>
