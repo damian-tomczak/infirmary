@@ -44,19 +44,19 @@ auto times=@@.get<std::vector<std::string>>("times");
 if (role == 1)
 {
 %>
-                        <a href="/panel/receptionist/doctor-information" class="btn btn-primary my-2 menu-button">Personal information</a>
-                        <a href="/panel/receptionist/patient-information" class="btn  my-2 btn-secondary menu-button mb-4">Patient information</a>
+                        <a href="/panel/admin/doctor-information" class="btn btn-primary my-2 menu-button">Personal information</a>
+                        <a href="/panel/admin/patient-information" class="btn  my-2 btn-secondary menu-button mb-4">Patient information</a>
 <%c++
 }
 else if (role == 2)
 {
-    $$<<"<a href=\"/panel/receptionist/pending-requests\" class=\"btn btn-secondary my-2 menu-button\">Pending visit requests</a>";
-    $$<<"<a href=\"/panel/receptionist/patient-information\" class=\"btn btn-secondary my-2 menu-button mb-4\">Patient information</a>";
+    $$<<"<a href=\"/panel/admin/pending-requests\" class=\"btn btn-secondary my-2 menu-button\">Pending visit requests</a>";
+    $$<<"<a href=\"/panel/admin/patient-information\" class=\"btn btn-secondary my-2 menu-button mb-4\">Patient information</a>";
     if (doctorIds.size() > 0)
     {
             for (size_t i = 0; i < doctorIds.size(); ++i)
             {
-                $$<<"<a href=\"/panel/receptionist/doctor-information?doctorId=" << doctorIds.at(i) << "\" class=\"btn " <<
+                $$<<"<a href=\"/panel/admin/doctor-information?doctorId=" << doctorIds.at(i) << "\" class=\"btn " <<
                     ((doctorIds.at(i) == doctorId) ? "btn-primary" : "btn-secondary") << " my-2 menu-button\">";
                     $$<<doctorFirstNames.at(i) << " " << doctorLastNames.at(i) << "<br>";
                     $$<<doctorProfessions.at(i);
@@ -88,7 +88,7 @@ else if (role == 2)
                             </div>
                         </div>
                     </div>
-                    <div class="visits">
+                    <div class="row visits">
                         <div class="d-flex justify-content-end bg-dark">
                             <form>
                                 <input type="hidden" value="<%c++ $$<<doctorId; %>" name="doctorId"></input>

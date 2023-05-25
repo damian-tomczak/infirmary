@@ -21,14 +21,14 @@ auto doctorProfessions=@@.get<std::vector<std::string>>("doctorProfessions");
                 <div class="col-2 bg-light position-fixed h-100">
                     <div class="row justify-content-center text-center">
                         <h1><a href="/">Welcome to Infirmary</a></h1>
-                        <a href="/panel/receptionist/pending-requests" class="btn btn-primary my-2 menu-button">Pending visit requests</a>
-                        <a href="/panel/receptionist/patient-information" class="btn btn-secondary my-2 menu-button mb-4">Patient information</a>
+                        <a href="/panel/admin/pending-requests" class="btn btn-primary my-2 menu-button">Pending visit requests</a>
+                        <a href="/panel/admin/patient-information" class="btn btn-secondary my-2 menu-button mb-4">Patient information</a>
 <%c++
 if (doctorIds.size() > 0)
 {
         for (size_t i = 0; i < doctorIds.size(); ++i)
         {
-            $$<<"<a href=\"/panel/receptionist/doctor-information?doctorId=" << doctorIds.at(i) << "\" class=\"btn btn-secondary my-2 menu-button\">";
+            $$<<"<a href=\"/panel/admin/doctor-information?doctorId=" << doctorIds.at(i) << "\" class=\"btn btn-secondary my-2 menu-button\">";
                 $$<<doctorFirstNames.at(i) << " " << doctorLastNames.at(i) << "<br>";
                 $$<<doctorProfessions.at(i);
             $$<<"</a>";

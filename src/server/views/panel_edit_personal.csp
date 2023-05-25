@@ -46,8 +46,8 @@ if (errorCode)
 if (role == 1)
 {
 %>
-                        <a href="/panel/receptionist/doctor-information" class="btn btn-primary my-2 menu-button">Personal information</a>
-                        <a href="/panel/receptionist/patient-information" class="btn  my-2 btn-secondary menu-button">Patient information</a>
+                        <a href="/panel/admin/doctor-information" class="btn btn-primary my-2 menu-button">Personal information</a>
+                        <a href="/panel/admin/patient-information" class="btn  my-2 btn-secondary menu-button">Patient information</a>
 <%c++
 }
 if (role == 0)
@@ -64,14 +64,14 @@ if (role == 0)
 else if (role == 2)
 {
 %>
-                        <a href="/panel/receptionist/pending-requests" class="btn btn-secondary my-2 menu-button">Pending visit requests</a>
-                        <a href="/panel/receptionist/patient-information" class="btn btn-secondary my-2 menu-button">Patient information</a>
+                        <a href="/panel/admin/pending-requests" class="btn btn-secondary my-2 menu-button">Pending visit requests</a>
+                        <a href="/panel/admin/patient-information" class="btn btn-secondary my-2 menu-button">Patient information</a>
 <%c++
     if (doctorIds.size() > 0)
     {
             for (size_t i = 0; i < doctorIds.size(); ++i)
             {
-                $$<<"<a href=\"/panel/receptionist/doctor-information?doctorId=" << doctorIds.at(i) << "\" class=\"btn btn-secondary my-2 menu-button\">";
+                $$<<"<a href=\"/panel/admin/doctor-information?doctorId=" << doctorIds.at(i) << "\" class=\"btn btn-secondary my-2 menu-button\">";
                     $$<<doctorFirstNames.at(i) << " " << doctorLastNames.at(i) << "<br>";
                     $$<<doctorProfessions.at(i);
                 $$<<"</a>";

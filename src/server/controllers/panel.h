@@ -18,17 +18,17 @@ public:
     METHOD_ADD(::Panel::receptionist, "receptionist");
 
     METHOD_ADD(::Panel::visitInformation, "visit-information");
-    METHOD_ADD(::Panel::doctorInformation, "receptionist/doctor-information");
-    METHOD_ADD(::Panel::patientInformation, "receptionist/patient-information");
 
     METHOD_ADD(::Panel::editPersonal, "edit-personal");
 
     METHOD_ADD(::Panel::patientPersonal, "patient/personal");
     METHOD_ADD(::Panel::patientCalendar, "patient/calendar");
 
-    METHOD_ADD(::Panel::receptionistPendingRequests, "receptionist/pending-requests");
+    METHOD_ADD(::Panel::doctorInformation, "admin/doctor-information");
+    METHOD_ADD(::Panel::patientInformation, "admin/patient-information");
 
-    METHOD_ADD(::Panel::statistics, "receptionist/statistics");
+    METHOD_ADD(::Panel::receptionistPendingRequests, "admin/pending-requests");
+    METHOD_ADD(::Panel::statistics, "admin/statistics");
     METHOD_LIST_END
 
     // REDIRECTS
@@ -44,10 +44,6 @@ public:
     // MEAT
     void visitInformation(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
-    void doctorInformation(const drogon::HttpRequestPtr& pReq,
-        std::function<void(const drogon::HttpResponsePtr&)>&& callback);
-    void patientInformation(const drogon::HttpRequestPtr& pReq,
-        std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 
     void editPersonal(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
@@ -57,9 +53,13 @@ public:
     void patientCalendar(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 
-    void receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
+    void doctorInformation(const drogon::HttpRequestPtr& pReq,
+        std::function<void(const drogon::HttpResponsePtr&)>&& callback);
+    void patientInformation(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 
+    void receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
+        std::function<void(const drogon::HttpResponsePtr&)>&& callback);
     void statistics(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 

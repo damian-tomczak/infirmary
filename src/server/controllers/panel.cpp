@@ -77,11 +77,11 @@ void Panel::receptionist(const drogon::HttpRequestPtr& pReq,
     std::string url;
     if (pUser->role == tsrpp::Database::User::Role::DOCTOR)
     {
-        url = tsrpp::createUrl("/panel/receptionist/doctor-information");
+        url = tsrpp::createUrl("/panel/admin/doctor-information");
     }
     else
     {
-        url = tsrpp::createUrl("/panel/receptionist/pending-requests");
+        url = tsrpp::createUrl("/panel/admin/pending-requests");
     }
 
     pResp = drogon::HttpResponse::newRedirectionResponse(url);
