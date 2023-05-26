@@ -9,6 +9,7 @@ auto doctorFirstName=@@.get<std::string>("doctorFirstName");
 auto doctorLastName=@@.get<std::string>("doctorLastName");
 auto doctorPesel=@@.get<std::string>("doctorPesel");
 auto doctorEmail=@@.get<std::string>("doctorEmail");
+auto doctorPhone=@@.get<std::string>("doctorPhone");
 auto doctorProfession=@@.get<std::string>("doctorProfession");
 
 auto role=@@.get<int>("role");
@@ -70,7 +71,7 @@ else if (role == 2)
 }
 %>
 
-                        <a href="/logout" class="btn btn-secondary my-2 menu-button mt-4">Logout</a>
+                        <a href="/logout" class="btn btn-secondary my-2 menu-button">Logout</a>
                         <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
                     </div>
                 </div>
@@ -82,6 +83,7 @@ else if (role == 2)
                             <p>Surname: <%c++ $$<<doctorLastName; %></p>
                             <p>PESEL: <%c++ $$<<doctorPesel; %></p>
                             <p>E-mail: <%c++ $$<<doctorEmail; %></p>
+                            <p>Phone: <%c++ $$<<doctorPhone; %></p>
                             <p>Profession: <%c++ $$<<doctorProfession; %></p>
                             <div class="row justify-content-center">
                                 <a href="/panel/edit-personal" class="btn btn-secondary my-2 menu-button">Edit Information</a>

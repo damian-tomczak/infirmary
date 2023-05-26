@@ -4,6 +4,7 @@ auto lastName=@@.get<std::string>("lastName");
 auto pesel=@@.get<std::string>("pesel");
 auto email=@@.get<std::string>("email");
 auto note=@@.get<std::string>("note");
+auto phone=@@.get<std::string>("phone");
 
 auto ids=@@.get<std::vector<int>>("ids");
 auto statuses=@@.get<std::vector<int>>("statuses");
@@ -50,6 +51,7 @@ auto times=@@.get<std::vector<std::string>>("times");
                                 <p>Surname: <%c++ $$<<lastName; %></p>
                                 <p>PESEL: <%c++ $$<<pesel; %></p>
                                 <p>E-mail: <%c++ $$<<email; %></p>
+                                <p>Phone: <%c++ $$<<phone; %></p>
                                 <div class="row justify-content-center">
                                     <a href="/panel/edit-personal" class="btn btn-secondary my-2 menu-button">Edit Information</a>
                                 </div>

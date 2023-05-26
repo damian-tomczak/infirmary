@@ -12,8 +12,8 @@ namespace tsrpp
 {
 bool Database::addUser(const User& user)
 {
-    SQLite::Statement q{*mpDatabase, "INSERT INTO users(pesel, password, first_name, last_name, email, note, role)"
-        "VALUES (:pesel, :password, :first_name, :last_name, :email, :note, 0)"};
+    SQLite::Statement q{*mpDatabase, "INSERT INTO users(pesel, password, first_name, last_name, email, note, role, phone)"
+        "VALUES (:pesel, :password, :first_name, :last_name, :email, :note, 0, :phone)"};
 
     q.bind(":pesel", user.pesel);
     q.bind(":password", user.password);
@@ -21,6 +21,7 @@ bool Database::addUser(const User& user)
     q.bind(":last_name", user.last_name);
     q.bind(":email", user.email);
     q.bind(":note", user.note);
+    q.bind(":phone", user.phone);
 
     if (q.exec() == 1)
     {
@@ -38,7 +39,9 @@ bool Database::updateUser(const User& user)
         "pesel = :pesel,"
         "password = :password,"
         "email = :email,"
-        "note = :note "
+        "note = :note,"
+        "type = :profession,"
+        "phone = :phone "
         "WHERE id = :id"
     };
     q.bind(":id", user.id);
@@ -48,8 +51,9 @@ bool Database::updateUser(const User& user)
     q.bind(":email", user.email);
     q.bind(":password", user.password);
     q.bind(":note", user.note);
+    q.bind(":profession", static_cast<int32_t>(user.type));
+    q.bind(":phone", user.phone);
 
-    // TODO: add validation
     if (q.exec() == 1)
     {
         return true;
@@ -76,7 +80,8 @@ std::optional<Database::User> Database::getUserByPesel(const std::string& pesel)
             .email{q.getColumn("email").getString()},
             .note{q.getColumn("note").getString()},
             .role{User::Role{q.getColumn("role").getInt()}},
-            .type{User::Profession{q.getColumn("type").getInt()}}
+            .type{User::Profession{q.getColumn("type").getInt()}},
+            .phone{{q.getColumn("phone").getString()}}
         });
     }
 
@@ -101,7 +106,8 @@ std::optional<Database::User> Database::getUserById(const int32_t id)
             .email{q.getColumn("email").getString()},
             .note{q.getColumn("note").getString()},
             .role{User::Role{q.getColumn("role").getInt()}},
-            .type{User::Profession{q.getColumn("type").getInt()}}
+            .type{User::Profession{q.getColumn("type").getInt()}},
+            .phone{{q.getColumn("phone").getString()}}
         });
     }
 
@@ -126,7 +132,8 @@ std::vector<Database::User> Database::getUsersByRole(const User::Role role)
             .email{q.getColumn("email").getString()},
             .note{q.getColumn("note").getString()},
             .role{User::Role{q.getColumn("role").getInt()}},
-            .type{User::Profession{q.getColumn("type").getInt()}}
+            .type{User::Profession{q.getColumn("type").getInt()}},
+            .phone{{q.getColumn("phone").getString()}}
         });
     }
 

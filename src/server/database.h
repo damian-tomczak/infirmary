@@ -22,7 +22,6 @@ public:
     Database(const int flags = SQLite::OPEN_READONLY) :
         mpDatabase{std::make_unique<SQLite::Database>(DATABASE_PATH, flags)}
     {}
-    ~Database() = default;
 
     struct User final
     {
@@ -86,6 +85,7 @@ public:
         Role role;
         // TODO: it should be named profession in the database
         Profession type;
+        std::string phone;
     };
     bool addUser(const User& user);
     bool updateUser(const User& user);

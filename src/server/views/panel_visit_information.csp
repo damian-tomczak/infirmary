@@ -15,12 +15,14 @@ auto patientFirstName=@@.get<std::string>("patientFirstName");
 auto patientLastName=@@.get<std::string>("patientLastName");
 auto patientPesel=@@.get<std::string>("patientPesel");
 auto patientEmail=@@.get<std::string>("patientEmail");
+auto patientPhone=@@.get<std::string>("patientPhone");
 auto patientNote=@@.get<std::string>("patientNote");
 
 auto doctorFirstName=@@.get<std::string>("doctorFirstName");
 auto doctorLastName=@@.get<std::string>("doctorLastName");
 auto doctorPesel=@@.get<std::string>("doctorPesel");
 auto doctorEmail=@@.get<std::string>("doctorEmail");
+auto doctorPhone=@@.get<std::string>("doctorPhone");
 auto doctorProfession=@@.get<std::string>("doctorProfession");
 %>
 <!DOCTYPE html>
@@ -101,13 +103,14 @@ else if (role == 2)
                                 <p>Last Name: <%c++ $$<<patientLastName; %></p>
                                 <p>Pesel: <%c++ $$<<patientPesel; %></p>
                                 <p>Email: <%c++ $$<<patientEmail; %></p>
+                                <p>Phone: <%c++ $$<<patientPhone; %></p>
                             </div>
                             <hr>
                             <div class="padding">
                                 <h2>Doctor's personal information</h2>
                                 <p>First Name: <%c++ $$<<doctorFirstName; %></p>
                                 <p>Last Name: <%c++ $$<<doctorLastName; %></p>
-                                <p>Email: <%c++ $$<<doctorEmail; %></p>
+                                <p>Phone: <%c++ $$<<doctorPhone; %></p>
                             </div>
                             <hr>
                             <div>

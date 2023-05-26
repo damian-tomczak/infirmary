@@ -5,10 +5,13 @@ auto doctorLastNames=@@.get<std::vector<std::string>>("doctorLastNames");
 auto doctorProfessions=@@.get<std::vector<std::string>>("doctorProfessions");
 
 auto role=@@.get<int>("role");
+
 auto firstName=@@.get<std::string>("firstName");
 auto lastName=@@.get<std::string>("lastName");
 auto email=@@.get<std::string>("email");
 auto profession=@@.get<int>("profession");
+auto phone=@@.get<std::string>("phone");
+
 auto errorCode=@@.get<int>("errorCode");
 
 if (errorCode)
@@ -18,7 +21,7 @@ if (errorCode)
     $$<<"alert(\"";
     switch (errorCode)
     {
-        case 1: $$<<"Something went wrong while editing the user"; break;
+        case 1: $$<<"Format one or more fields are incorrect"; break;
         case 2: $$<<"Success"; break;
     }
     $$<<"\")}";
@@ -87,32 +90,38 @@ else if (role == 2)
                         <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
                     </div>
                 </div>
-                <div class="col-10 offset-2 text-center">
-                    <h2>Personal information</h2>
-                    <form action="" method="post">
-                        <div class="form-group row justify-content-center mb-2">
+                <div class="col-10 offset-2">
+                    <h2 class="text-center">Personal information</h2>
+                    <form method="post">
+                        <div class="row justify-content-center mb-2">
                             <label for="firstName" class="col-2 col-form-label">First Name:</label>
                             <div class="col-5">
                                 <input type="text" class="form-control" name="firstName" value="<%c++ $$<<firstName; %>">
                             </div>
                         </div>
-                        <div class="form-group row justify-content-center mb-2">
+                        <div class="row justify-content-center mb-2">
                             <label for="lastName" class="col-2 col-form-label">Last Name:</label>
                             <div class="col-5">
                                 <input type="text" class="form-control" name="lastName" value="<%c++ $$<<lastName; %>">
                             </div>
                         </div>
-                        <div class="form-group row justify-content-center mb-2">
+                        <div class="row justify-content-center mb-2">
                             <label for="email" class="col-2 col-form-label">Email: </label>
                             <div class="col-5">
                                 <input type="text" class="form-control" name="email" value="<%c++ $$<<email; %>">
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mb-2">
+                            <label for="phone" class="col-2 col-form-label">Phone: </label>
+                            <div class="col-5">
+                                <input type="text" class="form-control" name="phone" value="<%c++ $$<<phone; %>">
                             </div>
                         </div>
 <%c++
 if (role == 1 || role == 2)
 {
 %>
-                        <div class="form-group row justify-content-center mb-2">
+                        <div class="row justify-content-center mb-2">
                             <label for="profession" class="col-2 col-form-label">Profession: </label>
                             <div class="col-5">
                                 <select class="form-select" name="profession">
@@ -126,25 +135,25 @@ if (role == 1 || role == 2)
 <%c++
 }
 %>
-                        <div class="form-group row justify-content-center mb-2">
-                            <label for="newPassword" class="col-2 col-form-label">New Password (you can leave it empty):</label>
+                        <div class="row justify-content-center mb-2">
+                            <label for="newPassword" class="col-2 col-form-label">New Password:</label>
                             <div class="col-5">
-                                <input type="password" class="form-control" name="newPassword">
+                                <input type="password" class="form-control" name="newPassword" placeholder="you can leave it empty">
                             </div>
                         </div>
-                        <div class="form-group row justify-content-center mb-2">
-                            <label for="repeatedNewPassword" class="col-2 col-form-label">Repeat New Password (you can leave it empty):</label>
+                        <div class="row justify-content-center mb-2">
+                            <label for="repeatedNewPassword" class="col-2 col-form-label">Repeat New Password:</label>
                             <div class="col-5">
-                                <input type="password" class="form-control" name="repeatedNewPassword">
+                                <input type="password" class="form-control" name="repeatedNewPassword" placeholder="you can leave it empty">
                             </div>
                         </div>
-                        <div class="form-group row justify-content-center mb-2">
+                        <div class="row justify-content-center mb-2">
                             <label for="currentPassword" class="col-2 col-form-label">Current Password <b>(obligatory for every change)</b>:</label>
                             <div class="col-5">
                                 <input type="password" class="form-control" name="currentPassword">
                             </div>
                         </div>
-                        <div class="form-group row justify-content-center mb-2">
+                        <div class="row justify-content-center mb-2 text-center">
                             <div class="col-5">
                                 <a href="/panel" class="btn btn-secondary">Return</a>
                                 <input type="submit" class="btn btn-primary" value="Save changes">

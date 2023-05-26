@@ -180,12 +180,13 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     data.insert("patientLastName", pPatient->last_name);
     data.insert("patientPesel", pPatient->pesel);
     data.insert("patientEmail", pPatient->email);
+    data.insert("patientPhone", pPatient->phone);
     data.insert("patientNote", pPatient->note);
 
     data.insert("doctorFirstName", pDoctor->first_name);
     data.insert("doctorLastName", pDoctor->last_name);
     data.insert("doctorPesel", pDoctor->pesel);
-    data.insert("doctorEmail", pDoctor->email);
+    data.insert("doctorPhone", pDoctor->phone);
     data.insert("errorCode", errorCode);
 
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_visit_information", data);
@@ -246,6 +247,7 @@ void Panel::patientPersonal(const drogon::HttpRequestPtr& pReq,
     data.insert("pesel", pUser->pesel);
     data.insert("email", pUser->email);
     data.insert("note", pUser->note);
+    data.insert("phone", pUser->phone);
     auto visits{database.getVisitsByPatientPesel(pUser->pesel)};
     std::vector<int> ids;
     std::vector<int> statuses;
@@ -326,6 +328,7 @@ void Panel::editPersonal(const drogon::HttpRequestPtr& pReq,
         auto pFirstName{pReq->getOptionalParameter<std::string>("firstName")};
         auto pLastName{pReq->getOptionalParameter<std::string>("lastName")};
         auto pEmail{pReq->getOptionalParameter<std::string>("email")};
+        auto pPhone{pReq->getOptionalParameter<std::string>("phone")};
         auto pProfession{pReq->getOptionalParameter<int32_t>("profession")};
         auto pCurrentPassword{pReq->getOptionalParameter<std::string>("currentPassword")};
         auto pNewPassword{pReq->getOptionalParameter<std::string>("newPassword")};
@@ -334,6 +337,7 @@ void Panel::editPersonal(const drogon::HttpRequestPtr& pReq,
         if ((pFirstName != std::nullopt) && LoginSystem::validFirstName(*pFirstName) &&
             (pLastName != std::nullopt) && LoginSystem::validLastName(*pLastName) &&
             (pEmail != std::nullopt) && LoginSystem::validEmail(*pEmail) &&
+            (pPhone != std::nullopt) && LoginSystem::validPhone(*pPhone) &&
             (((pEditableUser->role == tsrpp::Database::User::Role::DOCTOR) && (pProfession != std::nullopt)) || (pEditableUser->role == tsrpp::Database::User::Role::PATIENT)) &&
             (pCurrentPassword != std::nullopt) && tsrpp::verifyPassword(*pCurrentPassword, pEditableUser->password) &&
             (pNewPassword != std::nullopt) && (pRepeatedNewPassword != std::nullopt) &&
@@ -344,6 +348,7 @@ void Panel::editPersonal(const drogon::HttpRequestPtr& pReq,
             pEditableUser->first_name = *pFirstName;
             pEditableUser->last_name = *pLastName;
             pEditableUser->email = *pEmail;
+            pEditableUser->phone = *pPhone;
             if (pEditableUser->role == tsrpp::Database::User::Role::DOCTOR)
             {
                 pEditableUser->type = static_cast<tsrpp::Database::User::Profession>(*pProfession);
@@ -370,6 +375,7 @@ void Panel::editPersonal(const drogon::HttpRequestPtr& pReq,
     data.insert("firstName", pEditableUser->first_name);
     data.insert("lastName", pEditableUser->last_name);
     data.insert("email", pEditableUser->email);
+    data.insert("phone", pEditableUser->phone);
     data.insert("profession", static_cast<int>(pEditableUser->type));
     data.insert("errorCode", static_cast<int>(errorCode));
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_edit_personal", data);
@@ -644,6 +650,7 @@ void Panel::doctorInformation(const drogon::HttpRequestPtr& pReq,
     data.insert("doctorLastName", pDoctorInfo->last_name);
     data.insert("doctorPesel", pDoctorInfo->pesel);
     data.insert("doctorEmail", pDoctorInfo->email);
+    data.insert("doctorPhone", pDoctorInfo->phone);
     data.insert("doctorProfession", tsrpp::Database::User::profession2Str(static_cast<tsrpp::Database::User::Profession>(pDoctorInfo->type)));
 
     appendDoctorsToSideMenu(data);

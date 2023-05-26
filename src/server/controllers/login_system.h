@@ -6,6 +6,7 @@
 
 #include <regex>
 
+// TODO: in the login system I forgot about correct name convention for variables with arrow operator overloading
 class LoginSystem
 {
 public:
@@ -34,6 +35,7 @@ public:
         return false;
     }
 
+    // TODO: functions below should be renamed with "is" naming convention
     static bool validPesel(const std::string& pesel)
     {
         std::regex regex(R"(^\d{11}$)");
@@ -85,6 +87,13 @@ public:
         return std::regex_match(email, regex);
     }
 
+    static bool validPhone(const std::string& phone)
+    {
+        std::regex regex(R"(^\d{9}$)");
+        auto tmp = std::regex_match(phone, regex);;
+        return tmp;
+    }
+
 protected:
     bool isAlreadyLogged(const drogon::HttpRequestPtr& pReq, drogon::HttpResponsePtr& pResp);
 };
@@ -125,11 +134,8 @@ public:
             {
                 tsrpp::Database database{SQLite::OPEN_READWRITE};
                 pResp = drogon::HttpResponse::newRedirectionResponse(tsrpp::createUrl("/panel"));
-#ifndef NDEBUG
-    auto pesel{pReq->getOptionalParameter<std::string>("pesel")};
-#else
-    std::optional<std::string> pesel{"00302800690"};
-#endif
+
+                auto pesel{pReq->getOptionalParameter<std::string>("pesel")};
                 if (!pesel)
                 {
                     throw std::runtime_error{"login was successful, after which the pesel couldn't be found"};
@@ -191,6 +197,7 @@ public:
     PATH_ADD("/register");
     PATH_LIST_END
 
+    // TODO: reorganize
     enum class RegistrationStatus
     {
         DEFAULT,
@@ -201,7 +208,8 @@ public:
         INCORRECT_EMAIL,
         DIFFERENT_PASSWORDS,
         ALREADY_EXISTS,
-        SUCCESS
+        SUCCESS,
+        INCORRECT_PHONE
     };
 
     void asyncHandleHttpRequest(
