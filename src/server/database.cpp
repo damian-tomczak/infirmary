@@ -257,6 +257,14 @@ std::optional<Database::Visit> Database::getVisitById(const int32_t id)
     return result;
 }
 
+std::vector<Database::Visit> Database::getVisitByStatus(const Visit::Status status)
+{
+    std::vector<Visit> result;
+
+
+    return result;
+}
+
 Database::VisitAvailability Database::checkAvailabilityOfVisit(const int32_t patientId,
     const int32_t profession,
     const std::string& date,

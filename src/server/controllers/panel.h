@@ -29,6 +29,7 @@ public:
 
     METHOD_ADD(::Panel::receptionistPendingRequests, "admin/pending-requests");
     METHOD_ADD(::Panel::statistics, "admin/statistics");
+    METHOD_ADD(::Panel::addDoctor, "admin/add-doctor");
     METHOD_LIST_END
 
     // REDIRECTS
@@ -61,6 +62,8 @@ public:
     void receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
     void statistics(const drogon::HttpRequestPtr& pReq,
+        std::function<void(const drogon::HttpResponsePtr&)>&& callback);
+    void addDoctor(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 
 

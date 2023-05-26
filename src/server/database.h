@@ -132,6 +132,7 @@ public:
     std::vector<Visit> getVisitsByDoctorIdAndDate(const int32_t id, const std::string& date);
     bool updateVisitStatus(const int32_t visitId, const Visit::Status status);
     std::optional<Visit> getVisitById(const int32_t id);
+    std::vector<Visit> getVisitByStatus(const Visit::Status status);
 
     struct VisitAvailability final
     {

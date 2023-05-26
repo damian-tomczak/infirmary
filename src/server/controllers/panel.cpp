@@ -725,6 +725,31 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
     tsrpp::Database database{SQLite::OPEN_READWRITE};
     auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
     drogon::HttpViewData data;
+    auto visits{database.getVisitsByPatientPesel(pUser->pesel)};
+    std::vector<int> ids;
+    std::vector<int> statuses;
+    std::vector<int> doctorsType;
+    std::vector<std::string> doctorsFirstName;
+    std::vector<std::string> doctorsLastName;
+    std::vector<std::string> dates;
+    std::vector<std::string> times;
+    for (auto it{visits.begin()}; it != visits.end(); ++it)
+    {
+        ids.emplace_back(static_cast<int>(it->id));
+        statuses.emplace_back(static_cast<int>(it->status));
+        doctorsType.emplace_back(static_cast<int>(database.getUserById(it->doctor_id)->type));
+        doctorsFirstName.emplace_back(database.getUserById(it->doctor_id)->first_name);
+        doctorsLastName.emplace_back(database.getUserById(it->doctor_id)->last_name);
+        dates.emplace_back(it->date);
+        times.emplace_back(it->time);
+    }
+    data.insert("ids", ids);
+    data.insert("statuses", statuses);
+    data.insert("doctorsType", doctorsType);
+    data.insert("doctorsFirstName", doctorsFirstName);
+    data.insert("doctorsLastName", doctorsLastName);
+    data.insert("dates", dates);
+    data.insert("times", times);
     appendDoctorsToSideMenu(data);
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_pending_requests", data);
     callback(pResp);
@@ -758,6 +783,37 @@ void Panel::statistics(const drogon::HttpRequestPtr& pReq,
     drogon::HttpViewData data;
     appendDoctorsToSideMenu(data);
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_statistics", data);
+    callback(pResp);
+}
+catch(const std::exception& e)
+{
+    ERROR_PAGE(e);
+}
+
+void Panel::addDoctor(const drogon::HttpRequestPtr& pReq,
+    std::function<void(const drogon::HttpResponsePtr&)>&& callback) try
+{
+    drogon::HttpResponsePtr pResp;
+
+    if ((!LoginSystem::isUserShouldSeeThis<false>(pReq, pResp, tsrpp::Database::User::Role::DOCTOR)) &&
+        (!LoginSystem::isUserShouldSeeThis<false>(pReq, pResp, tsrpp::Database::User::Role::RECEPTIONIST)))
+    {
+        if (pReq->getSession()->getOptional<tsrpp::Database::User>("user") == std::nullopt)
+        {
+            callback(pResp);
+            return;
+        }
+        else
+        {
+            throw std::runtime_error{"you are not allowed to see this"};
+        }
+    }
+
+    tsrpp::Database database{SQLite::OPEN_READWRITE};
+    auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+    drogon::HttpViewData data;
+    appendDoctorsToSideMenu(data);
+    pResp = drogon::HttpResponse::newHttpViewResponse("panel_add_doctor", data);
     callback(pResp);
 }
 catch(const std::exception& e)
