@@ -33,6 +33,7 @@ public:
         }
 
         message msg;
+        msg.content_type(message::media_type_t::TEXT, "html", "utf-8");
         msg.from(mail_address(sender, sender));
         msg.add_recipient(mail_address(recipient, recipient));
         msg.subject(title);

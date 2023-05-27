@@ -115,6 +115,10 @@ public:
                 default: throw std::runtime_error{"invalid status"};
             }
         }
+        static bool isVisitExpired(const Status status)
+        {
+            return true;
+        }
 
         int32_t id;
         int32_t patient_id;

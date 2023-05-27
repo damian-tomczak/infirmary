@@ -88,8 +88,9 @@ if (visitIds.size() > 0)
             $$<<"<textarea name=\"reason\" placeholder=\"Insert reason\" class=\"form-control\"></textarea>";
             $$<<"</td>";
             $$<<"<td class=\"border border-secondary text-center\">";
-            $$<<"<input type=\"submit\" name=\"approve\" class=\"btn btn-primary bg-success\" value=\"Approve\">";
-            $$<<"<input type=\"submit\" name=\"decline\" class=\"btn btn-primary bg-danger\" value=\"Decline\">";
+            $$<<"<input type=\"hidden\" value=" << visitIds.at(i) << "\" name=\"visitId\"></input>";
+            $$<<"<input type=\"submit\" name=\"decision\" class=\"btn btn-primary bg-success me-2\" value=\"Approve\">";
+            $$<<"<input type=\"submit\" name=\"decision\" class=\"btn btn-primary bg-danger\" value=\"Decline\">";
             $$<<"</td>";
             $$<<"</form>";
             $$<<"</tr>";

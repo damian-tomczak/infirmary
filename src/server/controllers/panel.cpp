@@ -736,6 +736,37 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
 
     tsrpp::Database database{SQLite::OPEN_READWRITE};
     auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+
+    if (pReq->method() == drogon::HttpMethod::Post)
+    {
+        auto visitId{pReq->getOptionalParameter<int32_t>("visitId")};
+        auto pReason{pReq->getOptionalParameter<std::string>("reason")};
+        auto pDecision{pReq->getOptionalParameter<std::string>("decision")};
+        std::transform(pDecision->begin(), pDecision->end(), pDecision->begin(),
+                [](unsigned char c){ return std::tolower(c); });
+
+        auto pVisit{database.getVisitById(*visitId)};
+        auto pPatient{database.getUserById(pVisit->patient_id)};
+        std::ostringstream ss;
+        ss << "Welcome " << pPatient->first_name << " " << pPatient->last_name << "<br>"
+        << "Your appointment with " << tsrpp::Database::User::profession2Str(pVisit->profession) << " at "
+        << pVisit->date << " " << pVisit->time << " ";
+
+        if (*pDecision == "approve")
+        {
+            auto pDoctor{database.getUserById(pVisit->doctor_id)};
+            ss << "has been approved<br>Doctor Info: " << pDoctor->first_name << " " << pDoctor->last_name << "<br>"
+            << "More Info: " << *pReason;
+        }
+        else
+        {
+            ss << "has been declined<br>"
+            << "Reason: " << *pReason;
+        }
+        std::string message = ss.str();
+        Mailer::sendMail(pPatient->email, message);
+    }
+
     drogon::HttpViewData data;
     auto visits{database.getVisitsByStatus(tsrpp::Database::Visit::Status::REQUESTED)};
     std::vector<int> visitIds;
