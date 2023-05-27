@@ -20,10 +20,23 @@ auto patientNote=@@.get<std::string>("patientNote");
 
 auto doctorFirstName=@@.get<std::string>("doctorFirstName");
 auto doctorLastName=@@.get<std::string>("doctorLastName");
+auto doctorProfession=@@.get<std::string>("doctorProfession");
 auto doctorPesel=@@.get<std::string>("doctorPesel");
 auto doctorEmail=@@.get<std::string>("doctorEmail");
 auto doctorPhone=@@.get<std::string>("doctorPhone");
-auto doctorProfession=@@.get<std::string>("doctorProfession");
+
+auto controlVisitDate=@@.get<std::string>("controlVisitDate");
+auto controlVisitTime=@@.get<std::string>("controlVisitTime");
+
+if (controlVisitDate.length())
+{
+    $$<<"<script>";
+    $$<<"window.onload = function() {";
+    $$<<"alert(\"";
+    $$<<"Successuly booked a control visit on " << controlVisitDate << " " << controlVisitTime;
+    $$<<"\")}";
+    $$<<"</script>";
+}
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,7 +46,6 @@ auto doctorProfession=@@.get<std::string>("doctorProfession");
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
         <meta name="theme-color" content="#712cf9">
-        
         <link rel="stylesheet" href="/style/style.css">
     </head>
     <body>
@@ -65,7 +77,9 @@ else if (role == 2)
 {
 %>
                         <a href="/panel/admin/pending-requests" class="btn btn-secondary my-2 menu-button">Pending visit requests</a>
-                        <a href="/panel/admin/patient-information" class="btn btn-secondary my-2 menu-button mb-4">Patient information</a>
+                        <a href="/panel/admin/patient-information" class="btn btn-secondary my-2 menu-button">Patient information</a>
+                        <a href="/panel/admin/statistics" class="btn btn-secondary my-2 menu-button">Statistics</a>
+                        <a href="/panel/admin/add-doctor" class="btn btn-secondary my-2 menu-button mb-4">Add doctor</a>
 <%c++
     if (doctorIds.size() > 0)
     {
@@ -114,6 +128,7 @@ if (doctorFirstName.length())
 %>
                                 <p>First Name: <%c++ $$<<doctorFirstName; %></p>
                                 <p>Last Name: <%c++ $$<<doctorLastName; %></p>
+                                <p>Profession: <%c++ $$<<doctorProfession; %></p>
                                 <p>Phone: <%c++ $$<<doctorPhone; %></p>
 <%c++
 }
@@ -130,21 +145,47 @@ else
                                 <h2 class="padding">Patient's Notes</h2>
                                 <div class="col text-center">
                                     <form method="post" class="row justify-content-center text-center">
-                                        <div class="col-10">
+                                        <div class="col-8">
                                             <textarea class="form-control" rows="6" placeholder="Describe your health condition and list of pills your are taking here." name="note"><%c++ $$<<patientNote; %></textarea>
                                         </div>
-                                        <p>You can not modify already written note</p>
-                                        <input type="submit" value="Append Note" class="btn btn-secondary my-2 menu-button mb-4"></input>
+<%c++
+if (role == 0)
+{
+    $$<<"<p>You can not modify already written note</p>";
+}
+if (role == 0)
+{
+    $$<<"<input type=\"submit\" value=\"Append Note\" class=\"btn btn-secondary my-2 menu-button mb-4\"></input>";
+}
+else if (role == 1)
+{
+    $$<<"<input type=\"submit\" value=\"Edit Note\" class=\"btn btn-secondary my-2 menu-button mb-4\"></input>";
+}
+%>
                                     </form>
                                 </div>
                             </div>
                             <hr>
                             <div>
                                 <h2 class="padding">Prescription</h2>
-                                <div class="row justify-content-center">
-                                    <div class="col-10">
-                                        <textarea class="form-control" rows="6" placeholder="Prescription given during the visit" readonly><%c++ $$<<receipt; %></textarea>
-                                    </div>
+                                <div class="col text-center">
+                                    <form method="post" class="row justify-content-center text-center">
+<%c++
+if (role == 1)
+{
+    $$<<"<div class=\"col-8\">";
+    $$<<"<textarea class=\"form-control\" rows=\"6\" placeholder=\"Prescription given during the visit\" name=\"prescription\">" << receipt << "</textarea>";
+    $$<<"</div>";
+    $$<<"<input type=\"submit\" value=\"Edit Prescription\" class=\"btn btn-secondary my-2 menu-button mb-4\"></input>";
+}
+else
+{
+    $$<<"<div class=\"col-8\">";
+    $$<<"<textarea class=\"form-control\" rows=\"6\" placeholder=\"Prescription given during the visit\" name=\"prescription\" readonly" << receipt << "</textarea>";
+    $$<<"</div>";
+}
+%>
+                                    </form>
                                 </div>
                             </div>
                             <hr>
@@ -153,14 +194,22 @@ else
                                     <a href="/panel" class="btn btn-primary my-4 menu-button">Return</a>
                                 </div>
 <%c++
-    if (status != "Cancelled")
-    {
+if (role == 0 && status != "Cancelled")
+{
 %>
                                 <div class="col text-center">
                                     <a href="?id=<%c++ $$<<id; %>&cancelVisit=<%c++ $$<<id; %>" class="btn btn-secondary my-4 menu-button">Cancel Visit</a>
                                 </div>
 <%c++
-    }
+}
+else if (role == 1)
+{
+%>
+                                <div class="col text-center">
+                                    <a href="?id=<%c++ $$<<id; %>&controlVisit=1" class="btn btn-secondary my-4 menu-button">Set Control Visit</a>
+                                </div>
+<%c++
+}
 %>
                             </div>
                         </div>

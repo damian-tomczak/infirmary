@@ -3,9 +3,6 @@
 
 #include "drogon/HttpController.h"
 
-#include <iomanip>
-#include <chrono>
-
 class Panel final : public drogon::HttpController<Panel>
 {
 public:
@@ -71,4 +68,18 @@ private:
     void appendDoctorsToSideMenu(drogon::HttpViewData& data);
 
     inline static constexpr auto maxRequestedVisitPerUser{2};
+    inline static std::array<std::string, 12> hours{
+        "09:00",
+        "09:40",
+        "10:20",
+        "11:00",
+        "11:40",
+        "12:20",
+        "13:00",
+        "13:40",
+        "14:20",
+        "15:00",
+        "15:40",
+        "16:20",
+    };
 };

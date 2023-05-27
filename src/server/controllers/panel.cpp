@@ -113,49 +113,68 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     }
 
     tsrpp::Database database{SQLite::OPEN_READWRITE};
+    auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+    auto pVisitId{pReq->getOptionalParameter<int32_t>("id")};
+    if (!pVisitId)
+    {
+        throw std::runtime_error{"visit id should be specified"};
+    }
+    auto pVisit{database.getVisitById(*pVisitId)};
+    if ((pUser->role == tsrpp::Database::User::Role::PATIENT) && (pVisit->patient_id != pUser->id))
+    {
+        throw std::runtime_error{"you are not allowed to see that"};
+    }
+
     enum class ErrorCode
     {
         NOT_REQUESTED,
         FAILURE,
         SUCCESS
     } errorCode{};
+
+
     if (pReq->method() == drogon::HttpMethod::Post)
     {
         errorCode = ErrorCode::FAILURE;
-        auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+
         auto pNote{pReq->getOptionalParameter<std::string>("note")};
-        if ((pUser != std::nullopt) && (pNote != std::nullopt) &&
-            appendNote(pUser->role, pUser->note, *pNote))
+        auto pPrescription{pReq->getOptionalParameter<std::string>("prescription")};
+
+        if (pNote)
         {
-            pUser->note = *pNote;
-            if (database.updateUser(*pUser))
+            auto pPatient{database.getUserById(pVisit->patient_id)};
+            if ((pPatient != std::nullopt) &&
+                appendNote(pUser->role, pPatient->note, *pNote))
+            {
+                pPatient->note = *pNote;
+                if (database.updateUser(*pPatient))
+                {
+                    errorCode = ErrorCode::SUCCESS;
+                    if (pUser->id == pPatient->id)
+                    {
+                        pReq->getSession()->modify<tsrpp::Database::User>("user", [&pPatient](tsrpp::Database::User& sessionUser) {
+                            sessionUser = *pPatient;
+                        });
+                    }
+                }
+            }
+        }
+        else if (pPrescription)
+        {
+            pVisit->receipt = *pPrescription;
+            if (database.updateVisitPrescription(pVisit->id, pVisit->receipt))
             {
                 errorCode = ErrorCode::SUCCESS;
-                pReq->getSession()->modify<tsrpp::Database::User>("user", [&pUser](tsrpp::Database::User& sessionUser) {
-                    sessionUser = *pUser;
-                });
             }
         }
     }
 
-    auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
     auto pCancelVisitId{pReq->getOptionalParameter<int32_t>("cancelVisit")};
     if (pCancelVisitId != std::nullopt)
     {
         database.updateVisitStatus(*pCancelVisitId, tsrpp::Database::Visit::Status::CANCELLED);
     }
 
-    auto pVisitId{pReq->getOptionalParameter<std::string>("id")};
-    if (pVisitId == std::nullopt)
-    {
-        throw std::runtime_error{"visit id should be specified"};
-    }
-    auto visitId{std::stoi(*pVisitId)};
-    auto pVisit{database.getVisitById(visitId)};
-    if ((pUser->role == tsrpp::Database::User::Role::PATIENT) && (pVisit->patient_id != pUser->id))
-    {
-        throw std::runtime_error{"you are not allowed to see that"};
-    }
     auto pPatient{database.getUserById(pVisit->patient_id)};
     if (pPatient == std::nullopt)
     {
@@ -179,13 +198,49 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     data.insert("patientPhone", pPatient->phone);
     data.insert("patientNote", pPatient->note);
 
-    if (!pDoctor)
+    if (pDoctor)
     {
+        data.insert("doctorId", pDoctor->id);
         data.insert("doctorFirstName", pDoctor->first_name);
         data.insert("doctorLastName", pDoctor->last_name);
+        data.insert("doctorProfession", tsrpp::Database::User::profession2Str(pDoctor->type));
         data.insert("doctorPesel", pDoctor->pesel);
         data.insert("doctorPhone", pDoctor->phone);
         data.insert("errorCode", errorCode);
+    }
+
+    auto pControlVisit{pReq->getOptionalParameter<int32_t>("controlVisit")};
+    bool isControlVisitAdded{};
+    if (pControlVisit != std::nullopt)
+    {
+        for (int32_t days{14}; !isControlVisitAdded; ++days)
+        {
+            // TODO: still the lack of the C++20 days feature
+            // TODO: about the performance it would good to only modify time_t structure by adding the right amount of seconds
+            // but this variable usually should be created only once
+            auto controlVisitDate{tsrpp::time_t2Str(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now() + std::chrono::hours(days * 24)))};
+            for (auto it{hours.begin()}; it != hours.end(); ++it)
+            {
+                if (database.checkAvailabilityOfVisit(
+                    pPatient->id,
+                    static_cast<int32_t>(pVisit->profession),
+                    controlVisitDate,
+                    *it).status == tsrpp::Database::VisitAvailability::Status::FREE)
+                {
+                    database.addVisit(
+                        pPatient->id,
+                        controlVisitDate,
+                        *it,
+                        static_cast<int32_t>(pVisit->profession),
+                        tsrpp::Database::Visit::Status::SCHEDULED,
+                        pDoctor->id);
+                    data.insert("controlVisitDate", controlVisitDate);
+                    data.insert("controlVisitTime", *it);
+                    isControlVisitAdded = true;
+                    break;
+                }
+            }
+        }
     }
 
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_visit_information", data);
@@ -303,14 +358,14 @@ void Panel::editPersonal(const drogon::HttpRequestPtr& pReq,
     else
     {
         auto pUserId{pReq->getOptionalParameter<int32_t>("userId")};
-        if (pUserId == std::nullopt)
+        if (pUserId != std::nullopt)
         {
             auto pUserFromDb{database.getUserById(*pUserId)};
             if (pUserId == std::nullopt)
             {
                 throw std::runtime_error{"user couldn't be found"};
             }
-            pEditableUser = std::make_unique<tsrpp::Database::User>(*pEditableUser);;
+            pEditableUser = std::make_unique<tsrpp::Database::User>(*pUserFromDb);
         }
     }
 
@@ -338,7 +393,7 @@ void Panel::editPersonal(const drogon::HttpRequestPtr& pReq,
             (pEmail != std::nullopt) && LoginSystem::validEmail(*pEmail) &&
             (pPhone != std::nullopt) && LoginSystem::validPhone(*pPhone) &&
             (((pEditableUser->role == tsrpp::Database::User::Role::DOCTOR) && (pProfession != std::nullopt)) || (pEditableUser->role == tsrpp::Database::User::Role::PATIENT)) &&
-            (pCurrentPassword != std::nullopt) && tsrpp::verifyPassword(*pCurrentPassword, pEditableUser->password) &&
+            (pCurrentPassword != std::nullopt) && tsrpp::verifyPassword(*pCurrentPassword, pUser->password) &&
             (pNewPassword != std::nullopt) && (pRepeatedNewPassword != std::nullopt) &&
             (((pNewPassword->length() > 0) && LoginSystem::validPassword(*pNewPassword) && (*pNewPassword == *pRepeatedNewPassword)) ||
             (pNewPassword->length() == 0)))
@@ -370,13 +425,15 @@ void Panel::editPersonal(const drogon::HttpRequestPtr& pReq,
     }
 
     drogon::HttpViewData data;
-    data.insert("role", static_cast<int>(pEditableUser->role));
+    data.insert("role", static_cast<int>(pUser->role));
+    data.insert("id", pEditableUser->id);
     data.insert("firstName", pEditableUser->first_name);
     data.insert("lastName", pEditableUser->last_name);
     data.insert("email", pEditableUser->email);
     data.insert("phone", pEditableUser->phone);
     data.insert("profession", static_cast<int>(pEditableUser->type));
     data.insert("errorCode", static_cast<int>(errorCode));
+    appendDoctorsToSideMenu(data);
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_edit_personal", data);
     callback(pResp);
 }
@@ -441,12 +498,7 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
     }
     else
     {
-        auto now{std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())};
-        std::tm buffer;
-        localtime_r(&now, &buffer);
-        std::stringstream ss;
-        ss << std::put_time(&buffer, "%Y-%m-%d");
-        date = ss.str();
+        date = tsrpp::time_t2Str(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
     }
 
     auto pRegister{pReq->getOptionalParameter<std::string>("register")};
@@ -478,20 +530,6 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
     }
 
     drogon::HttpViewData data;
-    std::array<std::string, 12> hours {
-        "09:00",
-        "09:40",
-        "10:20",
-        "11:00",
-        "11:40",
-        "12:20",
-        "13:00",
-        "13:40",
-        "14:20",
-        "15:00",
-        "15:40",
-        "16:20",
-    };
     std::vector<int> availability;
     for (auto it{hours.begin()}; it != hours.end(); ++it)
     {
@@ -658,6 +696,7 @@ void Panel::doctorInformation(const drogon::HttpRequestPtr& pReq,
     }
 
     std::string date;
+    data.insert("doctorId", *pDoctorId);
     data.insert("doctorFirstName", pDoctorInfo->first_name);
     data.insert("doctorLastName", pDoctorInfo->last_name);
     data.insert("doctorPesel", pDoctorInfo->pesel);
@@ -698,7 +737,6 @@ void Panel::doctorInformation(const drogon::HttpRequestPtr& pReq,
         dates.emplace_back(it->date);
         times.emplace_back(it->time);
     }
-    data.insert("doctorId", *pDoctorId);
     data.insert("date", date);
     data.insert("ids", ids);
     data.insert("statuses", statuses);
@@ -749,7 +787,7 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
         }
         else
         {
-            status = tsrpp::Database::Visit::Status::CANCELLED;
+            status = tsrpp::Database::Visit::Status::REJECTED;
         }
         database.updateVisitStatus(*pVisitId, status);
         database.updateVisitDoctorId(*pVisitId, *pDoctorId);

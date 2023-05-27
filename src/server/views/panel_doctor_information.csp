@@ -4,6 +4,7 @@ auto doctorFirstNames=@@.get<std::vector<std::string>>("doctorFirstNames");
 auto doctorLastNames=@@.get<std::vector<std::string>>("doctorLastNames");
 auto doctorProfessions=@@.get<std::vector<std::string>>("doctorProfessions");
 
+auto doctorId=@@.get<int>("doctorId");
 auto doctorDate=@@.get<std::string>("doctorDate");
 auto doctorFirstName=@@.get<std::string>("doctorFirstName");
 auto doctorLastName=@@.get<std::string>("doctorLastName");
@@ -15,7 +16,6 @@ auto doctorProfession=@@.get<std::string>("doctorProfession");
 auto role=@@.get<int>("role");
 
 auto date=@@.get<std::string>("date");
-auto doctorId=@@.get<int>("doctorId");
 
 auto ids=@@.get<std::vector<int>>("ids");
 auto statuses=@@.get<std::vector<std::string>>("statuses");
@@ -46,7 +46,7 @@ if (role == 1)
 {
 %>
                         <a href="/panel/admin/doctor-information" class="btn btn-primary my-2 menu-button">Personal information</a>
-                        <a href="/panel/admin/patient-information" class="btn  my-2 btn-secondary menu-button mb-4">Patient information</a>
+                        <a href="/panel/admin/patient-information" class="btn  my-2 btn-secondary menu-button">Patient information</a>
 <%c++
 }
 else if (role == 2)
@@ -88,7 +88,7 @@ else if (role == 2)
                             <p>Phone: <%c++ $$<<doctorPhone; %></p>
                             <p>Profession: <%c++ $$<<doctorProfession; %></p>
                             <div class="row justify-content-center">
-                                <a href="/panel/edit-personal" class="btn btn-secondary my-2 menu-button">Edit Information</a>
+                                <a href="/panel/edit-personal?userId=<%c++ $$<<doctorId; %>" class="btn btn-secondary my-2 menu-button">Edit Information</a>
                             </div>
                         </div>
                     </div>
@@ -97,7 +97,7 @@ else if (role == 2)
                             <form>
                                 <input type="hidden" value="<%c++ $$<<doctorId; %>" name="doctorId"></input>
                                 <input type="date" value="<%c++ $$<<date; %>" name="date"></input>
-                                <input type="submit" class="me-3" value="Select date"></input>
+                                <input type="submit" value="Select date"></input>
                             </form>
                         </div>
 <%c++
