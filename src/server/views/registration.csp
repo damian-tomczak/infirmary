@@ -5,34 +5,36 @@ if (registrationStatus)
     std::ostringstream message;
     message << "<script>";
     message << "window.onload = function() {";
-    message << "alert(\"";
+    message << "alert(\"Registration failure: ";
     switch (registrationStatus)
     {
     case 1:
-        message << "Registration failure: incorrect pesel format";
+        message << "incorrect pesel format";
         break;
     case 2:
-        message << "Registration failure: incorrect first name format";
+        message << "incorrect first name format";
         break;
     case 3:
-        message << "Registration failure: incorrect last name format";
+        message << "incorrect last name format";
         break;
     case 4:
-        message << "Registration failure: your password format";
+        message << "your password isn't strong enough\n"
+            "it should contain at least one digit and is at least 9 characters long";
         break;
     case 5:
-        message << "Registration failure: your passwords are different";
+        message << "your passwords are different";
         break;
     case 6:
-        message << "Registration failure: incorrect email format";
+        message << "incorrect email format";
         break;
     case 7:
-        message << "Registration failure: patient already exists";
+        message << "patient already exists";
+        break;
+    case 9:
+        message << "incorrect phone format";
         break;
     }
-    message << "\")";
-    message << "}";
-    message << "</script>";
+    message << "\")}</script>";
 
     $$ << message.str();
 }
@@ -45,8 +47,8 @@ if (registrationStatus)
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
         <meta name="theme-color" content="#712cf9">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="../../style/style.css">
+        
+        <link rel="stylesheet" href="/style/style.css">
     </head>
     <body>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
@@ -60,36 +62,53 @@ if (registrationStatus)
                 <div class="d-flex justify-content-center align-items-center col-6">
                     <div>
                         <div>
-                            <h1 class="display-3">Register Panel</h1>
+                            <h1>Register Panel</h1>
                         </div>
                         <form action="register" method="post">
-                            <div class="form-floating mb-4">
-                                <input type="text" class="form-control" name="firstName">
-                                <label for="floatingName">First Name</label>
+                            <div class="row mb-2">
+                                <label for="firstName" class="col-5 col-form-label">First Name:</label>
+                                <div class="col-7">
+                                    <input type="text" class="form-control" name="firstName">
+                                </div>
                             </div>
-                            <div class="form-floating mb-4">
-                                <input type="text" class="form-control" name="lastName">
-                                <label for="floatingLastName">Last Name</label>
+                            <div class="row mb-2">
+                                <label for="lastName" class="col-5 col-form-label">Last Name:</label>
+                                <div class="col-7">
+                                    <input type="text" class="form-control" id="lastName" name="lastName">
+                                </div>
                             </div>
-                            <div class="form-floating mb-4">
-                                <input type="email" class="form-control" name="email">
-                                <label for="floatingEmail">Email</label>
+                            <div class="row mb-2">
+                                <label for="email" class="col-5 col-form-label">Email:</label>
+                                <div class="col-7">
+                                    <input type="email" class="form-control" id="email" name="email">
+                                </div>
                             </div>
-                            <div class="form-floating mb-4">
-                                <input type="text" class="form-control" name="pesel">
-                                <label for="floatingInput">Pesel</label>
+                            <div class="row mb-2">
+                                <label for="pesel" class="col-5 col-form-label">Pesel:</label>
+                                <div class="col-7">
+                                    <input type="text" class="form-control" id="pesel" name="pesel">
+                                </div>
                             </div>
-                            <div class="form-floating mb-4">
-                                <input type="password" class="form-control" name="password">
-                                <label for="floatingPassword">Password</label>
+                            <div class="row mb-2">
+                                <label for="phone" class="col-5 col-form-label">Phone:</label>
+                                <div class="col-7">
+                                    <input type="tel" class="form-control" id="phone" name="phone" placeholder="606502193">
+                                </div>
                             </div>
-                            <div class="form-floating mb-4">
-                                <input type="password" class="form-control" name="repeatedPassword">
-                                <label for="floatingPassword">Repeat Password</label>
+                            <div class="row mb-2">
+                                <label for="password" class="col-5 col-form-label">Password:</label>
+                                <div class="col-7">
+                                    <input type="password" class="form-control" id="password" name="password">
+                                </div>
                             </div>
-                            <div class="form-floating mb-4">
-                                <textarea class="form-control" rows="10" name="note"></textarea>
-                                <label for="note">Input notes about your self</label>
+                            <div class="row mb-2">
+                                <label for="repeatedPassword" class="col-5 col-form-label">Repeat Password:</label>
+                                <div class="col-7">
+                                    <input type="password" class="form-control" id="repeatedPassword" name="repeatedPassword">
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <textarea class="form-control" rows="10" name="note" placeholder="Input notes about yourself"></textarea>
                             </div>
                             <div>
                                 <input type="submit" class="w-100 btn btn-lg btn-primary"  value="Register">

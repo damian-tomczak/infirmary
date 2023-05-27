@@ -12,7 +12,7 @@ using message = mailio::message;
 using mail_address = mailio::mail_address;
 using smtps = mailio::smtps;
 
-static constexpr auto sender{"contact@damian-tomczak.pl"};
+static constexpr auto sender{"infirmary"};
 static constexpr auto hostName{"smtp.gmail.com"};
 static constexpr auto hostPort{587};
 
@@ -33,6 +33,7 @@ public:
         }
 
         message msg;
+        msg.content_type(message::media_type_t::TEXT, "html", "utf-8");
         msg.from(mail_address(sender, sender));
         msg.add_recipient(mail_address(recipient, recipient));
         msg.subject(title);

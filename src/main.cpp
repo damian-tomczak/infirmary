@@ -16,6 +16,7 @@ int main(int argc, char** argv)
         std::string mailLogin;
         std::string mailPassword;
 
+        // TODO: this code begs for the persistence
         po::options_description desc("Allowed options");
         desc.add_options()
             ("help,h", "produce help message")

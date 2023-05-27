@@ -22,12 +22,6 @@ TypeName& operator=(TypeName&&)=delete;
 NOT_COPYABLE(TypeName)                      \
 NOT_MOVEABLE(TypeName)
 
-#ifdef NDEBUG
-#define MAIN_URL "https://" DOMAIN_NAME
-#else
-#define MAIN_URL "http://" DOMAIN_NAME
-#endif
-
 #define XSTR(x) #x
 #define STR(x) XSTR(x)
 
@@ -37,7 +31,7 @@ NOT_MOVEABLE(TypeName)
     pResp = drogon::HttpResponse::newHttpResponse();                                                 \
     auto body{"<p>Something went wrong... " + std::string{exception.what()} + "</p>"                 \
         R"(<p><a href="mailto:contact@damian-tomczak.pl">Technical Support</a></p>)"                 \
-        R"(<p><a href=")" MAIN_URL R"(">Return to the Welcome Page</a></p>)"};                       \
+        R"(<p><a href="/">Return to the Welcome Page</a></p>)"};                                     \
     pResp->setBody(body);                                                                            \
     callback(pResp);
 

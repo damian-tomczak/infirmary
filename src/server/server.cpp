@@ -39,6 +39,8 @@ void Server::run()
         fmt::styled(startUrl, fmt::fg(fmt::color::green))
     );
 
+    auto pResp404{drogon::HttpResponse::newHttpViewResponse("resp404")};
+
     // TODO: it should be placed in json instead of hard-coded
     drogon::app()
         .setDocumentRoot(DOCUMENT_ROOT_PATH)
@@ -58,6 +60,7 @@ void Server::run()
         {drogon::Get})
 #endif
         .addListener(IP, PORT)
+        .setCustom404Page(pResp404)
         .run();
 }
 }

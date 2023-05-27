@@ -16,21 +16,13 @@ LoginController::LoginStatus LoginController::postLogin(const drogon::HttpReques
 {
     tsrpp::Database database{SQLite::OPEN_READWRITE};
 
-#ifndef NDEBUG
     auto pesel{pReq->getOptionalParameter<std::string>("pesel")};
-#else
-    std::optional<std::string> pesel{"00302800690"};
-#endif
     if ((!pesel) || (pesel->length() == 0) || (!validPesel(*pesel)))
     {
         return LoginStatus::INCORRECT_PESEL;
     }
 
-#ifndef NDEBUG
     auto password{pReq->getOptionalParameter<std::string>("password")};
-#else
-    std::optional<std::string> password{"password123"};
-#endif
     if ((!password) || (password->length() == 0) || (!validPassword(*password)))
     {
         return LoginStatus::INCORRECT_PASSWORD;
@@ -76,6 +68,12 @@ RegisterController::RegistrationStatus RegisterController::postRegister(const dr
         return RegistrationStatus::INCORRECT_EMAIL;
     }
 
+    auto phone{pReq->getOptionalParameter<std::string>("phone")};
+    if ((!phone) || (phone->length() == 0) || (!validPhone(*phone)))
+    {
+        return RegistrationStatus::INCORRECT_PHONE;
+    }
+
     auto password{pReq->getOptionalParameter<std::string>("password")};
     if ((!password) || (password->length() == 0) || (!validPassword(*password)))
     {
@@ -99,12 +97,13 @@ RegisterController::RegistrationStatus RegisterController::postRegister(const dr
     auto note{pReq->getOptionalParameter<std::string>("note").value_or("")};
 
     if (!database.addUser({
-        .pesel{std::move(*pesel)},
-        .password{std::move(hashedPassword)},
-        .first_name{std::move(*firstName)},
-        .last_name{std::move(*lastName)},
-        .email{std::move(*email)},
-        .note{std::move(note)}}))
+        .pesel{*pesel},
+        .password{hashedPassword},
+        .first_name{*firstName},
+        .last_name{*lastName},
+        .email{*email},
+        .note{note},
+        .phone{*phone}}))
     {
         throw std::runtime_error("couldn't add user");
     }

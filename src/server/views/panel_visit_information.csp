@@ -15,12 +15,14 @@ auto patientFirstName=@@.get<std::string>("patientFirstName");
 auto patientLastName=@@.get<std::string>("patientLastName");
 auto patientPesel=@@.get<std::string>("patientPesel");
 auto patientEmail=@@.get<std::string>("patientEmail");
+auto patientPhone=@@.get<std::string>("patientPhone");
 auto patientNote=@@.get<std::string>("patientNote");
 
 auto doctorFirstName=@@.get<std::string>("doctorFirstName");
 auto doctorLastName=@@.get<std::string>("doctorLastName");
 auto doctorPesel=@@.get<std::string>("doctorPesel");
 auto doctorEmail=@@.get<std::string>("doctorEmail");
+auto doctorPhone=@@.get<std::string>("doctorPhone");
 auto doctorProfession=@@.get<std::string>("doctorProfession");
 %>
 <!DOCTYPE html>
@@ -31,8 +33,8 @@ auto doctorProfession=@@.get<std::string>("doctorProfession");
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
         <meta name="theme-color" content="#712cf9">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="../../style/style.css">
+        
+        <link rel="stylesheet" href="/style/style.css">
     </head>
     <body>
         <div class="container-fluid">
@@ -55,21 +57,21 @@ if (role == 0)
 else if (role == 1)
 {
 %>
-                        <a href="/panel/doctor/personal" class="btn btn-secondary my-2 menu-button">Personal information</a>
-                        <a href="/panel/doctor/patient-information" class="btn btn-secondary my-2 menu-button">Patient information</a>
+                        <a href="/panel/admin/doctor-information" class="btn btn-primary my-2 menu-button">Personal information</a>
+                        <a href="/panel/admin/patient-information" class="btn  my-2 btn-secondary menu-button">Patient information</a>
 <%c++
 }
 else if (role == 2)
 {
 %>
-                        <a href="/panel/receptionist/pending-requests" class="btn btn-secondary my-2 menu-button">Pending visit requests</a>
-                        <a href="/panel/receptionist/patient-information" class="btn btn-secondary my-2 menu-button mb-4">Patient information</a>
+                        <a href="/panel/admin/pending-requests" class="btn btn-secondary my-2 menu-button">Pending visit requests</a>
+                        <a href="/panel/admin/patient-information" class="btn btn-secondary my-2 menu-button mb-4">Patient information</a>
 <%c++
     if (doctorIds.size() > 0)
     {
             for (size_t i = 0; i < doctorIds.size(); ++i)
             {
-                $$<<"<a href=\"/panel/receptionist/doctor-information?doctorId=" << doctorIds.at(i) << "\" class=\"btn btn-secondary my-2 menu-button\">";
+                $$<<"<a href=\"/panel/admin/doctor-information?doctorId=" << doctorIds.at(i) << "\" class=\"btn btn-secondary my-2 menu-button\">";
                     $$<<doctorFirstNames.at(i) << " " << doctorLastNames.at(i) << "<br>";
                     $$<<doctorProfessions.at(i);
                 $$<<"</a>";
@@ -101,29 +103,48 @@ else if (role == 2)
                                 <p>Last Name: <%c++ $$<<patientLastName; %></p>
                                 <p>Pesel: <%c++ $$<<patientPesel; %></p>
                                 <p>Email: <%c++ $$<<patientEmail; %></p>
+                                <p>Phone: <%c++ $$<<patientPhone; %></p>
                             </div>
                             <hr>
                             <div class="padding">
                                 <h2>Doctor's personal information</h2>
+<%c++
+if (doctorFirstName.length())
+{
+%>
                                 <p>First Name: <%c++ $$<<doctorFirstName; %></p>
                                 <p>Last Name: <%c++ $$<<doctorLastName; %></p>
-                                <p>Email: <%c++ $$<<doctorEmail; %></p>
+                                <p>Phone: <%c++ $$<<doctorPhone; %></p>
+<%c++
+}
+else
+{
+%>
+                                <p>Doctor hasn't yet been chosen</p>
+<%c++
+}
+%>
                             </div>
                             <hr>
                             <div>
                                 <h2 class="padding">Patient's Notes</h2>
                                 <div class="col text-center">
-                                    <form method="post" class="row justify-content-center">
-                                        <textarea rows="6" placeholder="Describe your health condition and list of pills your are taking here." class="ta" name="note"><%c++ $$<<patientNote; %></textarea>
+                                    <form method="post" class="row justify-content-center text-center">
+                                        <div class="col-10">
+                                            <textarea class="form-control" rows="6" placeholder="Describe your health condition and list of pills your are taking here." name="note"><%c++ $$<<patientNote; %></textarea>
+                                        </div>
+                                        <p>You can not modify already written note</p>
                                         <input type="submit" value="Append Note" class="btn btn-secondary my-2 menu-button mb-4"></input>
                                     </form>
                                 </div>
                             </div>
                             <hr>
                             <div>
-                                <h2 class="padding">Receipt</h2>
+                                <h2 class="padding">Prescription</h2>
                                 <div class="row justify-content-center">
-                                    <textarea rows="10" placeholder="Receipts given during visit" class="ta"><%c++ $$<<receipt; %></textarea>
+                                    <div class="col-10">
+                                        <textarea class="form-control" rows="6" placeholder="Prescription given during the visit" readonly><%c++ $$<<receipt; %></textarea>
+                                    </div>
                                 </div>
                             </div>
                             <hr>

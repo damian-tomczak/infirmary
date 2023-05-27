@@ -22,7 +22,6 @@ public:
     Database(const int flags = SQLite::OPEN_READONLY) :
         mpDatabase{std::make_unique<SQLite::Database>(DATABASE_PATH, flags)}
     {}
-    ~Database() = default;
 
     struct User final
     {
@@ -86,6 +85,7 @@ public:
         Role role;
         // TODO: it should be named profession in the database
         Profession type;
+        std::string phone;
     };
     bool addUser(const User& user);
     bool updateUser(const User& user);
@@ -115,6 +115,10 @@ public:
                 default: throw std::runtime_error{"invalid status"};
             }
         }
+        static bool isVisitExpired(const Status status)
+        {
+            return true;
+        }
 
         int32_t id;
         int32_t patient_id;
@@ -124,14 +128,18 @@ public:
         std::string time;
         // TODO: it should be named prescription
         std::string receipt;
+        User::Profession profession;
     };
     bool addVisit(const int32_t patientId,
-        const int32_t doctorId,
-        const std::string& date, const std::string& time);
+        const std::string& date,
+        const std::string& time,
+        const int32_t professionId);
     std::vector<Visit> getVisitsByPatientPesel(const std::string& pesel);
     std::vector<Visit> getVisitsByDoctorIdAndDate(const int32_t id, const std::string& date);
     bool updateVisitStatus(const int32_t visitId, const Visit::Status status);
     std::optional<Visit> getVisitById(const int32_t id);
+    std::vector<Visit> getVisitsByStatus(const Visit::Status status);
+    bool updateVisitDoctorId(const int32_t visitId, const int32_t doctorId);
 
     struct VisitAvailability final
     {
@@ -148,8 +156,9 @@ public:
         const int32_t profession,
         const std::string& date,
         const std::string time);
+    int32_t getNumberOfRequestedVisitPerPatientId(const int32_t patientId);
 
-    std::optional<int32_t> getFreeDoctor(const int32_t& profession, const std::vector<int32_t> takenDcotorsIds);
+    std::vector<User> getFreeDoctors(const User::Profession profession, const std::vector<int32_t> takenDcotorsIds);
 
 private:
     std::unique_ptr<SQLite::Database> mpDatabase;
