@@ -165,7 +165,7 @@ if (role == 2)
 }
 else
 {
-    $$<<"a href=\"/panel\" class=\"btn btn-secondary\">Return</a>";
+    $$<<"<a href=\"/panel\" class=\"btn btn-secondary\">Return</a>";
 }
 %>
                                 <input type="submit" class="btn btn-primary" value="Save changes">

@@ -304,6 +304,20 @@ bool Database::updateVisitDoctorId(const int32_t visitId, const int32_t doctorId
     return false;
 }
 
+bool Database::updateVisitPrescription(const int32_t visitId, const std::string& prescription)
+{
+    SQLite::Statement q{*mpDatabase, "UPDATE visits SET receipt = :prescription WHERE id = :id"};
+    q.bind(":prescription", prescription);
+    q.bind(":id", visitId);
+
+    if (q.exec() == 1)
+    {
+        return true;
+    }
+
+    return false;
+}
+
 Database::VisitAvailability Database::checkAvailabilityOfVisit(const int32_t patientId,
     const int32_t profession,
     const std::string& date,

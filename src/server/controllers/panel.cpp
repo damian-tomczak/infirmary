@@ -113,48 +113,66 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     }
 
     tsrpp::Database database{SQLite::OPEN_READWRITE};
+    auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+    auto pVisitId{pReq->getOptionalParameter<int32_t>("id")};
+    if (!pVisitId)
+    {
+        throw std::runtime_error{"visit id should be specified"};
+    }
+    auto pVisit{database.getVisitById(*pVisitId)};
+    if ((pUser->role == tsrpp::Database::User::Role::PATIENT) && (pVisit->patient_id != pUser->id))
+    {
+        throw std::runtime_error{"you are not allowed to see that"};
+    }
+
     enum class ErrorCode
     {
         NOT_REQUESTED,
         FAILURE,
         SUCCESS
     } errorCode{};
+
+
     if (pReq->method() == drogon::HttpMethod::Post)
     {
         errorCode = ErrorCode::FAILURE;
-        auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+
         auto pNote{pReq->getOptionalParameter<std::string>("note")};
-        if ((pUser != std::nullopt) && (pNote != std::nullopt) &&
-            appendNote(pUser->role, pUser->note, *pNote))
+        auto pPrescription{pReq->getOptionalParameter<std::string>("prescription")};
+
+        if (pNote)
         {
-            pUser->note = *pNote;
-            if (database.updateUser(*pUser))
+            auto pPatient{database.getUserById(pVisit->patient_id)};
+            if ((pPatient != std::nullopt) &&
+                appendNote(pUser->role, pPatient->note, *pNote))
+            {
+                pPatient->note = *pNote;
+                if (database.updateUser(*pPatient))
+                {
+                    errorCode = ErrorCode::SUCCESS;
+                    if (pUser->id == pPatient->id)
+                    {
+                        pReq->getSession()->modify<tsrpp::Database::User>("user", [&pPatient](tsrpp::Database::User& sessionUser) {
+                            sessionUser = *pPatient;
+                        });
+                    }
+                }
+            }
+        }
+        else if (pPrescription)
+        {
+            pVisit->receipt = *pPrescription;
+            if (database.updateVisitPrescription(pVisit->id, pVisit->receipt))
             {
                 errorCode = ErrorCode::SUCCESS;
-                pReq->getSession()->modify<tsrpp::Database::User>("user", [&pUser](tsrpp::Database::User& sessionUser) {
-                    sessionUser = *pUser;
-                });
             }
         }
     }
 
-    auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
     auto pCancelVisitId{pReq->getOptionalParameter<int32_t>("cancelVisit")};
     if (pCancelVisitId != std::nullopt)
     {
         database.updateVisitStatus(*pCancelVisitId, tsrpp::Database::Visit::Status::CANCELLED);
-    }
-
-    auto pVisitId{pReq->getOptionalParameter<std::string>("id")};
-    if (pVisitId == std::nullopt)
-    {
-        throw std::runtime_error{"visit id should be specified"};
-    }
-    auto visitId{std::stoi(*pVisitId)};
-    auto pVisit{database.getVisitById(visitId)};
-    if ((pUser->role == tsrpp::Database::User::Role::PATIENT) && (pVisit->patient_id != pUser->id))
-    {
-        throw std::runtime_error{"you are not allowed to see that"};
     }
     auto pPatient{database.getUserById(pVisit->patient_id)};
     if (pPatient == std::nullopt)
@@ -179,11 +197,12 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     data.insert("patientPhone", pPatient->phone);
     data.insert("patientNote", pPatient->note);
 
-    if (!pDoctor)
+    if (pDoctor)
     {
         data.insert("doctorId", pDoctor->id);
         data.insert("doctorFirstName", pDoctor->first_name);
         data.insert("doctorLastName", pDoctor->last_name);
+        data.insert("doctorProfession", tsrpp::Database::User::profession2Str(pDoctor->type));
         data.insert("doctorPesel", pDoctor->pesel);
         data.insert("doctorPhone", pDoctor->phone);
         data.insert("errorCode", errorCode);
