@@ -124,15 +124,17 @@ public:
         std::string time;
         // TODO: it should be named prescription
         std::string receipt;
+        User::Profession profession;
     };
     bool addVisit(const int32_t patientId,
-        const int32_t doctorId,
-        const std::string& date, const std::string& time);
+        const std::string& date,
+        const std::string& time,
+        const int32_t professionId);
     std::vector<Visit> getVisitsByPatientPesel(const std::string& pesel);
     std::vector<Visit> getVisitsByDoctorIdAndDate(const int32_t id, const std::string& date);
     bool updateVisitStatus(const int32_t visitId, const Visit::Status status);
     std::optional<Visit> getVisitById(const int32_t id);
-    std::vector<Visit> getVisitByStatus(const Visit::Status status);
+    std::vector<Visit> getVisitsByStatus(const Visit::Status status);
 
     struct VisitAvailability final
     {
@@ -149,8 +151,9 @@ public:
         const int32_t profession,
         const std::string& date,
         const std::string time);
+    int32_t getNumberOfRequestedVisitPerPatientId(const int32_t patientId);
 
-    std::optional<int32_t> getFreeDoctor(const int32_t& profession, const std::vector<int32_t> takenDcotorsIds);
+    std::vector<User> getFreeDoctors(const int32_t& profession, const std::vector<int32_t> takenDcotorsIds);
 
 private:
     std::unique_ptr<SQLite::Database> mpDatabase;

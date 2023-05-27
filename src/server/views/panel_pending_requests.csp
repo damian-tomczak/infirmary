@@ -63,15 +63,15 @@ else
                             <td class="border border-secondary justify-content-center">
                                 <select class="form-select mx-auto" name="doctorId">
                                     <option value="0">Jan Kowalski</option>
-                                    <option value="0">Jan Kowalski2</option>
+                                    <option value="1">Jan Kowalski2</option>
                                 </select>
                             </td>
                             <td class="border border-secondary text-center">
                                 <textarea name="reason" placeholder="Insert reason" class="form-control"></textarea>
                             </td>
                             <td class="border border-secondary text-center">
-                                <button class="btn btn-primary bg-success" type="button">Approve</button>
-                                <button class="btn btn-primary bg-danger" type="button">Decline</button>
+                                <input type="submit" name="approve" class="btn btn-primary bg-success" value="Approve">
+                                <input type="submit" name="decline" class="btn btn-primary bg-danger" value="Decline">
                             </td>
                         </form>
                     </tr>

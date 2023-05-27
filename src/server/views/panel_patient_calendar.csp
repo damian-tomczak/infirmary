@@ -4,6 +4,21 @@ auto doctorProfession=@@.get<std::string>("doctorProfession");
 auto isPastSelected=@@.get<bool>("isPastSelected");
 auto hours=@@.get<std::array<std::string, 12>>("hours");
 auto availability=@@.get<std::vector<int>>("availability");
+
+auto ec=@@.get<int>("ec");
+if (ec)
+{
+    $$<<"<script>";
+    $$<<"window.onload = function() {";
+    $$<<"alert(\"";
+    switch (ec)
+    {
+        case 1: $$<<"You have exceeded the maximum number of requested visits\\n"
+            "Please wait for the receptionist decision"; break;
+    }
+    $$<<"\")}";
+    $$<<"</script>";
+}
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -92,11 +107,13 @@ auto availability=@@.get<std::vector<int>>("availability");
         }
     }
 %>
-                        <form class="text-center" action="">
-                            <input type="hidden" value="<%c++ $$<<doctorProfession; %>" name="doctorProfession"></input>
-                            <p><input type="date" value="<%c++ $$<<date; %>" name="date"></input></p>
-                            <p><input type="submit" value="Go to date"></input></p>
-                        </form>
+                        <div class="d-flex justify-content-center w-100">
+                            <form class="col-3">
+                                <input type="hidden" value="<%c++ $$<<doctorProfession; %>" name="doctorProfession"></input>
+                                <p><input type="date" class="form-control" value="<%c++ $$<<date; %>" name="date"></input></p>
+                                <p><input type="submit" class="btn btn-primary" value="Go to date"></input></p>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>

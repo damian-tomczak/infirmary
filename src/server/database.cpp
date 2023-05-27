@@ -141,18 +141,19 @@ std::vector<Database::User> Database::getUsersByRole(const User::Role role)
 }
 
 bool Database::addVisit(const int32_t patientId,
-    const int32_t doctorId,
     const std::string& date,
-    const std::string& time)
+    const std::string& time,
+    const int32_t professionId
+    )
 {
-    SQLite::Statement q{*mpDatabase, "INSERT INTO visits(patient_id, doctor_id, status, date, time)"
-        "VALUES (:patient_id, :doctor_id, :status, :date, :time)"};
+    SQLite::Statement q{*mpDatabase, "INSERT INTO visits(patient_id, doctor_id, status, date, time, profession)"
+        "VALUES (:patient_id, -1, :status, :date, :time, :profession)"};
 
     q.bind(":patient_id", patientId);
-    q.bind(":doctor_id", doctorId);
     q.bind(":status", static_cast<int32_t>(Visit::Status::REQUESTED));
     q.bind(":date", date);
     q.bind(":time", time);
+    q.bind(":profession", professionId);
 
     if (q.exec() == 1)
     {
@@ -177,6 +178,11 @@ std::vector<Database::Visit> Database::getVisitsByPatientPesel(const std::string
         }
     }
 
+    if (!pPatientid)
+    {
+        throw std::runtime_error{"user with this pesel doesn't exist"};
+    }
+
     SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE patient_id = :patient_id"};
     q.bind(":patient_id", *pPatientid);
 
@@ -189,7 +195,8 @@ std::vector<Database::Visit> Database::getVisitsByPatientPesel(const std::string
             Visit::Status{q.getColumn("status").getInt()},
             q.getColumn("date"),
             q.getColumn("time"),
-            q.getColumn("receipt")
+            q.getColumn("receipt"),
+            User::Profession{q.getColumn("profession").getInt()}
         });
     }
 
@@ -213,7 +220,8 @@ std::vector<Database::Visit> Database::getVisitsByDoctorIdAndDate(const int32_t 
             Visit::Status{q.getColumn("status").getInt()},
             q.getColumn("date"),
             q.getColumn("time"),
-            q.getColumn("receipt")
+            q.getColumn("receipt"),
+            User::Profession{q.getColumn("profession").getInt()}
         });
     }
 
@@ -250,17 +258,34 @@ std::optional<Database::Visit> Database::getVisitById(const int32_t id)
             .status{static_cast<Visit::Status>(q.getColumn("status").getInt())},
             .date{q.getColumn("date").getString()},
             .time{q.getColumn("time").getString()},
-            .receipt{q.getColumn("receipt").getString()}
+            .receipt{q.getColumn("receipt").getString()},
+            .profession{User::Profession{q.getColumn("profession").getInt()}}
         });
     }
 
     return result;
 }
 
-std::vector<Database::Visit> Database::getVisitByStatus(const Visit::Status status)
+std::vector<Database::Visit> Database::getVisitsByStatus(const Visit::Status status)
 {
     std::vector<Visit> result;
 
+    SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE status = :status"};
+    q.bind(":status", static_cast<int32_t>(status));
+
+    while (q.executeStep())
+    {
+        result.emplace_back(Visit{
+            q.getColumn("id"),
+            q.getColumn("patient_id").getInt(),
+            q.getColumn("doctor_id").getInt(),
+            Visit::Status{q.getColumn("status").getInt()},
+            q.getColumn("date"),
+            q.getColumn("time"),
+            q.getColumn("receipt"),
+            User::Profession{q.getColumn("profession").getInt()}
+        });
+    }
 
     return result;
 }
@@ -285,11 +310,10 @@ Database::VisitAvailability Database::checkAvailabilityOfVisit(const int32_t pat
 
     SQLite::Statement q{*mpDatabase,
         "SELECT patient_id, doctor_id, status FROM visits "
-        "JOIN users ON doctor_id = users.id "
-        "WHERE date = :date AND time = :time AND type = :type"};
-    q.bind(":type", profession);
+        "WHERE date = :date AND time = :time AND profession = :profession"};
     q.bind(":date", date);
     q.bind(":time", time);
+    q.bind(":profession", profession);
 
     std::uint32_t takenCounter{};
     while (q.executeStep())
@@ -301,7 +325,7 @@ Database::VisitAvailability Database::checkAvailabilityOfVisit(const int32_t pat
         }
 
         auto status{static_cast<Visit::Status>(q.getColumn("status").getInt())};
-        if ((status == Visit::Status::REQUESTED) || (status == Visit::Status::SCHEDULED) || (status == Visit::Status::COMPLETED))
+        if ((status == Visit::Status::SCHEDULED) || (status == Visit::Status::COMPLETED))
         {
             takenCounter++;
             result.takenDoctorsIds.emplace_back(q.getColumn("doctor_id").getInt());
@@ -316,10 +340,23 @@ Database::VisitAvailability Database::checkAvailabilityOfVisit(const int32_t pat
     return result;
 }
 
-std::optional<int32_t> Database::getFreeDoctor(const int32_t& profession,
+int32_t Database::getNumberOfRequestedVisitPerPatientId(const int32_t patientId)
+{
+    SQLite::Statement q{*mpDatabase, "SELECT COUNT(*) FROM visits WHERE patient_id = :patientId AND status = 0"};
+    q.bind(":patientId", patientId);
+
+    if (q.executeStep())
+    {
+        return q.getColumn(0);
+    }
+
+    throw std::runtime_error{"couldn't calculate the number of requested visits"};
+}
+
+std::vector<Database::User> Database::getFreeDoctors(const int32_t& profession,
     const std::vector<int32_t> takenDoctorsIds)
 {
-    std::optional<int32_t> result;
+    std::vector<User> result;
 
     std::string takenDoctorsStr;
     for (auto& id : takenDoctorsIds)
@@ -336,9 +373,9 @@ std::optional<int32_t> Database::getFreeDoctor(const int32_t& profession,
 
     q.bind(":type", profession);
 
-    if (q.executeStep())
+    while (q.executeStep())
     {
-        result = q.getColumn("id");
+        result.emplace_back(*getUserById(q.getColumn("id")));
     }
 
     return result;

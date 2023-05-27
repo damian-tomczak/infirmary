@@ -162,10 +162,6 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
         throw std::runtime_error{"patient doesn't exist"};
     }
     auto pDoctor{database.getUserById(pVisit->doctor_id)};
-    if (pDoctor == std::nullopt)
-    {
-        throw std::runtime_error{"doctor doesn't exist"};
-    }
 
     drogon::HttpViewData data;
     appendDoctorsToSideMenu(data);
@@ -183,11 +179,14 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     data.insert("patientPhone", pPatient->phone);
     data.insert("patientNote", pPatient->note);
 
-    data.insert("doctorFirstName", pDoctor->first_name);
-    data.insert("doctorLastName", pDoctor->last_name);
-    data.insert("doctorPesel", pDoctor->pesel);
-    data.insert("doctorPhone", pDoctor->phone);
-    data.insert("errorCode", errorCode);
+    if (!pDoctor)
+    {
+        data.insert("doctorFirstName", pDoctor->first_name);
+        data.insert("doctorLastName", pDoctor->last_name);
+        data.insert("doctorPesel", pDoctor->pesel);
+        data.insert("doctorPhone", pDoctor->phone);
+        data.insert("errorCode", errorCode);
+    }
 
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_visit_information", data);
     callback(pResp);
@@ -397,6 +396,12 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
         return;
     }
 
+    enum class ErrorCode
+    {
+        DEFAULT,
+        EXCEEDING_MAX_REQUESTED_VISITS
+    } ec{};
+
     auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
     tsrpp::Database database{SQLite::OPEN_READWRITE};
     auto pDoctorProfession{pReq->getOptionalParameter<std::string>("doctorProfession")};
@@ -447,22 +452,28 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
     auto pRegister{pReq->getOptionalParameter<std::string>("register")};
     if (pRegister != std::nullopt)
     {
-        // TODO: Pity for the lack of std::views feature
-        std::string registrationDate, registrationTime;
-        std::istringstream ss(*pRegister);
-        std::getline(ss, registrationDate, ' ');
-        std::getline(ss, registrationTime, ' ');
-
-        auto takenDoctorsIds{database.checkAvailabilityOfVisit(
-            pUser->id,
-            profession,
-            registrationDate,
-            registrationTime
-        ).takenDoctorsIds};
-        auto pFreeDoctorId{database.getFreeDoctor(profession, takenDoctorsIds)};
-        if (pFreeDoctorId != std::nullopt)
+        if (database.getNumberOfRequestedVisitPerPatientId(pUser->id) < maxRequestedVisitPerUser)
         {
-            database.addVisit(pUser->id, *pFreeDoctorId, registrationDate, registrationTime);
+            // TODO: Pity for the lack of std::views feature
+            std::string registrationDate, registrationTime;
+            std::istringstream ss(*pRegister);
+            std::getline(ss, registrationDate, ' ');
+            std::getline(ss, registrationTime, ' ');
+
+            auto registrationStatus{database.checkAvailabilityOfVisit(
+                pUser->id,
+                profession,
+                registrationDate,
+                registrationTime
+            ).status};
+            if (registrationStatus == tsrpp::Database::VisitAvailability::Status::FREE)
+            {
+                database.addVisit(pUser->id, registrationDate, registrationTime, profession);
+            }
+        }
+        else
+        {
+            ec = ErrorCode::EXCEEDING_MAX_REQUESTED_VISITS;
         }
     }
 
@@ -492,6 +503,7 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
     data.insert("isPastSelected", isPastSelected);
     data.insert("hours", hours);
     data.insert("availability", availability);
+    data.insert("ec", static_cast<int>(ec));
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_patient_calendar", data);
     callback(pResp);
 }
@@ -725,31 +737,55 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
     tsrpp::Database database{SQLite::OPEN_READWRITE};
     auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
     drogon::HttpViewData data;
-    auto visits{database.getVisitsByPatientPesel(pUser->pesel)};
-    std::vector<int> ids;
-    std::vector<int> statuses;
-    std::vector<int> doctorsType;
-    std::vector<std::string> doctorsFirstName;
-    std::vector<std::string> doctorsLastName;
-    std::vector<std::string> dates;
-    std::vector<std::string> times;
-    for (auto it{visits.begin()}; it != visits.end(); ++it)
+    auto visits{database.getVisitsByStatus(tsrpp::Database::Visit::Status::REQUESTED)};
+    std::vector<int> visitIds;
+    std::vector<std::string> visitPesels;
+    std::vector<std::string> visitDoctorProfessions;
+    std::vector<std::string> visitDates;
+    std::vector<std::string> visitTimes;
+    std::vector<std::vector<int>> visitDoctorIds;
+    std::vector<std::vector<std::string>> visitDoctorFirstNames;
+    std::vector<std::vector<std::string>> visitDoctorLastNames;
+    for (auto visitIt{visits.begin()}; visitIt != visits.end(); ++visitIt)
     {
-        ids.emplace_back(static_cast<int>(it->id));
-        statuses.emplace_back(static_cast<int>(it->status));
-        doctorsType.emplace_back(static_cast<int>(database.getUserById(it->doctor_id)->type));
-        doctorsFirstName.emplace_back(database.getUserById(it->doctor_id)->first_name);
-        doctorsLastName.emplace_back(database.getUserById(it->doctor_id)->last_name);
-        dates.emplace_back(it->date);
-        times.emplace_back(it->time);
+        visitIds.emplace_back(static_cast<int>(visitIt->id));
+        visitPesels.emplace_back(database.getUserById(visitIt->patient_id)->pesel);
+        visitDoctorProfessions.emplace_back(tsrpp::Database::User::profession2Str(visitIt->profession));
+
+        auto takenDoctorsIds{database.checkAvailabilityOfVisit(
+            pUser->id,
+            static_cast<int32_t>(visitIt->profession),
+            visitIt->date,
+            visitIt->time
+        ).takenDoctorsIds};
+        auto freeDoctors{database.getFreeDoctors(static_cast<int32_t>(visitIt->profession), takenDoctorsIds)};
+
+        std::vector<int> visitDoctorIdsThisVisit;
+        std::vector<std::string> visitDoctorFirstNamesThisVisit;
+        std::vector<std::string> visitDoctorLastNamesThisVisit;
+
+        for (auto doctorIt{freeDoctors.begin()}; doctorIt != freeDoctors.end(); ++doctorIt)
+        {
+            visitDoctorIdsThisVisit.emplace_back(doctorIt->id);
+            visitDoctorFirstNamesThisVisit.emplace_back(doctorIt->first_name);
+            visitDoctorLastNamesThisVisit.emplace_back(doctorIt->last_name);
+        }
+
+        visitDoctorIds.emplace_back(std::move(visitDoctorIdsThisVisit));
+        visitDoctorFirstNames.emplace_back(std::move(visitDoctorFirstNamesThisVisit));
+        visitDoctorLastNames.emplace_back(std::move(visitDoctorLastNamesThisVisit));
+
+        visitDates.emplace_back(visitIt->date);
+        visitTimes.emplace_back(visitIt->time);
     }
-    data.insert("ids", ids);
-    data.insert("statuses", statuses);
-    data.insert("doctorsType", doctorsType);
-    data.insert("doctorsFirstName", doctorsFirstName);
-    data.insert("doctorsLastName", doctorsLastName);
-    data.insert("dates", dates);
-    data.insert("times", times);
+    data.insert("visitIds", visitIds);
+    data.insert("visitPesels", visitPesels);
+    data.insert("dates", visitDates);
+    data.insert("times", visitTimes);
+    data.insert("doctorsType", visitDoctorProfessions);
+    data.insert("doctorsFirstName", visitDoctorIds);
+    data.insert("doctorsFirstName", visitDoctorFirstNames);
+    data.insert("doctorsLastName", visitDoctorLastNames);
     appendDoctorsToSideMenu(data);
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_pending_requests", data);
     callback(pResp);
