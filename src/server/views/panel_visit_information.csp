@@ -190,6 +190,14 @@ else
                             </div>
                             <hr>
                             <div class="row">
+<%c++
+if (role == 1 && status != "Completed")
+{
+    $$<<"<div class=\"text-center\">";
+    $$<<"<a href=\"?id=" << id << "&confirmVisit=" << id << "\" class=\"btn btn-secondary my-4 menu-button\">Mark Visit as Completed</a>";
+    $$<<"</div>";
+}
+%>
                                 <div class="col text-center">
                                     <a href="/panel" class="btn btn-primary my-4 menu-button">Return</a>
                                 </div>

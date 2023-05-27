@@ -113,6 +113,12 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     }
 
     tsrpp::Database database{SQLite::OPEN_READWRITE};
+    auto pConfirmVisit{pReq->getOptionalParameter<int32_t>("confirmVisit")};
+    if (pConfirmVisit)
+    {
+        database.updateVisitStatus(*pConfirmVisit, tsrpp::Database::Visit::Status::COMPLETED);
+    }
+
     auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
     auto pVisitId{pReq->getOptionalParameter<int32_t>("id")};
     if (!pVisitId)
@@ -131,7 +137,6 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
         FAILURE,
         SUCCESS
     } errorCode{};
-
 
     if (pReq->method() == drogon::HttpMethod::Post)
     {
