@@ -156,6 +156,7 @@ public:
         } status;
 
         std::vector<int32_t> takenDoctorsIds;
+        std::optional<int32_t> pYourVisitId;
     };
     VisitAvailability checkAvailabilityOfVisit(const int32_t patientId,
         const int32_t profession,

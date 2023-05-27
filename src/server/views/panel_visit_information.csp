@@ -181,7 +181,7 @@ if (role == 1)
 else
 {
     $$<<"<div class=\"col-8\">";
-    $$<<"<textarea class=\"form-control\" rows=\"6\" placeholder=\"Prescription given during the visit\" name=\"prescription\" readonly" << receipt << "</textarea>";
+    $$<<"<textarea class=\"form-control\" rows=\"6\" placeholder=\"Prescription given during the visit\" name=\"prescription\" readonly>" << receipt << "</textarea>";
     $$<<"</div>";
 }
 %>

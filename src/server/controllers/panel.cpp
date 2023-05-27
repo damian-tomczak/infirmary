@@ -531,16 +531,28 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
 
     drogon::HttpViewData data;
     std::vector<int> availability;
+    std::vector<int> ids;
     for (auto it{hours.begin()}; it != hours.end(); ++it)
     {
-        availability.emplace_back(static_cast<int>(
-            database.checkAvailabilityOfVisit(pUser->id, profession, date, *it).status));
+        auto avail{database.checkAvailabilityOfVisit(pUser->id, profession, date, *it)};
+        availability.emplace_back(static_cast<int>(avail.status));
+        int32_t id{};
+        if (avail.status == tsrpp::Database::VisitAvailability::Status::YOUR_VISIT)
+        {
+            id = *avail.pYourVisitId;
+        }
+        else
+        {
+            id = -1;
+        }
+        ids.emplace_back(id);
     }
     data.insert("date", date);
     data.insert("doctorProfession", *pDoctorProfession);
     data.insert("isPastSelected", isPastSelected);
     data.insert("hours", hours);
     data.insert("availability", availability);
+    data.insert("ids", ids);
     data.insert("ec", static_cast<int>(ec));
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_patient_calendar", data);
     callback(pResp);
@@ -781,7 +793,7 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
         auto pVisitId{pReq->getOptionalParameter<int32_t>("visitId")};
         auto pDoctorId{pReq->getOptionalParameter<int32_t>("doctorId")};
         tsrpp::Database::Visit::Status status;
-        if (*pDecision == "approve")
+        if (*pDecision == "Approve")
         {
             status = tsrpp::Database::Visit::Status::SCHEDULED;
         }

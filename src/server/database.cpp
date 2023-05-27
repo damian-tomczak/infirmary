@@ -341,7 +341,7 @@ Database::VisitAvailability Database::checkAvailabilityOfVisit(const int32_t pat
     }
 
     SQLite::Statement q{*mpDatabase,
-        "SELECT patient_id, doctor_id, status FROM visits "
+        "SELECT id, patient_id, doctor_id, status FROM visits "
         "WHERE date = :date AND time = :time AND profession = :profession"};
     q.bind(":date", date);
     q.bind(":time", time);
@@ -353,6 +353,7 @@ Database::VisitAvailability Database::checkAvailabilityOfVisit(const int32_t pat
         auto visitPatientId{q.getColumn("patient_id").getInt()};
         if (visitPatientId == patientId)
         {
+            result.pYourVisitId = getVisitById(q.getColumn("id"))->id;
             result.status = VisitAvailability::Status::YOUR_VISIT;
         }
 
