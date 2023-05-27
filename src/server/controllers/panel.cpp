@@ -739,13 +739,26 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
 
     if (pReq->method() == drogon::HttpMethod::Post)
     {
-        auto visitId{pReq->getOptionalParameter<int32_t>("visitId")};
-        auto pReason{pReq->getOptionalParameter<std::string>("reason")};
         auto pDecision{pReq->getOptionalParameter<std::string>("decision")};
+        auto pVisitId{pReq->getOptionalParameter<int32_t>("visitId")};
+        auto pDoctorId{pReq->getOptionalParameter<int32_t>("doctorId")};
+        tsrpp::Database::Visit::Status status;
+        if (*pDecision == "approve")
+        {
+            status = tsrpp::Database::Visit::Status::SCHEDULED;
+        }
+        else
+        {
+            status = tsrpp::Database::Visit::Status::CANCELLED;
+        }
+        database.updateVisitStatus(*pVisitId, status);
+        database.updateVisitDoctorId(*pVisitId, *pDoctorId);
+
+        auto pVisit{database.getVisitById(*pVisitId)};
+        auto pReason{pReq->getOptionalParameter<std::string>("reason")};
         std::transform(pDecision->begin(), pDecision->end(), pDecision->begin(),
                 [](unsigned char c){ return std::tolower(c); });
 
-        auto pVisit{database.getVisitById(*visitId)};
         auto pPatient{database.getUserById(pVisit->patient_id)};
         std::ostringstream ss;
         ss << "Welcome " << pPatient->first_name << " " << pPatient->last_name << "<br>"

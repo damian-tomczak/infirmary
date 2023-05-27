@@ -98,7 +98,9 @@ if (visitIds.size() > 0)
 }
 else
 {
-    $$<<"<p>There is no pending visit requests</p>";
+    $$<<"<tr>";
+    $$<<"<td colspan=\"7\">There is no pending visit requests</td>";
+    $$<<"</tr>";
 }
 %>
                 </table>

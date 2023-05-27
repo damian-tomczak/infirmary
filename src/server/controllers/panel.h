@@ -66,7 +66,6 @@ public:
     void addDoctor(const drogon::HttpRequestPtr& pReq,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 
-
 private:
     bool appendNote(const tsrpp::Database::User::Role role, const std::string& currentNote, const std::string& newNote);
     void appendDoctorsToSideMenu(drogon::HttpViewData& data);

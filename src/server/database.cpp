@@ -290,6 +290,20 @@ std::vector<Database::Visit> Database::getVisitsByStatus(const Visit::Status sta
     return result;
 }
 
+bool Database::updateVisitDoctorId(const int32_t visitId, const int32_t doctorId)
+{
+    SQLite::Statement q{*mpDatabase, "UPDATE visits SET doctor_id = :doctorId WHERE id = :id"};
+    q.bind(":doctorId", doctorId);
+    q.bind(":id", visitId);
+
+    if (q.exec() == 1)
+    {
+        return true;
+    }
+
+    return false;
+}
+
 Database::VisitAvailability Database::checkAvailabilityOfVisit(const int32_t patientId,
     const int32_t profession,
     const std::string& date,
