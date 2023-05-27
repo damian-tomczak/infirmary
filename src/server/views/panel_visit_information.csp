@@ -65,7 +65,9 @@ else if (role == 2)
 {
 %>
                         <a href="/panel/admin/pending-requests" class="btn btn-secondary my-2 menu-button">Pending visit requests</a>
-                        <a href="/panel/admin/patient-information" class="btn btn-secondary my-2 menu-button mb-4">Patient information</a>
+                        <a href="/panel/admin/patient-information" class="btn btn-secondary my-2 menu-button">Patient information</a>
+                        <a href="/panel/admin/statistics" class="btn btn-secondary my-2 menu-button">Statistics</a>
+                        <a href="/panel/admin/add-doctor" class="btn btn-secondary my-2 menu-button mb-4">Add doctor</a>
 <%c++
     if (doctorIds.size() > 0)
     {

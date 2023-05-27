@@ -181,6 +181,7 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
 
     if (!pDoctor)
     {
+        data.insert("doctorId", pDoctor->id);
         data.insert("doctorFirstName", pDoctor->first_name);
         data.insert("doctorLastName", pDoctor->last_name);
         data.insert("doctorPesel", pDoctor->pesel);
@@ -303,14 +304,14 @@ void Panel::editPersonal(const drogon::HttpRequestPtr& pReq,
     else
     {
         auto pUserId{pReq->getOptionalParameter<int32_t>("userId")};
-        if (pUserId == std::nullopt)
+        if (pUserId != std::nullopt)
         {
             auto pUserFromDb{database.getUserById(*pUserId)};
             if (pUserId == std::nullopt)
             {
                 throw std::runtime_error{"user couldn't be found"};
             }
-            pEditableUser = std::make_unique<tsrpp::Database::User>(*pEditableUser);;
+            pEditableUser = std::make_unique<tsrpp::Database::User>(*pUserFromDb);
         }
     }
 
@@ -338,7 +339,7 @@ void Panel::editPersonal(const drogon::HttpRequestPtr& pReq,
             (pEmail != std::nullopt) && LoginSystem::validEmail(*pEmail) &&
             (pPhone != std::nullopt) && LoginSystem::validPhone(*pPhone) &&
             (((pEditableUser->role == tsrpp::Database::User::Role::DOCTOR) && (pProfession != std::nullopt)) || (pEditableUser->role == tsrpp::Database::User::Role::PATIENT)) &&
-            (pCurrentPassword != std::nullopt) && tsrpp::verifyPassword(*pCurrentPassword, pEditableUser->password) &&
+            (pCurrentPassword != std::nullopt) && tsrpp::verifyPassword(*pCurrentPassword, pUser->password) &&
             (pNewPassword != std::nullopt) && (pRepeatedNewPassword != std::nullopt) &&
             (((pNewPassword->length() > 0) && LoginSystem::validPassword(*pNewPassword) && (*pNewPassword == *pRepeatedNewPassword)) ||
             (pNewPassword->length() == 0)))
@@ -370,13 +371,15 @@ void Panel::editPersonal(const drogon::HttpRequestPtr& pReq,
     }
 
     drogon::HttpViewData data;
-    data.insert("role", static_cast<int>(pEditableUser->role));
+    data.insert("role", static_cast<int>(pUser->role));
+    data.insert("id", pEditableUser->id);
     data.insert("firstName", pEditableUser->first_name);
     data.insert("lastName", pEditableUser->last_name);
     data.insert("email", pEditableUser->email);
     data.insert("phone", pEditableUser->phone);
     data.insert("profession", static_cast<int>(pEditableUser->type));
     data.insert("errorCode", static_cast<int>(errorCode));
+    appendDoctorsToSideMenu(data);
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_edit_personal", data);
     callback(pResp);
 }
@@ -658,6 +661,7 @@ void Panel::doctorInformation(const drogon::HttpRequestPtr& pReq,
     }
 
     std::string date;
+    data.insert("doctorId", *pDoctorId);
     data.insert("doctorFirstName", pDoctorInfo->first_name);
     data.insert("doctorLastName", pDoctorInfo->last_name);
     data.insert("doctorPesel", pDoctorInfo->pesel);
@@ -698,7 +702,6 @@ void Panel::doctorInformation(const drogon::HttpRequestPtr& pReq,
         dates.emplace_back(it->date);
         times.emplace_back(it->time);
     }
-    data.insert("doctorId", *pDoctorId);
     data.insert("date", date);
     data.insert("ids", ids);
     data.insert("statuses", statuses);
@@ -749,7 +752,7 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
         }
         else
         {
-            status = tsrpp::Database::Visit::Status::CANCELLED;
+            status = tsrpp::Database::Visit::Status::REJECTED;
         }
         database.updateVisitStatus(*pVisitId, status);
         database.updateVisitDoctorId(*pVisitId, *pDoctorId);
