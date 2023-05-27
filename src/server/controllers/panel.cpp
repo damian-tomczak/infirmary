@@ -740,6 +740,8 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
     auto visits{database.getVisitsByStatus(tsrpp::Database::Visit::Status::REQUESTED)};
     std::vector<int> visitIds;
     std::vector<std::string> visitPesels;
+    std::vector<std::string> visitPatientFirstNames;
+    std::vector<std::string> visitPatientLastNames;
     std::vector<std::string> visitDoctorProfessions;
     std::vector<std::string> visitDates;
     std::vector<std::string> visitTimes;
@@ -748,8 +750,12 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
     std::vector<std::vector<std::string>> visitDoctorLastNames;
     for (auto visitIt{visits.begin()}; visitIt != visits.end(); ++visitIt)
     {
+        auto pPatient{database.getUserById(visitIt->patient_id)};
+
         visitIds.emplace_back(static_cast<int>(visitIt->id));
-        visitPesels.emplace_back(database.getUserById(visitIt->patient_id)->pesel);
+        visitPesels.emplace_back(pPatient->pesel);
+        visitPatientFirstNames.emplace_back(pPatient->first_name);
+        visitPatientLastNames.emplace_back(pPatient->last_name);
         visitDoctorProfessions.emplace_back(tsrpp::Database::User::profession2Str(visitIt->profession));
 
         auto takenDoctorsIds{database.checkAvailabilityOfVisit(
@@ -758,7 +764,7 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
             visitIt->date,
             visitIt->time
         ).takenDoctorsIds};
-        auto freeDoctors{database.getFreeDoctors(static_cast<int32_t>(visitIt->profession), takenDoctorsIds)};
+        auto freeDoctors{database.getFreeDoctors(visitIt->profession, takenDoctorsIds)};
 
         std::vector<int> visitDoctorIdsThisVisit;
         std::vector<std::string> visitDoctorFirstNamesThisVisit;
@@ -779,13 +785,15 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
         visitTimes.emplace_back(visitIt->time);
     }
     data.insert("visitIds", visitIds);
+    data.insert("visitPatientFirstNames", visitPatientFirstNames);
+    data.insert("visitPatientLastNames", visitPatientLastNames);
     data.insert("visitPesels", visitPesels);
-    data.insert("dates", visitDates);
-    data.insert("times", visitTimes);
-    data.insert("doctorsType", visitDoctorProfessions);
-    data.insert("doctorsFirstName", visitDoctorIds);
-    data.insert("doctorsFirstName", visitDoctorFirstNames);
-    data.insert("doctorsLastName", visitDoctorLastNames);
+    data.insert("visitDates", visitDates);
+    data.insert("visitTimes", visitTimes);
+    data.insert("visitDoctorProfessions", visitDoctorProfessions);
+    data.insert("visitDoctorIds", visitDoctorIds);
+    data.insert("visitDoctorFirstNames", visitDoctorFirstNames);
+    data.insert("visitsDoctorLastNames", visitDoctorLastNames);
     appendDoctorsToSideMenu(data);
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_pending_requests", data);
     callback(pResp);

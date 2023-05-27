@@ -140,10 +140,10 @@ else
                             </div>
                             <hr>
                             <div>
-                                <h2 class="padding">Receipt</h2>
+                                <h2 class="padding">Prescription</h2>
                                 <div class="row justify-content-center">
                                     <div class="col-10">
-                                        <textarea class="form-control" rows="6" placeholder="Receipts given during visit" readonly><%c++ $$<<receipt; %></textarea>
+                                        <textarea class="form-control" rows="6" placeholder="Prescription given during the visit" readonly><%c++ $$<<receipt; %></textarea>
                                     </div>
                                 </div>
                             </div>

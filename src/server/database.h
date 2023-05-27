@@ -153,7 +153,7 @@ public:
         const std::string time);
     int32_t getNumberOfRequestedVisitPerPatientId(const int32_t patientId);
 
-    std::vector<User> getFreeDoctors(const int32_t& profession, const std::vector<int32_t> takenDcotorsIds);
+    std::vector<User> getFreeDoctors(const User::Profession profession, const std::vector<int32_t> takenDcotorsIds);
 
 private:
     std::unique_ptr<SQLite::Database> mpDatabase;

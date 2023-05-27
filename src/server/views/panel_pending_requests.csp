@@ -3,6 +3,17 @@ auto doctorIds=@@.get<std::vector<int>>("doctorIds");
 auto doctorFirstNames=@@.get<std::vector<std::string>>("doctorFirstNames");
 auto doctorLastNames=@@.get<std::vector<std::string>>("doctorLastNames");
 auto doctorProfessions=@@.get<std::vector<std::string>>("doctorProfessions");
+
+auto visitIds=@@.get<std::vector<int>>("visitIds");
+auto visitPatientFirstNames=@@.get<std::vector<std::string>>("visitPatientFirstNames");
+auto visitPatientLastNames=@@.get<std::vector<std::string>>("visitPatientLastNames");
+auto visitPesels=@@.get<std::vector<std::string>>("visitPesels");
+auto visitDates=@@.get<std::vector<std::string>>("visitDates");
+auto visitTimes=@@.get<std::vector<std::string>>("visitTimes");
+auto visitDoctorProfessions=@@.get<std::vector<std::string>>("visitDoctorProfessions");
+auto visitDoctorIds=@@.get<std::vector<std::vector<int>>>("visitDoctorIds");
+auto visitDoctorFirstNames=@@.get<std::vector<std::vector<std::string>>>("visitDoctorFirstNames");
+auto visitDoctorLastNames=@@.get<std::vector<std::vector<std::string>>>("visitsDoctorLastNames");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -54,27 +65,41 @@ else
                         <th>Decline message</th>
                         <th>Decision</th>
                     </tr>
-                    <tr>
-                        <form method="post">
-                            <td class="border border-secondary">Damian Tomczak</td>
-                            <td class="border border-secondary">01210103388</td>
-                            <td class="border border-secondary">Internist</td>
-                            <td class="border border-secondary">25.05.2023 9:40</td>
-                            <td class="border border-secondary justify-content-center">
-                                <select class="form-select mx-auto" name="doctorId">
-                                    <option value="0">Jan Kowalski</option>
-                                    <option value="1">Jan Kowalski2</option>
-                                </select>
-                            </td>
-                            <td class="border border-secondary text-center">
-                                <textarea name="reason" placeholder="Insert reason" class="form-control"></textarea>
-                            </td>
-                            <td class="border border-secondary text-center">
-                                <input type="submit" name="approve" class="btn btn-primary bg-success" value="Approve">
-                                <input type="submit" name="decline" class="btn btn-primary bg-danger" value="Decline">
-                            </td>
-                        </form>
-                    </tr>
+<%c++
+if (visitIds.size() > 0)
+{
+        for (size_t i = 0; i < visitIds.size(); ++i)
+        {
+            $$<<"<tr>";
+            $$<<"<form method=\"post\">";
+            $$<<"<td class=\"border border-secondary\">" << visitPatientFirstNames.at(i) << " " << visitPatientLastNames.at(i) << "</td>";
+            $$<<"<td class=\"border border-secondary\">" << visitPesels.at(i) << "</td>";
+            $$<<"<td class=\"border border-secondary\">" << visitDoctorProfessions.at(i) << "</td>";
+            $$<<"<td class=\"border border-secondary\">" << visitDates.at(i) << " " << visitTimes.at(i) << "</td>";
+            $$<<"<td class=\"border border-secondary justify-content-center\">";
+            $$<<"<select class=\"form-select mx-auto\" name=\"doctorId\">";
+            for (size_t j = 0; j < visitDoctorIds.at(i).size(); ++j)
+            {
+                $$<<"<option value=" << visitDoctorIds.at(i).at(j) << ">" << visitDoctorFirstNames.at(i).at(j) << " " << visitDoctorLastNames.at(i).at(j) << "</option>";
+            }
+            $$<<"</select>";
+            $$<<"</td>";
+            $$<<"<td class=\"border border-secondary text-center\">";
+            $$<<"<textarea name=\"reason\" placeholder=\"Insert reason\" class=\"form-control\"></textarea>";
+            $$<<"</td>";
+            $$<<"<td class=\"border border-secondary text-center\">";
+            $$<<"<input type=\"submit\" name=\"approve\" class=\"btn btn-primary bg-success\" value=\"Approve\">";
+            $$<<"<input type=\"submit\" name=\"decline\" class=\"btn btn-primary bg-danger\" value=\"Decline\">";
+            $$<<"</td>";
+            $$<<"</form>";
+            $$<<"</tr>";
+        }
+}
+else
+{
+    $$<<"<p>There is no pending visit requests</p>";
+}
+%>
                 </table>
             </div>
         </div>

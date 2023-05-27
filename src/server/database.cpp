@@ -353,7 +353,7 @@ int32_t Database::getNumberOfRequestedVisitPerPatientId(const int32_t patientId)
     throw std::runtime_error{"couldn't calculate the number of requested visits"};
 }
 
-std::vector<Database::User> Database::getFreeDoctors(const int32_t& profession,
+std::vector<Database::User> Database::getFreeDoctors(const User::Profession profession,
     const std::vector<int32_t> takenDoctorsIds)
 {
     std::vector<User> result;
@@ -369,9 +369,10 @@ std::vector<Database::User> Database::getFreeDoctors(const int32_t& profession,
     }
 
     SQLite::Statement q{*mpDatabase, "SELECT id FROM users "
-        "WHERE type = :type AND id NOT IN (" + takenDoctorsStr + ")"};
+        "WHERE role = :role AND type = :type AND id NOT IN (" + takenDoctorsStr + ")"};
 
-    q.bind(":type", profession);
+    q.bind(":role", static_cast<int32_t>(User::Role::DOCTOR));
+    q.bind(":type", static_cast<int32_t>(profession));
 
     while (q.executeStep())
     {
