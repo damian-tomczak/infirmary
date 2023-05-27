@@ -97,7 +97,7 @@ else if (role == 2)
                             <form>
                                 <input type="hidden" value="<%c++ $$<<doctorId; %>" name="doctorId"></input>
                                 <input type="date" value="<%c++ $$<<date; %>" name="date"></input>
-                                <input type="submit" class="me-3" value="Select date"></input>
+                                <input type="submit" value="Select date"></input>
                             </form>
                         </div>
 <%c++

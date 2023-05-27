@@ -140,17 +140,21 @@ std::vector<Database::User> Database::getUsersByRole(const User::Role role)
     return result;
 }
 
-bool Database::addVisit(const int32_t patientId,
+bool Database::addVisit(
+    const int32_t patientId,
     const std::string& date,
     const std::string& time,
-    const int32_t professionId
+    const int32_t professionId,
+    const Visit::Status status,
+    const int32_t doctorId
     )
 {
     SQLite::Statement q{*mpDatabase, "INSERT INTO visits(patient_id, doctor_id, status, date, time, profession)"
-        "VALUES (:patient_id, -1, :status, :date, :time, :profession)"};
+        "VALUES (:patient_id, :doctorId, :status, :date, :time, :profession)"};
 
+    q.bind(":doctorId", doctorId);
     q.bind(":patient_id", patientId);
-    q.bind(":status", static_cast<int32_t>(Visit::Status::REQUESTED));
+    q.bind(":status", static_cast<int32_t>(status));
     q.bind(":date", date);
     q.bind(":time", time);
     q.bind(":profession", professionId);

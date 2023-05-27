@@ -174,6 +174,7 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     {
         database.updateVisitStatus(*pCancelVisitId, tsrpp::Database::Visit::Status::CANCELLED);
     }
+
     auto pPatient{database.getUserById(pVisit->patient_id)};
     if (pPatient == std::nullopt)
     {
@@ -206,6 +207,40 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
         data.insert("doctorPesel", pDoctor->pesel);
         data.insert("doctorPhone", pDoctor->phone);
         data.insert("errorCode", errorCode);
+    }
+
+    auto pControlVisit{pReq->getOptionalParameter<int32_t>("controlVisit")};
+    bool isControlVisitAdded{};
+    if (pControlVisit != std::nullopt)
+    {
+        for (int32_t days{14}; !isControlVisitAdded; ++days)
+        {
+            // TODO: still the lack of the C++20 days feature
+            // TODO: about the performance it would good to only modify time_t structure by adding the right amount of seconds
+            // but this variable usually should be created only once
+            auto controlVisitDate{tsrpp::time_t2Str(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now() + std::chrono::hours(days * 24)))};
+            for (auto it{hours.begin()}; it != hours.end(); ++it)
+            {
+                if (database.checkAvailabilityOfVisit(
+                    pPatient->id,
+                    static_cast<int32_t>(pVisit->profession),
+                    controlVisitDate,
+                    *it).status == tsrpp::Database::VisitAvailability::Status::FREE)
+                {
+                    database.addVisit(
+                        pPatient->id,
+                        controlVisitDate,
+                        *it,
+                        static_cast<int32_t>(pVisit->profession),
+                        tsrpp::Database::Visit::Status::SCHEDULED,
+                        pDoctor->id);
+                    data.insert("controlVisitDate", controlVisitDate);
+                    data.insert("controlVisitTime", *it);
+                    isControlVisitAdded = true;
+                    break;
+                }
+            }
+        }
     }
 
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_visit_information", data);
@@ -463,12 +498,7 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
     }
     else
     {
-        auto now{std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())};
-        std::tm buffer;
-        localtime_r(&now, &buffer);
-        std::stringstream ss;
-        ss << std::put_time(&buffer, "%Y-%m-%d");
-        date = ss.str();
+        date = tsrpp::time_t2Str(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
     }
 
     auto pRegister{pReq->getOptionalParameter<std::string>("register")};
@@ -500,20 +530,6 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
     }
 
     drogon::HttpViewData data;
-    std::array<std::string, 12> hours {
-        "09:00",
-        "09:40",
-        "10:20",
-        "11:00",
-        "11:40",
-        "12:20",
-        "13:00",
-        "13:40",
-        "14:20",
-        "15:00",
-        "15:40",
-        "16:20",
-    };
     std::vector<int> availability;
     for (auto it{hours.begin()}; it != hours.end(); ++it)
     {

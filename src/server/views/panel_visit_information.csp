@@ -24,6 +24,19 @@ auto doctorProfession=@@.get<std::string>("doctorProfession");
 auto doctorPesel=@@.get<std::string>("doctorPesel");
 auto doctorEmail=@@.get<std::string>("doctorEmail");
 auto doctorPhone=@@.get<std::string>("doctorPhone");
+
+auto controlVisitDate=@@.get<std::string>("controlVisitDate");
+auto controlVisitTime=@@.get<std::string>("controlVisitTime");
+
+if (controlVisitDate.length())
+{
+    $$<<"<script>";
+    $$<<"window.onload = function() {";
+    $$<<"alert(\"";
+    $$<<"Successuly booked a control visit on " << controlVisitDate << " " << controlVisitTime;
+    $$<<"\")}";
+    $$<<"</script>";
+}
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -181,14 +194,22 @@ else
                                     <a href="/panel" class="btn btn-primary my-4 menu-button">Return</a>
                                 </div>
 <%c++
-    if (status != "Cancelled")
-    {
+if (role == 0 && status != "Cancelled")
+{
 %>
                                 <div class="col text-center">
                                     <a href="?id=<%c++ $$<<id; %>&cancelVisit=<%c++ $$<<id; %>" class="btn btn-secondary my-4 menu-button">Cancel Visit</a>
                                 </div>
 <%c++
-    }
+}
+else if (role == 1)
+{
+%>
+                                <div class="col text-center">
+                                    <a href="?id=<%c++ $$<<id; %>&controlVisit=1" class="btn btn-secondary my-4 menu-button">Set Control Visit</a>
+                                </div>
+<%c++
+}
 %>
                             </div>
                         </div>

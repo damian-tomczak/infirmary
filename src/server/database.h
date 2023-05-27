@@ -134,7 +134,9 @@ public:
     bool addVisit(const int32_t patientId,
         const std::string& date,
         const std::string& time,
-        const int32_t professionId);
+        const int32_t professionId,
+        const Visit::Status status = Visit::Status::REQUESTED,
+        const int32_t doctorId = -1);
     std::vector<Visit> getVisitsByPatientPesel(const std::string& pesel);
     std::vector<Visit> getVisitsByDoctorIdAndDate(const int32_t id, const std::string& date);
     std::optional<Visit> getVisitById(const int32_t id);
