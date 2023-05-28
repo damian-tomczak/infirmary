@@ -687,16 +687,15 @@ void Panel::doctorInformation(const drogon::HttpRequestPtr& pReq,
     tsrpp::Database database{SQLite::OPEN_READWRITE};
     drogon::HttpViewData data;
     data.insert("role", static_cast<int>(pUser->role));
-    auto pDoctorId{pReq->getOptionalParameter<int32_t>("doctorId")};
-    if ((pUser->role == tsrpp::Database::User::Role::DOCTOR) &&
-        (pDoctorId != std::nullopt))
-    {
-        throw std::runtime_error{"you are not allowed to investigate other doctors"};
-    }
 
+    auto pDoctorId{pReq->getOptionalParameter<int32_t>("doctorId")};
     if (pDoctorId == std::nullopt)
     {
         pDoctorId = std::make_optional(pUser->id);
+    }
+    if ((pUser->role == tsrpp::Database::User::Role::DOCTOR) && (pDoctorId != pUser->id))
+    {
+        throw std::runtime_error{"you are not allowed to investigate other doctors"};
     }
 
     std::unique_ptr<tsrpp::Database::User> pDoctorInfo;
