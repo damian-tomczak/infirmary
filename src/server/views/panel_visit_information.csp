@@ -28,7 +28,18 @@ auto doctorPhone=@@.get<std::string>("doctorPhone");
 auto controlVisitDate=@@.get<std::string>("controlVisitDate");
 auto controlVisitTime=@@.get<std::string>("controlVisitTime");
 
-if (controlVisitDate.length())
+auto errorCode=@@.get<int>("errorCode");
+
+if (errorCode == 3)
+{
+    $$<<"<script>";
+    $$<<"window.onload = function() {";
+    $$<<"alert(\"";
+    $$<<"You can cancel the visit only 24 hours before";
+    $$<<"\")}";
+    $$<<"</script>";
+}
+else if (controlVisitDate.length())
 {
     $$<<"<script>";
     $$<<"window.onload = function() {";

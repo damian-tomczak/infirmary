@@ -66,6 +66,7 @@ public:
 private:
     bool appendNote(const tsrpp::Database::User::Role role, const std::string& currentNote, const std::string& newNote);
     void appendDoctorsToSideMenu(drogon::HttpViewData& data);
+    bool cancelVisit(const std::optional<int32_t> visitId);
 
     inline static constexpr auto maxRequestedVisitPerUser{2};
     inline static std::array<std::string, 12> hours{
