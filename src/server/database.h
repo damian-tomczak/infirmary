@@ -146,6 +146,7 @@ public:
     bool updateVisitStatus(const int32_t visitId, const Visit::Status status);
     bool updateVisitDoctorId(const int32_t visitId, const int32_t doctorId);
     bool updateVisitPrescription(const int32_t visitId, const std::string& prescription);
+    int32_t getVisitStats(const std::string& date, const User::Profession profession);
 
     struct VisitAvailability final
     {

@@ -222,7 +222,12 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
             // TODO: still the lack of the C++20 days feature
             // TODO: about the performance it would good to only modify time_t structure by adding the right amount of seconds
             // but this variable usually should be created only once
-            auto controlVisitDate{tsrpp::time_t2Str(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now() + std::chrono::hours(days * 24)))};
+            auto now{std::chrono::system_clock::to_time_t(std::chrono::system_clock::now() + std::chrono::hours(days * 24))};
+            std::tm buffer;
+            localtime_r(&now, &buffer);
+            std::stringstream ss;
+            ss << std::put_time(&buffer, "%Y-%m-%d");
+            auto controlVisitDate{ss.str()};
             for (auto it{hours.begin()}; it != hours.end(); ++it)
             {
                 if (database.checkAvailabilityOfVisit(
@@ -505,7 +510,12 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
     }
     else
     {
-        date = tsrpp::time_t2Str(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
+        auto now{std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())};
+        std::tm buffer;
+        localtime_r(&now, &buffer);
+        std::stringstream ss;
+        ss << std::put_time(&buffer, "%Y-%m-%d");
+        date = ss.str();
     }
 
     auto pRegister{pReq->getOptionalParameter<std::string>("register")};
@@ -687,16 +697,15 @@ void Panel::doctorInformation(const drogon::HttpRequestPtr& pReq,
     tsrpp::Database database{SQLite::OPEN_READWRITE};
     drogon::HttpViewData data;
     data.insert("role", static_cast<int>(pUser->role));
-    auto pDoctorId{pReq->getOptionalParameter<int32_t>("doctorId")};
-    if ((pUser->role == tsrpp::Database::User::Role::DOCTOR) &&
-        (pDoctorId != std::nullopt))
-    {
-        throw std::runtime_error{"you are not allowed to investigate other doctors"};
-    }
 
+    auto pDoctorId{pReq->getOptionalParameter<int32_t>("doctorId")};
     if (pDoctorId == std::nullopt)
     {
         pDoctorId = std::make_optional(pUser->id);
+    }
+    if ((pUser->role == tsrpp::Database::User::Role::DOCTOR) && (pDoctorId != pUser->id))
+    {
+        throw std::runtime_error{"you are not allowed to investigate other doctors"};
     }
 
     std::unique_ptr<tsrpp::Database::User> pDoctorInfo;
@@ -909,24 +918,38 @@ void Panel::statistics(const drogon::HttpRequestPtr& pReq,
 {
     drogon::HttpResponsePtr pResp;
 
-    if ((!LoginSystem::isUserShouldSeeThis<false>(pReq, pResp, tsrpp::Database::User::Role::DOCTOR)) &&
-        (!LoginSystem::isUserShouldSeeThis<false>(pReq, pResp, tsrpp::Database::User::Role::RECEPTIONIST)))
+    if (!LoginSystem::isUserShouldSeeThis(pReq, pResp, tsrpp::Database::User::Role::RECEPTIONIST))
     {
-        if (pReq->getSession()->getOptional<tsrpp::Database::User>("user") == std::nullopt)
-        {
-            callback(pResp);
-            return;
-        }
-        else
-        {
-            throw std::runtime_error{"you are not allowed to see this"};
-        }
+        callback(pResp);
+        return;
     }
 
     tsrpp::Database database{SQLite::OPEN_READWRITE};
     auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+
+    std::string date;
+    auto pData{pReq->getOptionalParameter<std::string>("date")};
+    if (pData != std::nullopt)
+    {
+        date = *pData;
+    }
+    else
+    {
+        auto now{std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())};
+        std::tm buffer;
+        localtime_r(&now, &buffer);
+        std::stringstream ss;
+        ss << std::put_time(&buffer, "%Y-%m");
+        date = ss.str();
+    }
+
     drogon::HttpViewData data;
     appendDoctorsToSideMenu(data);
+    data.insert("date", date);
+    data.insert("visitsWithInternists", database.getVisitStats(date, tsrpp::Database::User::Profession::INTERNIST));
+    data.insert("visitsWithGastroenterologists", database.getVisitStats(date, tsrpp::Database::User::Profession::GASTROENTEROLOGIST));
+    data.insert("visitsWithPulmonologists", database.getVisitStats(date, tsrpp::Database::User::Profession::PULMONOLOGIST));
+    data.insert("visitsWithOculists", database.getVisitStats(date, tsrpp::Database::User::Profession::OCULIST));
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_statistics", data);
     callback(pResp);
 }

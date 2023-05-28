@@ -78,9 +78,10 @@ if (errorCode == 3)
                                     <input type="submit" value="Append Note" class="btn btn-secondary my-2 menu-button mb-4"></input>
                                 </form>
                             </div>
-                        </div>
-                        <div class="visits bg-light">
-                            <table>
+                            <h2>Your visits</h2>
+                            <hr>
+                            <div class="visits bg-white">
+                                <table>
 <%c++
 $$<<"<tr>";
 for (size_t i = 0; i < statuses.size(); ++i)
@@ -144,7 +145,8 @@ for (size_t i = 0; i < statuses.size(); ++i)
     $$<<"</tr>";
 }
 %>
-                            </table>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
