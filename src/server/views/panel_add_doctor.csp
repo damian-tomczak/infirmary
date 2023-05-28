@@ -1,4 +1,9 @@
 <%c++
+auto doctorIds=@@.get<std::vector<int>>("doctorIds");
+auto doctorFirstNames=@@.get<std::vector<std::string>>("doctorFirstNames");
+auto doctorLastNames=@@.get<std::vector<std::string>>("doctorLastNames");
+auto doctorProfessions=@@.get<std::vector<std::string>>("doctorProfessions");
+
 auto errorCode = @@.get<int>("errorCode");
 if (errorCode)
 {
@@ -45,62 +50,109 @@ if (errorCode)
     $$ << message.str();
 }
 %>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Infirmary</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+        <meta name="theme-color" content="#712cf9">
+        <link rel="stylesheet" href="/style/style.css">
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-2 bg-light position-fixed h-100">
+                    <div class="row justify-content-center text-center">
+                        <h1><a href="/">Welcome to Infirmary</a></h1>
+<%c++
+$$<<"<a href=\"/panel/admin/pending-requests\" class=\"btn btn-secondary my-2 menu-button\">Pending visit requests</a>";
+$$<<"<a href=\"/panel/admin/patient-information\" class=\"btn btn-secondary my-2 menu-button\">Patient information</a>";
+$$<<"<a href=\"/panel/admin/statistics\" class=\"btn btn-secondary my-2 menu-button\">Statistics</a>";
+$$<<"<a href=\"/panel/admin/add-doctor\" class=\"btn btn-primary my-2 menu-button mb-4\">Add doctor</a>";
+if (doctorIds.size() > 0)
+{
+        for (size_t i = 0; i < doctorIds.size(); ++i)
+        {
+            $$<<"<a href=\"/panel/admin/doctor-information?doctorId=" << doctorIds.at(i) << "\" class=\"btn btn-secondary my-2 menu-button\">";
+                $$<<doctorFirstNames.at(i) << " " << doctorLastNames.at(i) << "<br>";
+                $$<<doctorProfessions.at(i);
+            $$<<"</a>";
+        }
+}
+else
+{
+    $$<<"<p>Doctors haven't been found</p>";
+}
+%>
 
-<form method="post">
-    <div class="row mb-2">
-        <label for="firstName" class="col-5 col-form-label">First Name:</label>
-        <div class="col-7">
-            <input type="text" class="form-control" name="firstName">
+                        <a href="/logout" class="btn btn-secondary my-2 menu-button mt-4">Logout</a>
+                        <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
+                    </div>
+                </div>
+                <div class="col-10 offset-2">
+                    <h2 class="text-center">Adding New Doctor</h2>
+                    <form method="post">
+                        <div class="row justify-content-center mb-2">
+                            <label for="firstName" class="col-2 col-form-label">First Name:</label>
+                            <div class="col-5">
+                                <input type="text" class="form-control" name="firstName">
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mb-2">
+                            <label for="lastName" class="col-2 col-form-label">Last Name:</label>
+                            <div class="col-5">
+                                <input type="text" class="form-control" id="lastName" name="lastName">
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mb-2">
+                            <label for="profession" class="col-2 col-form-label">Profession:</label>
+                            <div class="col-5">
+                                <select class="form-select" id="profession" name="profession">
+                                    <option value="0">Internist</option>
+                                    <option value="1">Gastroenterologist</option>
+                                    <option value="2">Pulmonologist</option>
+                                    <option value="3">Oculist</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mb-2">
+                            <label for="email" class="col-2 col-form-label">Email:</label>
+                            <div class="col-5">
+                                <input type="email" class="form-control" id="email" name="email" placeholder="contact@damian-tomczak.pl">
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mb-2">
+                            <label for="pesel" class="col-2 col-form-label">Pesel:</label>
+                            <div class="col-5">
+                                <input type="text" class="form-control" id="pesel" name="pesel" placeholder="00302800690">
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mb-2">
+                            <label for="phone" class="col-2 col-form-label">Phone:</label>
+                            <div class="col-5">
+                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="606502193">
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mb-2">
+                            <label for="password" class="col-2 col-form-label">Password:</label>
+                            <div class="col-5">
+                                <input type="password" class="form-control" id="password" name="password">
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mb-2">
+                            <label for="repeatedPassword" class="col-2 col-form-label">Repeat Password:</label>
+                            <div class="col-5">
+                                <input type="password" class="form-control" id="repeatedPassword" name="repeatedPassword">
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mb-2">
+                            <input type="submit" class="w-25 btn btn-primary"  value="Add new doctor">
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="row mb-2">
-        <label for="lastName" class="col-5 col-form-label">Last Name:</label>
-        <div class="col-7">
-            <input type="text" class="form-control" id="lastName" name="lastName">
-        </div>
-    </div>
-    <div class="row mb-2">
-        <label for="profession" class="col-5 col-form-label">Profession:</label>
-        <div class="col-7">
-            <select class="form-select" id="profession" name="profession">
-                <option value="0">Internist</option>
-                <option value="1">Gastroenterologist</option>
-                <option value="2">Pulmonologist</option>
-                <option value="3">Oculist</option>
-            </select>
-        </div>
-    </div>
-    <div class="row mb-2">
-        <label for="email" class="col-5 col-form-label">Email:</label>
-        <div class="col-7">
-            <input type="email" class="form-control" id="email" name="email" placeholder="contact@damian-tomczak.pl">
-        </div>
-    </div>
-    <div class="row mb-2">
-        <label for="pesel" class="col-5 col-form-label">Pesel:</label>
-        <div class="col-7">
-            <input type="text" class="form-control" id="pesel" name="pesel" placeholder="00302800690">
-        </div>
-    </div>
-    <div class="row mb-2">
-        <label for="phone" class="col-5 col-form-label">Phone:</label>
-        <div class="col-7">
-            <input type="tel" class="form-control" id="phone" name="phone" placeholder="606502193">
-        </div>
-    </div>
-    <div class="row mb-2">
-        <label for="password" class="col-5 col-form-label">Password:</label>
-        <div class="col-7">
-            <input type="password" class="form-control" id="password" name="password">
-        </div>
-    </div>
-    <div class="row mb-2">
-        <label for="repeatedPassword" class="col-5 col-form-label">Repeat Password:</label>
-        <div class="col-7">
-            <input type="password" class="form-control" id="repeatedPassword" name="repeatedPassword">
-        </div>
-    </div>
-    <div>
-        <input type="submit" class="w-100 btn btn-lg btn-primary"  value="Register">
-    </div>
-</form>
+    </body>
+</html>
