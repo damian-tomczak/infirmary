@@ -324,6 +324,27 @@ bool Database::updateVisitPrescription(const int32_t visitId, const std::string&
     return false;
 }
 
+/**
+ * @brief Get the Visit Stats object
+ *
+ * @param date format YYYY-MM
+ * @param profession
+ * @return int32_t
+ */
+int32_t Database::getVisitStats(const std::string& date, const User::Profession profession)
+{
+    SQLite::Statement q{*mpDatabase, "SELECT COUNT(*) FROM visits WHERE strftime('%Y-%m', date) = :date AND profession = :profession"};
+    q.bind(":date", date);
+    q.bind(":profession", static_cast<int32_t>(profession));
+
+    if (q.executeStep())
+    {
+        return q.getColumn(0);
+    }
+
+    return -1;
+}
+
 Database::VisitAvailability Database::checkAvailabilityOfVisit(const int32_t patientId,
     const int32_t profession,
     const std::string& date,

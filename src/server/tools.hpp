@@ -92,14 +92,4 @@ inline std::string createUrl(const std::string& path)
 #endif
     return std::string{prefix} + path;
 }
-
-inline std::string time_t2Str(const std::time_t time)
-{
-
-    std::tm buffer;
-    localtime_r(&time, &buffer);
-    std::stringstream ss;
-    ss << std::put_time(&buffer, "%Y-%m-%d");
-    return ss.str();
-}
 }
