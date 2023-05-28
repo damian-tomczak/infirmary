@@ -482,31 +482,9 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
 
     std::string date;
     auto pDateParameter{pReq->getOptionalParameter<std::string>("date")};
-    bool isPastSelected{};
     if (pDateParameter != std::nullopt)
     {
         date = *pDateParameter;
-
-        std::tm tm{};
-        std::stringstream ss(date);
-        ss >> std::get_time(&tm, "%Y-%m-%d");
-
-        std::time_t inputTimeT = mktime(&tm);
-        std::time_t nowTimeT = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-
-        std::tm* nowTm{std::localtime(&nowTimeT)};
-
-        std::tm yearMonthDayOnlyTm{};
-        yearMonthDayOnlyTm.tm_year = nowTm->tm_year;
-        yearMonthDayOnlyTm.tm_mon = nowTm->tm_mon;
-        yearMonthDayOnlyTm.tm_mday = nowTm->tm_mday;
-
-        nowTimeT = std::mktime(&yearMonthDayOnlyTm);
-
-        if (inputTimeT < nowTimeT)
-        {
-            isPastSelected = true;
-        }
     }
     else
     {
@@ -549,6 +527,25 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
     drogon::HttpViewData data;
     std::vector<int> availability;
     std::vector<int> ids;
+    std::vector<bool> pastVisits;
+
+    auto isVisitPast{[&date](auto hour) -> bool {
+        std::tm tm{};
+        std::stringstream ss;
+        ss << date << " " << hour;
+        ss >> std::get_time(&tm, "%Y-%m-%d %H:%M");
+
+        std::time_t inputTime{mktime(&tm)};
+        std::time_t nowTime{std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())};
+
+        if (inputTime < nowTime)
+        {
+            return true;
+        }
+
+        return false;
+    }};
+
     for (auto it{hours.begin()}; it != hours.end(); ++it)
     {
         auto avail{database.checkAvailabilityOfVisit(pUser->id, profession, date, *it)};
@@ -563,10 +560,12 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
             id = -1;
         }
         ids.emplace_back(id);
+
+        pastVisits.emplace_back(isVisitPast(*it));
     }
     data.insert("date", date);
+    data.insert("pastVisits", pastVisits);
     data.insert("doctorProfession", *pDoctorProfession);
-    data.insert("isPastSelected", isPastSelected);
     data.insert("hours", hours);
     data.insert("availability", availability);
     data.insert("ids", ids);
