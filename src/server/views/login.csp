@@ -1,13 +1,13 @@
 <%c++
-    auto loginStatus = @@.get<int>("loginStatus");
-    if (loginStatus)
+    auto LoginErrorCode = @@.get<int>("LoginErrorCode");
+    if (LoginErrorCode)
     {
         std::ostringstream message;
         message << "<script>";
         // TODO: find something better than an alert
         message << "window.onload = function() {";
         message << "alert(\"";
-        switch (loginStatus)
+        switch (LoginErrorCode)
         {
         case 1:
             message << "You have been successfuly registered\\n"
@@ -54,7 +54,7 @@
                         <div>
                             <h1>Welcome Back</h1>
                         </div>
-                        <form action="login" method="post">
+                        <form method="post">
                             <div class="form-floating mb-4">
                                 <input type="text" class="form-control" id="floatingInput" placeholder="Pesel" name="pesel">
                                 <label for="floatingInput">Pesel</label>

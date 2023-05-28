@@ -62,7 +62,7 @@ else
                         <th>Doctor type</th>
                         <th>Date</th>
                         <th>Choose doctor</th>
-                        <th>Decline message</th>
+                        <th>Decision reason</th>
                         <th>Decision</th>
                     </tr>
 <%c++
@@ -77,12 +77,19 @@ if (visitIds.size() > 0)
             $$<<"<td class=\"border border-secondary\">" << visitDoctorProfessions.at(i) << "</td>";
             $$<<"<td class=\"border border-secondary\">" << visitDates.at(i) << " " << visitTimes.at(i) << "</td>";
             $$<<"<td class=\"border border-secondary justify-content-center\">";
-            $$<<"<select class=\"form-select mx-auto\" name=\"doctorId\">";
-            for (size_t j = 0; j < visitDoctorIds.at(i).size(); ++j)
+            if (visitDoctorIds.at(i).size() > 0)
             {
-                $$<<"<option value=" << visitDoctorIds.at(i).at(j) << ">" << visitDoctorFirstNames.at(i).at(j) << " " << visitDoctorLastNames.at(i).at(j) << "</option>";
+                $$<<"<select class=\"form-select mx-auto\" name=\"doctorId\">";
+                for (size_t j = 0; j < visitDoctorIds.at(i).size(); ++j)
+                {
+                    $$<<"<option value=" << visitDoctorIds.at(i).at(j) << ">" << visitDoctorFirstNames.at(i).at(j) << " " << visitDoctorLastNames.at(i).at(j) << "</option>";
+                }
+                $$<<"</select>";
             }
-            $$<<"</select>";
+            else
+            {
+                $$<<"There is no available doctors";
+            }
             $$<<"</td>";
             $$<<"<td class=\"border border-secondary text-center\">";
             $$<<"<textarea name=\"reason\" placeholder=\"Insert reason\" class=\"form-control\"></textarea>";

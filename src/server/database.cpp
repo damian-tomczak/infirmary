@@ -12,8 +12,8 @@ namespace tsrpp
 {
 bool Database::addUser(const User& user)
 {
-    SQLite::Statement q{*mpDatabase, "INSERT INTO users(pesel, password, first_name, last_name, email, note, role, phone)"
-        "VALUES (:pesel, :password, :first_name, :last_name, :email, :note, 0, :phone)"};
+    SQLite::Statement q{*mpDatabase, "INSERT INTO users(pesel, password, first_name, last_name, email, note, role, type, phone)"
+        "VALUES (:pesel, :password, :first_name, :last_name, :email, :note, :role, :profession, :phone)"};
 
     q.bind(":pesel", user.pesel);
     q.bind(":password", user.password);
@@ -21,6 +21,8 @@ bool Database::addUser(const User& user)
     q.bind(":last_name", user.last_name);
     q.bind(":email", user.email);
     q.bind(":note", user.note);
+    q.bind(":role", static_cast<int32_t>(user.role));
+    q.bind(":profession", static_cast<int32_t>(user.type));
     q.bind(":phone", user.phone);
 
     if (q.exec() == 1)
@@ -341,7 +343,7 @@ Database::VisitAvailability Database::checkAvailabilityOfVisit(const int32_t pat
     }
 
     SQLite::Statement q{*mpDatabase,
-        "SELECT patient_id, doctor_id, status FROM visits "
+        "SELECT id, patient_id, doctor_id, status FROM visits "
         "WHERE date = :date AND time = :time AND profession = :profession"};
     q.bind(":date", date);
     q.bind(":time", time);
@@ -353,6 +355,7 @@ Database::VisitAvailability Database::checkAvailabilityOfVisit(const int32_t pat
         auto visitPatientId{q.getColumn("patient_id").getInt()};
         if (visitPatientId == patientId)
         {
+            result.pYourVisitId = getVisitById(q.getColumn("id"))->id;
             result.status = VisitAvailability::Status::YOUR_VISIT;
         }
 

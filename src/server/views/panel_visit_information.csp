@@ -28,7 +28,18 @@ auto doctorPhone=@@.get<std::string>("doctorPhone");
 auto controlVisitDate=@@.get<std::string>("controlVisitDate");
 auto controlVisitTime=@@.get<std::string>("controlVisitTime");
 
-if (controlVisitDate.length())
+auto errorCode=@@.get<int>("errorCode");
+
+if (errorCode == 3)
+{
+    $$<<"<script>";
+    $$<<"window.onload = function() {";
+    $$<<"alert(\"";
+    $$<<"You can cancel the visit only 24 hours before";
+    $$<<"\")}";
+    $$<<"</script>";
+}
+else if (controlVisitDate.length())
 {
     $$<<"<script>";
     $$<<"window.onload = function() {";
@@ -181,7 +192,7 @@ if (role == 1)
 else
 {
     $$<<"<div class=\"col-8\">";
-    $$<<"<textarea class=\"form-control\" rows=\"6\" placeholder=\"Prescription given during the visit\" name=\"prescription\" readonly" << receipt << "</textarea>";
+    $$<<"<textarea class=\"form-control\" rows=\"6\" placeholder=\"Prescription given during the visit\" name=\"prescription\" readonly>" << receipt << "</textarea>";
     $$<<"</div>";
 }
 %>
@@ -190,6 +201,14 @@ else
                             </div>
                             <hr>
                             <div class="row">
+<%c++
+if (role == 1 && status != "Completed")
+{
+    $$<<"<div class=\"text-center\">";
+    $$<<"<a href=\"?id=" << id << "&confirmVisit=" << id << "\" class=\"btn btn-secondary my-4 menu-button\">Mark Visit as Completed</a>";
+    $$<<"</div>";
+}
+%>
                                 <div class="col text-center">
                                     <a href="/panel" class="btn btn-primary my-4 menu-button">Return</a>
                                 </div>

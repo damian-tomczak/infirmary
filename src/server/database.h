@@ -14,6 +14,7 @@
 namespace tsrpp
 {
 // TODO: use GLFS for database.db
+// TODO: I would rate the db 2/10 - it isn't development quality db
 class Database final
 {
     // TODO:: it would be a great idea to specify data types used by the database
@@ -156,6 +157,7 @@ public:
         } status;
 
         std::vector<int32_t> takenDoctorsIds;
+        std::optional<int32_t> pYourVisitId;
     };
     VisitAvailability checkAvailabilityOfVisit(const int32_t patientId,
         const int32_t profession,
