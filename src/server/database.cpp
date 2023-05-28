@@ -12,8 +12,8 @@ namespace tsrpp
 {
 bool Database::addUser(const User& user)
 {
-    SQLite::Statement q{*mpDatabase, "INSERT INTO users(pesel, password, first_name, last_name, email, note, role, phone)"
-        "VALUES (:pesel, :password, :first_name, :last_name, :email, :note, 0, :phone)"};
+    SQLite::Statement q{*mpDatabase, "INSERT INTO users(pesel, password, first_name, last_name, email, note, role, type, phone)"
+        "VALUES (:pesel, :password, :first_name, :last_name, :email, :note, :role, :profession, :phone)"};
 
     q.bind(":pesel", user.pesel);
     q.bind(":password", user.password);
@@ -21,6 +21,8 @@ bool Database::addUser(const User& user)
     q.bind(":last_name", user.last_name);
     q.bind(":email", user.email);
     q.bind(":note", user.note);
+    q.bind(":role", static_cast<int32_t>(user.role));
+    q.bind(":profession", static_cast<int32_t>(user.type));
     q.bind(":phone", user.phone);
 
     if (q.exec() == 1)

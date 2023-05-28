@@ -1,0 +1,106 @@
+<%c++
+auto errorCode = @@.get<int>("errorCode");
+if (errorCode)
+{
+    std::ostringstream message;
+    message << "<script>";
+    message << "window.onload = function() {";
+    message << "alert(\"";
+    switch (errorCode)
+    {
+    case 1:
+        message << "Registration Failure: Incorrect pesel format";
+        break;
+    case 2:
+        message << "Registration Failure: Incorrect first name format";
+        break;
+    case 3:
+        message << "Registration Failure: Incorrect last name format";
+        break;
+    case 4:
+        message << "Registration Failure: Your password isn't strong enough!\n"
+            "It should contain at least one digit and is at least 9 characters long";
+        break;
+    case 5:
+        message << "Registration Failure: Your passwords are different";
+        break;
+    case 6:
+        message << "Registration Failure: Incorrect email format";
+        break;
+    case 7:
+        message << "Registration Failure: Doctor already exists";
+        break;
+    case 8:
+        message << "Registration Success: Doctor added successfuly";
+        break;
+    case 9:
+        message << "Registration Failure: Incorrect phone format";
+        break;
+    case 10:
+        message << "Registration Failure: Incorrect profession";
+        break;
+    }
+    message << "\")}</script>";
+
+    $$ << message.str();
+}
+%>
+
+<form method="post">
+    <div class="row mb-2">
+        <label for="firstName" class="col-5 col-form-label">First Name:</label>
+        <div class="col-7">
+            <input type="text" class="form-control" name="firstName">
+        </div>
+    </div>
+    <div class="row mb-2">
+        <label for="lastName" class="col-5 col-form-label">Last Name:</label>
+        <div class="col-7">
+            <input type="text" class="form-control" id="lastName" name="lastName">
+        </div>
+    </div>
+    <div class="row mb-2">
+        <label for="profession" class="col-5 col-form-label">Profession:</label>
+        <div class="col-7">
+            <select class="form-select" id="profession" name="profession">
+                <option value="0">Internist</option>
+                <option value="1">Gastroenterologist</option>
+                <option value="2">Pulmonologist</option>
+                <option value="3">Oculist</option>
+            </select>
+        </div>
+    </div>
+    <div class="row mb-2">
+        <label for="email" class="col-5 col-form-label">Email:</label>
+        <div class="col-7">
+            <input type="email" class="form-control" id="email" name="email" placeholder="contact@damian-tomczak.pl">
+        </div>
+    </div>
+    <div class="row mb-2">
+        <label for="pesel" class="col-5 col-form-label">Pesel:</label>
+        <div class="col-7">
+            <input type="text" class="form-control" id="pesel" name="pesel" placeholder="00302800690">
+        </div>
+    </div>
+    <div class="row mb-2">
+        <label for="phone" class="col-5 col-form-label">Phone:</label>
+        <div class="col-7">
+            <input type="tel" class="form-control" id="phone" name="phone" placeholder="606502193">
+        </div>
+    </div>
+    <div class="row mb-2">
+        <label for="password" class="col-5 col-form-label">Password:</label>
+        <div class="col-7">
+            <input type="password" class="form-control" id="password" name="password">
+        </div>
+    </div>
+    <div class="row mb-2">
+        <label for="repeatedPassword" class="col-5 col-form-label">Repeat Password:</label>
+        <div class="col-7">
+            <input type="password" class="form-control" id="repeatedPassword" name="repeatedPassword">
+        </div>
+    </div>
+    <div>
+        <input type="submit" class="w-100 btn btn-lg btn-primary"  value="Register">
+    </div>
+</form>

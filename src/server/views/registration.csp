@@ -1,12 +1,12 @@
 <%c++
-auto registrationStatus = @@.get<int>("registrationStatus");
-if (registrationStatus)
+auto RegistrationErrorCode = @@.get<int>("RegistrationErrorCode");
+if (RegistrationErrorCode)
 {
     std::ostringstream message;
     message << "<script>";
     message << "window.onload = function() {";
     message << "alert(\"Registration failure: ";
-    switch (registrationStatus)
+    switch (RegistrationErrorCode)
     {
     case 1:
         message << "incorrect pesel format";
@@ -32,6 +32,9 @@ if (registrationStatus)
         break;
     case 9:
         message << "incorrect phone format";
+        break;
+    case 10:
+        message << "incorrect profession";
         break;
     }
     message << "\")}</script>";
@@ -64,7 +67,7 @@ if (registrationStatus)
                         <div>
                             <h1>Register Panel</h1>
                         </div>
-                        <form action="register" method="post">
+                        <form method="post">
                             <div class="row mb-2">
                                 <label for="firstName" class="col-5 col-form-label">First Name:</label>
                                 <div class="col-7">
@@ -80,13 +83,13 @@ if (registrationStatus)
                             <div class="row mb-2">
                                 <label for="email" class="col-5 col-form-label">Email:</label>
                                 <div class="col-7">
-                                    <input type="email" class="form-control" id="email" name="email">
+                                    <input type="email" class="form-control" id="email" name="email" placeholder="contact@damian-tomczak.pl">
                                 </div>
                             </div>
                             <div class="row mb-2">
                                 <label for="pesel" class="col-5 col-form-label">Pesel:</label>
                                 <div class="col-7">
-                                    <input type="text" class="form-control" id="pesel" name="pesel">
+                                    <input type="text" class="form-control" id="pesel" name="pesel" placeholder="00302800690">
                                 </div>
                             </div>
                             <div class="row mb-2">

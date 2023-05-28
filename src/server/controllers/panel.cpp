@@ -517,13 +517,13 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
             std::getline(ss, registrationDate, ' ');
             std::getline(ss, registrationTime, ' ');
 
-            auto registrationStatus{database.checkAvailabilityOfVisit(
+            auto RegistrationErrorCode{database.checkAvailabilityOfVisit(
                 pUser->id,
                 profession,
                 registrationDate,
                 registrationTime
             ).status};
-            if (registrationStatus == tsrpp::Database::VisitAvailability::Status::FREE)
+            if (RegistrationErrorCode == tsrpp::Database::VisitAvailability::Status::FREE)
             {
                 database.addVisit(pUser->id, registrationDate, registrationTime, profession);
             }
@@ -954,8 +954,16 @@ void Panel::addDoctor(const drogon::HttpRequestPtr& pReq,
 
     tsrpp::Database database{SQLite::OPEN_READWRITE};
     auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
+
+    RegistrationController::RegistrationErrorCode errorCode{};
+    if (pReq->method() == drogon::HttpMethod::Post)
+    {
+        errorCode = RegistrationController::postRegister<tsrpp::Database::User::Role::DOCTOR>(pReq);
+    }
+
     drogon::HttpViewData data;
     appendDoctorsToSideMenu(data);
+    data.insert("errorCode", static_cast<int>(errorCode));
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_add_doctor", data);
     callback(pResp);
 }

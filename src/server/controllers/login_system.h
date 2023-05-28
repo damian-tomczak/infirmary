@@ -105,7 +105,7 @@ public:
     PATH_ADD("/login");
     PATH_LIST_END
 
-    enum class LoginStatus
+    enum class LoginErrorCode
     {
         DEFAULT,
         REGISTRATION_SUCCESS,
@@ -126,11 +126,11 @@ public:
             return;
         }
 
-        LoginStatus loginStatus{};
+        LoginErrorCode LoginErrorCode{};
         if (pReq->method() == drogon::HttpMethod::Post)
         {
-            loginStatus = postLogin(pReq);
-            if (loginStatus == LoginStatus::SUCCESS)
+            LoginErrorCode = postLogin(pReq);
+            if (LoginErrorCode == LoginErrorCode::SUCCESS)
             {
                 tsrpp::Database database{SQLite::OPEN_READWRITE};
                 pResp = drogon::HttpResponse::newRedirectionResponse(tsrpp::createUrl("/panel"));
@@ -156,9 +156,9 @@ public:
         auto isRegistrationSuccess{pReq->getOptionalParameter<bool>("registrationSuccess").value_or(false)};
         if (isRegistrationSuccess)
         {
-            loginStatus = LoginStatus::REGISTRATION_SUCCESS;
+            LoginErrorCode = LoginErrorCode::REGISTRATION_SUCCESS;
         }
-        data.insert("loginStatus", static_cast<int>(loginStatus));
+        data.insert("LoginErrorCode", static_cast<int>(LoginErrorCode));
 
         pResp = drogon::HttpResponse::newHttpViewResponse("login", data);
         callback(pResp);
@@ -169,7 +169,7 @@ public:
     }
 
 
-    LoginStatus postLogin(const drogon::HttpRequestPtr& pReq);
+    LoginErrorCode postLogin(const drogon::HttpRequestPtr& pReq);
 };
 
 class LogoutController final : public drogon::HttpSimpleController<LogoutController>, public LoginSystem
@@ -190,7 +190,7 @@ public:
     }
 };
 
-class RegisterController : public drogon::HttpSimpleController<RegisterController>, public LoginSystem
+class RegistrationController : public drogon::HttpSimpleController<RegistrationController>, public LoginSystem
 {
 public:
     PATH_LIST_BEGIN
@@ -198,18 +198,19 @@ public:
     PATH_LIST_END
 
     // TODO: reorganize
-    enum class RegistrationStatus
+    enum class RegistrationErrorCode
     {
         DEFAULT,
         INCORRECT_PESEL,
-        INCORRECT_FIRST_NAME,
-        INCORRECT_LAST_NAME,
+        INCORRECT_FIRSTNAME,
+        INCORRECT_LASTNAME,
         INCORRECT_PASSWORD,
         INCORRECT_EMAIL,
         DIFFERENT_PASSWORDS,
         ALREADY_EXISTS,
         SUCCESS,
-        INCORRECT_PHONE
+        INCORRECT_PHONE,
+        INCORRECT_PROFESSION
     };
 
     void asyncHandleHttpRequest(
@@ -223,13 +224,13 @@ public:
             return;
         }
 
-        RegistrationStatus registrationStatus{};
+        RegistrationErrorCode RegistrationErrorCode{};
         if (pReq->method() == drogon::HttpMethod::Post)
         {
-            registrationStatus = postRegister(pReq);
+            RegistrationErrorCode = postRegister(pReq);
         }
 
-        if (registrationStatus == RegistrationStatus::SUCCESS)
+        if (RegistrationErrorCode == RegistrationErrorCode::SUCCESS)
         {
             pResp = drogon::HttpResponse::newRedirectionResponse(tsrpp::createUrl("/login?registrationSuccess=true"));
             callback(pResp);
@@ -237,7 +238,7 @@ public:
         }
 
         drogon::HttpViewData data;
-        data.insert("registrationStatus", static_cast<int>(registrationStatus));
+        data.insert("RegistrationErrorCode", static_cast<int>(RegistrationErrorCode));
 
         pResp = drogon::HttpResponse::newHttpViewResponse("registration", data);
         callback(pResp);
@@ -247,6 +248,106 @@ public:
         ERROR_PAGE(e);
     }
 
+    template<tsrpp::Database::User::Role role = tsrpp::Database::User::Role::PATIENT>
+    static RegistrationController::RegistrationErrorCode postRegister(const drogon::HttpRequestPtr& pReq)
+    {
+        tsrpp::Database database{SQLite::OPEN_READWRITE};
 
-    RegistrationStatus postRegister(const drogon::HttpRequestPtr& pReq);
+        auto firstName{pReq->getOptionalParameter<std::string>("firstName")};
+        if ((!firstName) || (firstName->length() == 0) || (!validFirstName(*firstName)))
+        {
+            return RegistrationErrorCode::INCORRECT_FIRSTNAME;
+        }
+
+        auto lastName{pReq->getOptionalParameter<std::string>("lastName")};
+        if ((!lastName) || (lastName->length() == 0) || (!validLastName(*lastName)))
+        {
+            return RegistrationErrorCode::INCORRECT_LASTNAME;
+        }
+
+        auto pProfession{pReq->getOptionalParameter<int32_t>("profession")};
+        if constexpr (role == tsrpp::Database::User::Role::DOCTOR)
+        {
+            if ((!pProfession) || !tsrpp::Database::User::isValidProfession(tsrpp::Database::User::Profession{*pProfession}))
+            {
+                return RegistrationErrorCode::INCORRECT_PROFESSION;
+            }
+        }
+
+        auto pesel{pReq->getOptionalParameter<std::string>("pesel")};
+        if ((!pesel) || (pesel->length() == 0) || (!validPesel(*pesel)))
+        {
+            return RegistrationErrorCode::INCORRECT_PESEL;
+        }
+
+        auto email{pReq->getOptionalParameter<std::string>("email")};
+        if ((!email) || (email->length() == 0) || (!validEmail(*email)))
+        {
+            return RegistrationErrorCode::INCORRECT_EMAIL;
+        }
+
+        auto phone{pReq->getOptionalParameter<std::string>("phone")};
+        if ((!phone) || (phone->length() == 0) || (!validPhone(*phone)))
+        {
+            return RegistrationErrorCode::INCORRECT_PHONE;
+        }
+
+        auto password{pReq->getOptionalParameter<std::string>("password")};
+        if ((!password) || (password->length() == 0) || (!validPassword(*password)))
+        {
+            return RegistrationErrorCode::INCORRECT_PASSWORD;
+        }
+
+        auto repeatedPassword{pReq->getOptionalParameter<std::string>("repeatedPassword")};
+        if (*password != *repeatedPassword)
+        {
+            return RegistrationErrorCode::DIFFERENT_PASSWORDS;
+        }
+
+        auto hasUser{database.getUserByPesel(pesel.value())};
+        if (hasUser)
+        {
+            return RegistrationErrorCode::ALREADY_EXISTS;
+        }
+
+        auto hashedPassword = tsrpp::hashPassword(*password);
+
+        auto note{pReq->getOptionalParameter<std::string>("note").value_or("")};
+
+        if constexpr (role != tsrpp::Database::User::Role::DOCTOR)
+        {
+            if (!database.addUser({
+                .pesel{*pesel},
+                .password{hashedPassword},
+                .first_name{*firstName},
+                .last_name{*lastName},
+                .email{*email},
+                .note{note},
+                .role{tsrpp::Database::User::Role::PATIENT},
+                .phone{*phone}
+                }))
+            {
+                throw std::runtime_error("couldn't add user");
+            }
+        }
+        else
+        {
+            if (!database.addUser({
+                .pesel{*pesel},
+                .password{hashedPassword},
+                .first_name{*firstName},
+                .last_name{*lastName},
+                .email{*email},
+                .note{note},
+                .role{tsrpp::Database::User::Role::DOCTOR},
+                .type{tsrpp::Database::User::Profession{*pProfession}},
+                .phone{*phone}
+                }))
+            {
+                throw std::runtime_error("couldn't add user");
+            }
+        }
+
+        return RegistrationErrorCode::SUCCESS;
+    }
 };

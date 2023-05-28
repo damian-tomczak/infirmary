@@ -78,6 +78,10 @@ else if (role == 2)
                     </div>
                 </div>
                 <div class="col-10 offset-2">
+<%c++
+if (role == 1)
+{
+%>
                     <div class="row justify-content-center">
                         <div class="bg-light col-8 mb-4">
                             <h2>Personal information</h2>
@@ -92,6 +96,9 @@ else if (role == 2)
                             </div>
                         </div>
                     </div>
+<%c++
+}
+%>
                     <div class="row visits">
                         <div class="d-flex justify-content-end bg-dark">
                             <form>
