@@ -1,10 +1,10 @@
 <%c++
 auto date=@@.get<std::string>("date");
 auto doctorProfession=@@.get<std::string>("doctorProfession");
-auto isPastSelected=@@.get<bool>("isPastSelected");
 auto hours=@@.get<std::array<std::string, 12>>("hours");
 auto ids=@@.get<std::vector<int>>("ids");
 auto availability=@@.get<std::vector<int>>("availability");
+auto pastVisits=@@.get<std::vector<bool>>("pastVisits");
 
 auto ec=@@.get<int>("ec");
 if (ec)
@@ -53,6 +53,7 @@ if (ec)
 <%c++
     for (size_t i{}; i < hours.size(); ++i)
     {
+        auto isPastSelected = pastVisits.at(i);
         if (i % 6 == 0)
         {
             $$<<"<div class=\"row mb-5 mt-5\">";
