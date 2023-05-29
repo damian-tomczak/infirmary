@@ -535,9 +535,10 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
         ss << date << " " << hour;
         ss >> std::get_time(&tm, "%Y-%m-%d %H:%M");
 
+        tm.tm_isdst = 1;
+
         std::time_t inputTime{mktime(&tm)};
         std::time_t nowTime{std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())};
-
         if (inputTime < nowTime)
         {
             return true;
