@@ -133,21 +133,19 @@ public:
         std::string receipt;
         User::Profession profession;
     };
+
     bool addVisit(const int32_t patientId,
         const std::string& date,
         const std::string& time,
         const int32_t professionId,
         const Visit::Status status = Visit::Status::REQUESTED,
         const int32_t doctorId = -1);
+    // TODO: by patients id is more expected
     std::vector<Visit> getVisitsByPatientPesel(const std::string& pesel);
     std::vector<Visit> getVisitsByDoctorIdAndDate(const int32_t id, const std::string& date);
     std::optional<Visit> getVisitById(const int32_t id);
     std::vector<Visit> getVisitsByStatus(const Visit::Status status);
-    std::optional<Visit> getVisitByDateTimePatientId(
-        const std::string& date,
-        const std::string& time,
-        const int32_t patientId
-    );
+
     // TODO: those functions should be connected into one
     bool updateVisitStatus(const int32_t visitId, const Visit::Status status);
     bool updateVisitDoctorId(const int32_t visitId, const int32_t doctorId);
@@ -166,6 +164,8 @@ public:
         std::vector<int32_t> takenDoctorsIds;
         std::optional<int32_t> pYourVisitId;
     };
+    // TODO: This function was prepared with system which automatically managing visits status
+    // thus it should be refactored
     VisitAvailability checkAvailabilityOfVisit(const int32_t patientId,
         const int32_t profession,
         const std::string& date,

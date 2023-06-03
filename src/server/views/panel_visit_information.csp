@@ -218,7 +218,7 @@ if (role == 1 && status != "Completed")
                                     <a href="/panel" class="btn btn-primary my-4 w-75">Return</a>
                                 </div>
 <%c++
-if (role == 0 && status != "Cancelled")
+if (role == 0 && status != "Cancelled" && status != "Rejected")
 {
 %>
                                 <div class="col text-center">

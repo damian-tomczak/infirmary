@@ -564,7 +564,7 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
         if (avail.status == tsrpp::Database::VisitAvailability::Status::YOUR_VISIT)
         {
             id = *avail.pYourVisitId;
-            auto pStatusVisit{database.getVisitByDateTimePatientId(date, *it, pUser->id)};
+            auto pStatusVisit{database.getVisitById(id)};
             if (!pStatusVisit)
             {
                 throw std::runtime_error{"visit should exist but then couldn't be found"};

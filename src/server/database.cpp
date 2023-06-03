@@ -189,7 +189,7 @@ std::vector<Database::Visit> Database::getVisitsByPatientPesel(const std::string
         throw std::runtime_error{"user with this pesel doesn't exist"};
     }
 
-    SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE patient_id = :patient_id ORDER BY id"};
+    SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE patient_id = :patient_id ORDER BY id DESC"};
     q.bind(":patient_id", *pPatientid);
 
     while (q.executeStep())
@@ -294,33 +294,6 @@ std::vector<Database::Visit> Database::getVisitsByStatus(const Visit::Status sta
     }
 
     return result;
-}
-
-std::optional<Database::Visit> Database::getVisitByDateTimePatientId(
-        const std::string& date,
-        const std::string& time,
-        const int32_t patientId)
-{
-    SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE date = :date AND time = :time AND patient_id = :patientId"};
-    q.bind(":date", date);
-    q.bind(":time", time);
-    q.bind(":patientId", patientId);
-
-    while (q.executeStep())
-    {
-        return std::make_optional<Visit>({
-            .id{q.getColumn("id").getInt()},
-            .patient_id{q.getColumn("patient_id").getInt()},
-            .doctor_id{q.getColumn("doctor_id").getInt()},
-            .status{Visit::Status{q.getColumn("status").getInt()}},
-            .date{q.getColumn("date")},
-            .time{q.getColumn("time")},
-            .receipt{q.getColumn("receipt")},
-            .profession{User::Profession{q.getColumn("profession").getInt()}}
-        });
-    }
-
-    return std::nullopt;
 }
 
 bool Database::updateVisitDoctorId(const int32_t visitId, const int32_t doctorId)
