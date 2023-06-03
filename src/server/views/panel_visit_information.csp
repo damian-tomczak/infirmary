@@ -178,27 +178,36 @@ else
                                             <textarea class="form-control" rows="6" placeholder="Your health condition and list of pills your are taking here." readonly><%c++ $$<<patientNote; %></textarea>
                                         </div>
                                     </form>
+<%c++
+if (role == 0)
+{
+%>
                                     <a href="/panel/patient/personal">You can edit note in personal information bookmark</a>
-                                </div>
+<%c++
+}
+%>
+                                    </div>
                             </div>
                             <hr>
                             <div>
                                 <h2 class="padding">Prescription</h2>
+                                <div class="d-flex justify-content-center mb-2">
+                                    <div class="col-8">
+                                        <textarea class="form-control" rows="6" placeholder="Prescription given during the visit" name="prescription" readonly><%c++ $$<<receipt; %></textarea>
+                                    </div>
+                                </div>
                                 <div class="col text-center">
                                     <form method="post" class="row justify-content-center text-center">
 <%c++
-if (role == 1)
+if (role == 1 && status != "Rejected" && status != "Cancelled")
 {
-    $$<<"<div class=\"col-8\">";
-    $$<<"<textarea class=\"form-control\" rows=\"6\" placeholder=\"Prescription given during the visit\" name=\"prescription\">" << receipt << "</textarea>";
-    $$<<"</div>";
-    $$<<"<input type=\"submit\" value=\"Edit Prescription\" class=\"btn btn-secondary my-2 w-75 mb-4\"></input>";
-}
-else
-{
-    $$<<"<div class=\"col-8\">";
-    $$<<"<textarea class=\"form-control\" rows=\"6\" placeholder=\"Prescription given during the visit\" name=\"prescription\" readonly>" << receipt << "</textarea>";
-    $$<<"</div>";
+%>
+                                        <div class="col-8">
+                                            <textarea class="form-control" rows="3" placeholder="Prescription given during the visit" name="prescription"><%c++ $$<<receipt; %></textarea>
+                                        </div>
+                                        <input type="submit" value="Edit Prescription" class="btn btn-secondary my-2 w-75 mb-4"></input>
+
+<%c++
 }
 %>
                                     </form>
@@ -207,11 +216,21 @@ else
                             <hr>
                             <div class="row">
 <%c++
-if (role == 1 && status != "Completed")
+if (role == 1 && status == "Scheduled")
 {
-    $$<<"<div class=\"text-center\">";
-    $$<<"<a href=\"?id=" << id << "&confirmVisit=" << id << "\" class=\"btn btn-secondary my-4 w-75\">Mark Visit as Completed</a>";
-    $$<<"</div>";
+%>
+                                <div class="text-center">
+                                    <a href="?id=<%c++ $$<<id; %>&confirmVisit=<%c++ $$<<id; %>" class="btn btn-secondary my-4 w-75">Mark Visit as Completed</a>
+                                </div>
+<%c++
+}
+else if (role == 1 && status == "Completed")
+{
+%>
+                                <div class="col text-center">
+                                    <a href="?id=<%c++ $$<<id; %>&controlVisit=1" class="btn btn-secondary my-4 w-75">Set Control Visit</a>
+                                </div>
+<%c++
 }
 %>
                                 <div class="col text-center">
@@ -223,14 +242,6 @@ if (role == 0 && status != "Cancelled" && status != "Rejected")
 %>
                                 <div class="col text-center">
                                     <a href="?id=<%c++ $$<<id; %>&cancelVisit=<%c++ $$<<id; %>" class="btn btn-secondary my-4 w-75">Cancel Visit</a>
-                                </div>
-<%c++
-}
-else if (role == 1)
-{
-%>
-                                <div class="col text-center">
-                                    <a href="?id=<%c++ $$<<id; %>&controlVisit=1" class="btn btn-secondary my-4 w-75">Set Control Visit</a>
                                 </div>
 <%c++
 }

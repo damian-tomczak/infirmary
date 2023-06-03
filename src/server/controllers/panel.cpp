@@ -859,8 +859,8 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
             ss << "has been declined<br>"
             << "Reason: " << *pReason;
         }
-        std::string message = ss.str();
-        Mailer::sendMail(pPatient->email, message);
+
+        Mailer::sendMail(pPatient->email, ss.str());
     }
 
     drogon::HttpViewData data;
@@ -875,23 +875,17 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
     std::vector<std::vector<int>> visitDoctorIds;
     std::vector<std::vector<std::string>> visitDoctorFirstNames;
     std::vector<std::vector<std::string>> visitDoctorLastNames;
-    for (auto visitIt{visits.begin()}; visitIt != visits.end(); ++visitIt)
+    for (auto pVisitIt{visits.begin()}; pVisitIt != visits.end(); ++pVisitIt)
     {
-        auto pPatient{database.getUserById(visitIt->patient_id)};
-
-        visitIds.emplace_back(static_cast<int>(visitIt->id));
-        visitPesels.emplace_back(pPatient->pesel);
-        visitPatientFirstNames.emplace_back(pPatient->first_name);
-        visitPatientLastNames.emplace_back(pPatient->last_name);
-        visitDoctorProfessions.emplace_back(tsrpp::Database::User::profession2Str(visitIt->profession));
+        auto pPatient{database.getUserById(pVisitIt->patient_id)};
 
         auto takenDoctorsIds{database.checkAvailabilityOfVisit(
             pUser->id,
-            static_cast<int32_t>(visitIt->profession),
-            visitIt->date,
-            visitIt->time
+            static_cast<int32_t>(pVisitIt->profession),
+            pVisitIt->date,
+            pVisitIt->time
         ).takenDoctorsIds};
-        auto freeDoctors{database.getFreeDoctors(visitIt->profession, takenDoctorsIds)};
+        auto freeDoctors{database.getFreeDoctors(pVisitIt->profession, takenDoctorsIds)};
 
         std::vector<int> visitDoctorIdsThisVisit;
         std::vector<std::string> visitDoctorFirstNamesThisVisit;
@@ -904,13 +898,35 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
             visitDoctorLastNamesThisVisit.emplace_back(doctorIt->last_name);
         }
 
-        visitDoctorIds.emplace_back(std::move(visitDoctorIdsThisVisit));
-        visitDoctorFirstNames.emplace_back(std::move(visitDoctorFirstNamesThisVisit));
-        visitDoctorLastNames.emplace_back(std::move(visitDoctorLastNamesThisVisit));
+        if (visitDoctorIdsThisVisit.size())
+        {
+            visitIds.emplace_back(static_cast<int>(pVisitIt->id));
+            visitPesels.emplace_back(pPatient->pesel);
+            visitPatientFirstNames.emplace_back(pPatient->first_name);
+            visitPatientLastNames.emplace_back(pPatient->last_name);
+            visitDoctorProfessions.emplace_back(tsrpp::Database::User::profession2Str(pVisitIt->profession));
 
-        visitDates.emplace_back(visitIt->date);
-        visitTimes.emplace_back(visitIt->time);
+            visitDoctorIds.emplace_back(std::move(visitDoctorIdsThisVisit));
+            visitDoctorFirstNames.emplace_back(std::move(visitDoctorFirstNamesThisVisit));
+            visitDoctorLastNames.emplace_back(std::move(visitDoctorLastNamesThisVisit));
+
+            visitDates.emplace_back(pVisitIt->date);
+            visitTimes.emplace_back(pVisitIt->time);
+        }
+        else
+        {
+            // database.updateVisitStatus(pVisitIt->id, tsrpp::Database::Visit::Status::REJECTED);
+
+            // std::ostringstream ss;
+            // ss << "Welcome " << pPatient->first_name << " " << pPatient->last_name << "<br>"
+            // << "Your appointment with " << tsrpp::Database::User::profession2Str(pVisitIt->profession) << " at "
+            // << pVisitIt->date << " " << pVisitIt->time << "<br>"
+            // "Has been automatically rejected due to the lack of doctors available in selected date and time.";
+
+            // Mailer::sendMail(pPatient->email, ss.str());
+        }
     }
+
     data.insert("visitIds", visitIds);
     data.insert("visitPatientFirstNames", visitPatientFirstNames);
     data.insert("visitPatientLastNames", visitPatientLastNames);

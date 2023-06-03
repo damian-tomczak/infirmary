@@ -88,11 +88,11 @@ if (errorCode)
                             <div>
                                 <h2>Notes</h2>
                                 <div class="text-center">
-                                    <textarea class="form-control mb-3" rows="6" readonly><%c++ $$<<note; %></textarea>
+                                    <textarea class="form-control mb-3" rows="6" placeholder="Add your health condition and list of pills your are taking." readonly><%c++ $$<<note; %></textarea>
                                     <form method="post">
                                         <div class="d-flex justify-content-center">
                                             <div class="col-10">
-                                                <textarea class="form-control" rows="2" placeholder="Add your health condition and list of pills your are taking." name="note"></textarea>
+                                                <textarea class="form-control" rows="2" placeholder="Note to be appended" name="note"></textarea>
                                             </div>
                                         </div>
                                         <input type="submit" value="Append Note" class="btn btn-secondary my-2 w-75 mb-4 mt-2"></input>
