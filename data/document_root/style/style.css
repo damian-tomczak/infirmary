@@ -31,7 +31,6 @@ textarea:read-only,
 textarea:read-only:focus {
     background-color: #dddddd;
     outline: 1px solid black;
-    resize: none;
 }
 
 .scroll {

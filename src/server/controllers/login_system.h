@@ -208,9 +208,9 @@ public:
         INCORRECT_EMAIL,
         DIFFERENT_PASSWORDS,
         ALREADY_EXISTS,
-        SUCCESS,
         INCORRECT_PHONE,
-        INCORRECT_PROFESSION
+        INCORRECT_PROFESSION,
+        SUCCESS,
     };
 
     void asyncHandleHttpRequest(
@@ -268,22 +268,22 @@ public:
         auto pProfession{pReq->getOptionalParameter<int32_t>("profession")};
         if constexpr (role == tsrpp::Database::User::Role::DOCTOR)
         {
-            if ((!pProfession) || !tsrpp::Database::User::isValidProfession(tsrpp::Database::User::Profession{*pProfession}))
+            if ((!pProfession) || (!tsrpp::Database::User::isValidProfession(tsrpp::Database::User::Profession{*pProfession})))
             {
-                return RegistrationErrorCode::INCORRECT_PROFESSION;
+                throw std::runtime_error{"profession is not valid"};
             }
-        }
-
-        auto pesel{pReq->getOptionalParameter<std::string>("pesel")};
-        if ((!pesel) || (pesel->length() == 0) || (!validPesel(*pesel)))
-        {
-            return RegistrationErrorCode::INCORRECT_PESEL;
         }
 
         auto email{pReq->getOptionalParameter<std::string>("email")};
         if ((!email) || (email->length() == 0) || (!validEmail(*email)))
         {
             return RegistrationErrorCode::INCORRECT_EMAIL;
+        }
+
+        auto pesel{pReq->getOptionalParameter<std::string>("pesel")};
+        if ((!pesel) || (pesel->length() == 0) || (!validPesel(*pesel)))
+        {
+            return RegistrationErrorCode::INCORRECT_PESEL;
         }
 
         auto phone{pReq->getOptionalParameter<std::string>("phone")};
@@ -314,6 +314,7 @@ public:
 
         auto note{pReq->getOptionalParameter<std::string>("note").value_or("")};
 
+        // TODO: it should be refactored
         if constexpr (role != tsrpp::Database::User::Role::DOCTOR)
         {
             if (!database.addUser({

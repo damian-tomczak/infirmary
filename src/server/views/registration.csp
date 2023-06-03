@@ -1,39 +1,36 @@
 <%c++
-auto registrationErrorCode = @@.get<int>("RegistrationErrorCode");
-if (registrationErrorCode)
+auto errorCode = @@.get<int>("RegistrationErrorCode");
+if (errorCode)
 {
     std::ostringstream message;
     message << "<script>";
     message << "window.onload = function() {";
     message << "alert(\"Registration failure: ";
-    switch (registrationErrorCode)
+    switch (errorCode)
     {
     case 1:
-        message << "incorrect pesel format";
+        message << "Incorrect pesel format";
         break;
     case 2:
-        message << "incorrect first name format";
+        message << "Incorrect first name format";
         break;
     case 3:
-        message << "incorrect last name format";
+        message << "Incorrect last name format";
         break;
     case 4:
-        message << "your password is weak";
+        message << "Your password is weak";
         break;
     case 5:
-        message << "your passwords are different";
+        message << "Incorrect email format";
         break;
     case 6:
-        message << "incorrect email format";
+        message << "Your passwords are different";
         break;
     case 7:
-        message << "patient already exists";
+        message << "Patient already exists";
         break;
-    case 9:
-        message << "incorrect phone format";
-        break;
-    case 10:
-        message << "incorrect profession";
+    case 8:
+        message << "Incorrect phone format";
         break;
     }
     message << "\")}</script>";

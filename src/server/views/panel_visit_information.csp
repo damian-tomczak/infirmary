@@ -39,24 +39,17 @@ if (errorCode)
     switch (errorCode)
     {
     case 1:
-        message << "Update note failure:\\n"
-            "Your wanted to enter empty note or reached the limit of the note";
-        break;
-    case 2:
-        message << "Update note success";
-        break;
-    case 3:
         message << "Cancel visit failure:\\n"
             "You can not cancel visit less than 24h before or in the past";
         break;
-    case 4:
+    case 2:
         message << "Cancel visit success";
         break;
-    case 5:
+    case 3:
         message << "Update prescription failure:\\n"
             "You have reached the limit of the prescription";
         break;
-    case 6:
+    case 4:
         message << "Update prescription success";
         break;
     }
@@ -165,7 +158,6 @@ if (doctorFirstName.length())
 %>
                                 <p>First Name: <%c++ $$<<doctorFirstName; %></p>
                                 <p>Last Name: <%c++ $$<<doctorLastName; %></p>
-                                <p>Profession: <%c++ $$<<doctorProfession; %></p>
                                 <p>Phone: <%c++ $$<<doctorPhone; %></p>
 <%c++
 }
@@ -183,23 +175,10 @@ else
                                 <div class="col text-center">
                                     <form method="post" class="row justify-content-center text-center">
                                         <div class="col-8">
-                                            <textarea class="form-control" rows="6" placeholder="Describe your health condition and list of pills your are taking here." name="note"><%c++ $$<<patientNote; %></textarea>
+                                            <textarea class="form-control" rows="6" placeholder="Your health condition and list of pills your are taking here." readonly><%c++ $$<<patientNote; %></textarea>
                                         </div>
-<%c++
-if (role == 0)
-{
-    $$<<"<p>You can not modify already written note</p>";
-}
-if (role == 0)
-{
-    $$<<"<input type=\"submit\" value=\"Append Note\" class=\"btn btn-secondary my-2 w-75 mb-4\"></input>";
-}
-else if (role == 1)
-{
-    $$<<"<input type=\"submit\" value=\"Edit Note\" class=\"btn btn-secondary my-2 w-75 mb-4\"></input>";
-}
-%>
                                     </form>
+                                    <a href="/panel/patient/personal">You can edit note in personal information bookmark</a>
                                 </div>
                             </div>
                             <hr>

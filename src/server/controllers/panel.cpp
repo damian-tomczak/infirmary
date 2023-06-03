@@ -117,8 +117,6 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     enum class ErrorCode
     {
         NOT_REQUESTED,
-        UPDATE_NOTE_FAILURE,
-        UPDATE_NOTE_SUCCESS,
         CANCEL_VISIT_FAILURE,
         CANCEL_VISIT_SUCCESS,
         UPDATE_PRESCRIPTION_FAILURE,
@@ -153,31 +151,7 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
 
     if (pReq->method() == drogon::HttpMethod::Post)
     {
-
-        auto pNote{pReq->getOptionalParameter<std::string>("note")};
-        auto pPrescription{pReq->getOptionalParameter<std::string>("prescription")};
-
-        if (pNote)
-        {
-            errorCode = ErrorCode::UPDATE_NOTE_FAILURE;
-
-            auto pPatient{database.getUserById(pVisit->patient_id)};
-            if ((pPatient != std::nullopt))
-            {
-                if (appendNote(pPatient->note, *pNote) && database.updateUser(*pPatient))
-                {
-                    if (pUser->id == pPatient->id)
-                    {
-                        pReq->getSession()->modify<tsrpp::Database::User>("user", [&pPatient](tsrpp::Database::User& sessionUser) {
-                            sessionUser = *pPatient;
-                        });
-                    }
-
-                    errorCode = ErrorCode::UPDATE_NOTE_SUCCESS;
-                }
-            }
-        }
-        else if (pPrescription)
+        if (auto pPrescription{pReq->getOptionalParameter<std::string>("prescription")}; pPrescription)
         {
             errorCode = ErrorCode::UPDATE_PRESCRIPTION_FAILURE;
 
@@ -321,12 +295,20 @@ void Panel::patientPersonal(const drogon::HttpRequestPtr& pReq,
         {
             errorCode = ErrorCode::UPDATE_NOTE_FAILURE;
 
-            if (appendNote(pUser->note, *pNote) && database.updateUser(*pUser))
+            if ((pNote->length()) && (pUser->note.length() < tsrpp::Database::User::maxNoteLength))
             {
-                pReq->getSession()->modify<tsrpp::Database::User>("user", [&pUser](tsrpp::Database::User& sessionUser) {
-                    sessionUser = *pUser;
-                });
-                errorCode = ErrorCode::UPDATE_NOTE_SUCCESS;
+                std::ostringstream ss;
+                ss << *pNote << "\n" << pUser->note;
+                pUser->note = ss.str();
+
+                if (database.updateUser(*pUser))
+                {
+                    pReq->getSession()->modify<tsrpp::Database::User>("user", [&pUser](tsrpp::Database::User& sessionUser) {
+                        sessionUser = *pUser;
+                    });
+
+                    errorCode = ErrorCode::UPDATE_NOTE_SUCCESS;
+                }
             }
         }
     }
@@ -1030,20 +1012,6 @@ void Panel::addDoctor(const drogon::HttpRequestPtr& pReq,
 catch(const std::exception& e)
 {
     ERROR_PAGE(e);
-}
-
-bool Panel::appendNote(std::string& currentNote, const std::string& noteToAppend)
-{
-    if ((!noteToAppend.length()) || (currentNote.length() > tsrpp::Database::User::maxNoteLength))
-    {
-        return false;
-    }
-
-    std::ostringstream ss;
-    ss << noteToAppend << "\n" << currentNote;
-    currentNote = ss.str();
-
-    return true;
 }
 
 void Panel::appendDoctorsToSideMenu(drogon::HttpViewData& data)

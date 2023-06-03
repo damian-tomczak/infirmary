@@ -95,78 +95,85 @@ if (errorCode)
                                                 <textarea class="form-control" rows="2" placeholder="Add your health condition and list of pills your are taking." name="note"></textarea>
                                             </div>
                                         </div>
-                                        <input type="submit" value="Add Note" class="btn btn-secondary my-2 w-75 mb-4 mt-2"></input>
+                                        <input type="submit" value="Append Note" class="btn btn-secondary my-2 w-75 mb-4 mt-2"></input>
                                     </form>
                                 </div>
                             </div>
                             <hr>
                             <h2>Your visits</h2>
-                            <div class="visits bg-white mb-4">
-                                <table>
+                            <div class="visits mb-4">
 <%c++
-$$<<"<tr>";
-for (size_t i = 0; i < statuses.size(); ++i)
+if (statuses.size() > 0)
 {
-    $$<<"<td>";
-    auto status = statuses.at(i);
-    if (status == 0)
+    $$<<"<table class=\"bg-white\">";
+    $$<<"<tr>";
+    for (size_t i = 0; i < statuses.size(); ++i)
     {
-        $$<<"Requested";
+        $$<<"<td>";
+        auto status = statuses.at(i);
+        if (status == 0)
+        {
+            $$<<"Requested";
+        }
+        else if (status == 1)
+        {
+            $$<<"Rejected";
+        }
+        else if (status == 2)
+        {
+            $$<<"Cancelled";
+        }
+        else if (status == 3)
+        {
+            $$<<"Scheduled";
+        }
+        else if (status == 4)
+        {
+            $$<<"Completed";
+        }
+        $$<<" | ";
+        auto doctorType = doctorsType.at(i);
+        if (doctorType == 0)
+        {
+            $$<<"Internist";
+        }
+        else if (doctorType == 1)
+        {
+            $$<<"Gastroenterologist";
+        }
+        else if (doctorType == 2)
+        {
+            $$<<"Pulmonologist";
+        }
+        else if (doctorType == 3)
+        {
+            $$<<"Oculist";
+        }
+        $$<<" ";
+        $$<<doctorsFirstName.at(i) << " ";
+        $$<<doctorsLastName.at(i);
+        $$<<" | ";
+        $$<<dates.at(i) << " ";
+        $$<<times.at(i);
+        $$<<"</td>";
+        if (status == 0 || status == 3)
+        {
+            $$<<"<td class=\"text-end\"><a href=\"?cancelVisit=" << ids.at(i) << "\">Cancel Visit</a></td>";
+        }
+        else
+        {
+            $$<<"<td></td>";
+        }
+        $$<<"<td><a href=\"/panel/visit-information?id=" << ids.at(i) << "\" class=\"btn btn-secondary my-2 w-75\">Visit Info</a></td>";
+        $$<<"</tr>";
     }
-    else if (status == 1)
-    {
-        $$<<"Rejected";
-    }
-    else if (status == 2)
-    {
-        $$<<"Cancelled";
-    }
-    else if (status == 3)
-    {
-        $$<<"Scheduled";
-    }
-    else if (status == 4)
-    {
-        $$<<"Completed";
-    }
-    $$<<" | ";
-    auto doctorType = doctorsType.at(i);
-    if (doctorType == 0)
-    {
-        $$<<"Internist";
-    }
-    else if (doctorType == 1)
-    {
-        $$<<"Gastroenterologist";
-    }
-    else if (doctorType == 2)
-    {
-        $$<<"Pulmonologist";
-    }
-    else if (doctorType == 3)
-    {
-        $$<<"Oculist";
-    }
-    $$<<" ";
-    $$<<doctorsFirstName.at(i) << " ";
-    $$<<doctorsLastName.at(i);
-    $$<<" | ";
-    $$<<dates.at(i) << " ";
-    $$<<times.at(i);
-    $$<<"</td>";
-    if (status == 0 || status == 3)
-    {
-        $$<<"<td class=\"text-end\"><a href=\"?cancelVisit=" << ids.at(i) << "\">Cancel Visit</a></td>";
-    }
-    else
-    {
-        $$<<"<td></td>";
-    }
-    $$<<"<td><a href=\"/panel/visit-information?id=" << ids.at(i) << "\" class=\"btn btn-secondary my-2 w-75\">Visit Info</a></td>";
-    $$<<"</tr>";
+    $$<<"</table>";
+}
+else
+{
+    $$<<"<p>You have no visits yet</p>";
 }
 %>
-                                </table>
                             </div>
                         </div>
                     </div>

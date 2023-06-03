@@ -7,42 +7,35 @@ auto doctorProfessions=@@.get<std::vector<std::string>>("doctorProfessions");
 auto errorCode = @@.get<int>("errorCode");
 if (errorCode)
 {
-    std::stringstream message;
+    std::ostringstream message;
     message << "<script>";
     message << "window.onload = function() {";
-    message << "alert(\"";
+    message << "alert(\"Registration failure: ";
     switch (errorCode)
     {
     case 1:
-        message << "Registration Failure: Incorrect pesel format";
+        message << "Incorrect pesel format";
         break;
     case 2:
-        message << "Registration Failure: Incorrect first name format";
+        message << "Incorrect first name format";
         break;
     case 3:
-        message << "Registration Failure: Incorrect last name format";
+        message << "Incorrect last name format";
         break;
     case 4:
-        message << "Registration Failure: Your password isn't strong enough!\n"
-            "It should contain at least one digit and is at least 9 characters long";
+        message << "Your password is weak";
         break;
     case 5:
-        message << "Registration Failure: Your passwords are different";
+        message << "Incorrect email format";
         break;
     case 6:
-        message << "Registration Failure: Incorrect email format";
+        message << "Your passwords are different";
         break;
     case 7:
-        message << "Registration Failure: Doctor already exists";
+        message << "Patient or doctor with this pesel already exists";
         break;
     case 8:
-        message << "Registration Success: Doctor added successfuly";
-        break;
-    case 9:
-        message << "Registration Failure: Incorrect phone format";
-        break;
-    case 10:
-        message << "Registration Failure: Incorrect profession";
+        message << "Incorrect phone format";
         break;
     }
     message << "\")}</script>";
