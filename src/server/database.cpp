@@ -12,7 +12,7 @@ namespace tsrpp
 {
 bool Database::addUser(const User& user)
 {
-    SQLite::Statement q{*mpDatabase, "INSERT INTO users(pesel, password, first_name, last_name, email, note, role, type, phone)"
+    SQLite::Statement q{mDatabase, "INSERT INTO users(pesel, password, first_name, last_name, email, note, role, type, phone)"
         "VALUES (:pesel, :password, :first_name, :last_name, :email, :note, :role, :profession, :phone)"};
 
     q.bind(":pesel", user.pesel);
@@ -35,7 +35,7 @@ bool Database::addUser(const User& user)
 
 bool Database::updateUser(const User& user)
 {
-    SQLite::Statement q{*mpDatabase, "UPDATE users SET "
+    SQLite::Statement q{mDatabase, "UPDATE users SET "
         "first_name = :first_name,"
         "last_name = :last_name,"
         "pesel = :pesel,"
@@ -67,7 +67,7 @@ bool Database::updateUser(const User& user)
 std::optional<Database::User> Database::getUserByPesel(const std::string& pesel)
 {
     std::optional<User> result;
-    SQLite::Statement q{*mpDatabase, "SELECT * FROM users WHERE pesel = :pesel LIMIT 1"};
+    SQLite::Statement q{mDatabase, "SELECT * FROM users WHERE pesel = :pesel LIMIT 1"};
 
     q.bind(":pesel", pesel);
 
@@ -93,7 +93,7 @@ std::optional<Database::User> Database::getUserByPesel(const std::string& pesel)
 std::optional<Database::User> Database::getUserById(const int32_t id)
 {
     std::optional<User> result;
-    SQLite::Statement q{*mpDatabase, "SELECT * FROM users WHERE id = :id LIMIT 1"};
+    SQLite::Statement q{mDatabase, "SELECT * FROM users WHERE id = :id LIMIT 1"};
 
     q.bind(":id", id);
 
@@ -120,7 +120,7 @@ std::vector<Database::User> Database::getUsersByRole(const User::Role role)
 {
     std::vector<Database::User> result;
 
-    SQLite::Statement q{*mpDatabase, "SELECT * FROM users WHERE role = :role"};
+    SQLite::Statement q{mDatabase, "SELECT * FROM users WHERE role = :role"};
     q.bind(":role", static_cast<int32_t>(role));
 
     while (q.executeStep())
@@ -151,7 +151,7 @@ bool Database::addVisit(
     const int32_t doctorId
     )
 {
-    SQLite::Statement q{*mpDatabase, "INSERT INTO visits(patient_id, doctor_id, status, date, time, profession)"
+    SQLite::Statement q{mDatabase, "INSERT INTO visits(patient_id, doctor_id, status, date, time, profession)"
         "VALUES (:patient_id, :doctorId, :status, :date, :time, :profession)"};
 
     q.bind(":doctorId", doctorId);
@@ -175,7 +175,7 @@ std::vector<Database::Visit> Database::getVisitsByPatientPesel(const std::string
 
     std::optional<std::uint32_t> pPatientid;
     {
-        SQLite::Statement q{*mpDatabase, "SELECT id FROM users WHERE pesel = :pesel LIMIT 1"};
+        SQLite::Statement q{mDatabase, "SELECT id FROM users WHERE pesel = :pesel LIMIT 1"};
         q.bind(":pesel", pesel);
 
         if (q.executeStep())
@@ -189,7 +189,7 @@ std::vector<Database::Visit> Database::getVisitsByPatientPesel(const std::string
         throw std::runtime_error{"user with this pesel doesn't exist"};
     }
 
-    SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE patient_id = :patient_id ORDER BY id DESC"};
+    SQLite::Statement q{mDatabase, "SELECT * FROM visits WHERE patient_id = :patient_id ORDER BY id DESC"};
     q.bind(":patient_id", *pPatientid);
 
     while (q.executeStep())
@@ -213,7 +213,7 @@ std::vector<Database::Visit> Database::getVisitsByDoctorIdAndDate(const int32_t 
 {
     std::vector<Visit> result;
 
-    SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE doctor_id = :doctor_id AND date = :date ORDER BY (date || ' ' || time)"};
+    SQLite::Statement q{mDatabase, "SELECT * FROM visits WHERE doctor_id = :doctor_id AND date = :date ORDER BY (date || ' ' || time)"};
     q.bind(":doctor_id", id);
     q.bind(":date", date);
 
@@ -236,7 +236,7 @@ std::vector<Database::Visit> Database::getVisitsByDoctorIdAndDate(const int32_t 
 
 bool Database::updateVisitStatus(const int32_t visitId, const Database::Visit::Status status)
 {
-    SQLite::Statement q{*mpDatabase, "UPDATE visits SET status = :status WHERE id = :id"};
+    SQLite::Statement q{mDatabase, "UPDATE visits SET status = :status WHERE id = :id"};
     q.bind(":status", static_cast<int32_t>(status));
     q.bind(":id", visitId);
 
@@ -251,7 +251,7 @@ bool Database::updateVisitStatus(const int32_t visitId, const Database::Visit::S
 std::optional<Database::Visit> Database::getVisitById(const int32_t id)
 {
     std::optional<Visit> result;
-    SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE id = :id LIMIT 1"};
+    SQLite::Statement q{mDatabase, "SELECT * FROM visits WHERE id = :id LIMIT 1"};
 
     q.bind(":id", id);
 
@@ -276,7 +276,7 @@ std::vector<Database::Visit> Database::getVisitsByStatus(const Visit::Status sta
 {
     std::vector<Visit> result;
 
-    SQLite::Statement q{*mpDatabase, "SELECT * FROM visits WHERE status = :status ORDER BY id DESC"};
+    SQLite::Statement q{mDatabase, "SELECT * FROM visits WHERE status = :status ORDER BY id DESC"};
     q.bind(":status", static_cast<int32_t>(status));
 
     while (q.executeStep())
@@ -298,7 +298,7 @@ std::vector<Database::Visit> Database::getVisitsByStatus(const Visit::Status sta
 
 bool Database::updateVisitDoctorId(const int32_t visitId, const int32_t doctorId)
 {
-    SQLite::Statement q{*mpDatabase, "UPDATE visits SET doctor_id = :doctorId WHERE id = :id"};
+    SQLite::Statement q{mDatabase, "UPDATE visits SET doctor_id = :doctorId WHERE id = :id"};
     q.bind(":doctorId", doctorId);
     q.bind(":id", visitId);
 
@@ -312,7 +312,7 @@ bool Database::updateVisitDoctorId(const int32_t visitId, const int32_t doctorId
 
 bool Database::updateVisitPrescription(const int32_t visitId, const std::string& prescription)
 {
-    SQLite::Statement q{*mpDatabase, "UPDATE visits SET receipt = :prescription WHERE id = :id"};
+    SQLite::Statement q{mDatabase, "UPDATE visits SET receipt = :prescription WHERE id = :id"};
     q.bind(":prescription", prescription);
     q.bind(":id", visitId);
 
@@ -333,7 +333,7 @@ bool Database::updateVisitPrescription(const int32_t visitId, const std::string&
  */
 int32_t Database::getVisitStats(const std::string& date, const User::Profession profession)
 {
-    SQLite::Statement q{*mpDatabase, "SELECT COUNT(*) FROM visits WHERE strftime('%Y-%m', date) = :date AND profession = :profession"};
+    SQLite::Statement q{mDatabase, "SELECT COUNT(*) FROM visits WHERE strftime('%Y-%m', date) = :date AND profession = :profession"};
     q.bind(":date", date);
     q.bind(":profession", static_cast<int32_t>(profession));
 
@@ -353,7 +353,7 @@ Database::VisitAvailability Database::checkAvailabilityOfVisit(const int32_t pat
     VisitAvailability result{};
     std::uint32_t numberOfDoctorsWithProfession{};
     {
-        SQLite::Statement q{*mpDatabase, "SELECT COUNT(*) FROM users WHERE role = :role AND type = :type"};
+        SQLite::Statement q{mDatabase, "SELECT COUNT(*) FROM users WHERE role = :role AND type = :type"};
         q.bind(":role", static_cast<int>(User::Role::DOCTOR));
         q.bind(":type", profession);
 
@@ -363,7 +363,7 @@ Database::VisitAvailability Database::checkAvailabilityOfVisit(const int32_t pat
         }
     }
 
-    SQLite::Statement q{*mpDatabase,
+    SQLite::Statement q{mDatabase,
         "SELECT id, patient_id, doctor_id, status FROM visits "
         "WHERE date = :date AND time = :time AND profession = :profession"};
     q.bind(":date", date);
@@ -398,7 +398,7 @@ Database::VisitAvailability Database::checkAvailabilityOfVisit(const int32_t pat
 
 int32_t Database::getNumberOfRequestedVisitPerPatientId(const int32_t patientId)
 {
-    SQLite::Statement q{*mpDatabase, "SELECT COUNT(*) FROM visits WHERE patient_id = :patientId AND status = 0"};
+    SQLite::Statement q{mDatabase, "SELECT COUNT(*) FROM visits WHERE patient_id = :patientId AND status = 0"};
     q.bind(":patientId", patientId);
 
     if (q.executeStep())
@@ -424,7 +424,7 @@ std::vector<Database::User> Database::getFreeDoctors(const User::Profession prof
         takenDoctorsStr.pop_back();
     }
 
-    SQLite::Statement q{*mpDatabase, "SELECT id FROM users "
+    SQLite::Statement q{mDatabase, "SELECT id FROM users "
         "WHERE role = :role AND type = :type AND id NOT IN (" + takenDoctorsStr + ")"};
 
     q.bind(":role", static_cast<int32_t>(User::Role::DOCTOR));

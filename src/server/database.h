@@ -20,8 +20,7 @@ class Database final
     // TODO:: it would be a great idea to specify data types used by the database
 
 public:
-    Database(const int flags = SQLite::OPEN_READONLY) :
-        mpDatabase{std::make_unique<SQLite::Database>(DATABASE_PATH, flags)}
+    Database(const int flags = SQLite::OPEN_READONLY) : mDatabase{DATABASE_PATH, flags}
     {}
 
     struct User final
@@ -131,6 +130,7 @@ public:
         std::string time;
         // TODO: it should be named prescription
         std::string receipt;
+        inline static constexpr auto maxPrescriptionLength{ 512 };
         User::Profession profession;
     };
 
@@ -175,6 +175,6 @@ public:
     std::vector<User> getFreeDoctors(const User::Profession profession, const std::vector<int32_t> takenDcotorsIds);
 
 private:
-    std::unique_ptr<SQLite::Database> mpDatabase;
+    SQLite::Database mDatabase;
 };
 }

@@ -86,7 +86,7 @@ if (role == 1)
                             <h2>Personal information</h2>
                             <p>Name: <%c++ $$<<doctorFirstName; %></p>
                             <p>Surname: <%c++ $$<<doctorLastName; %></p>
-                            <p>PESEL: <%c++ $$<<doctorPesel; %></p>
+                            <p>Pesel: <%c++ $$<<doctorPesel; %></p>
                             <p>E-mail: <%c++ $$<<doctorEmail; %></p>
                             <p>Phone: <%c++ $$<<doctorPhone; %></p>
                             <p>Profession: <%c++ $$<<doctorProfession; %></p>

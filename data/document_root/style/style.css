@@ -44,3 +44,9 @@ textarea:read-only:focus {
 .btn:hover.inactive-cal-hour {
     background-color: #adb5bd !important;
 }
+
+.scroller {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+}

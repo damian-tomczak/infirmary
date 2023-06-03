@@ -65,7 +65,7 @@ public:
 
 private:
     void appendDoctorsToSideMenu(drogon::HttpViewData& data);
-    bool cancelVisit(const std::optional<int32_t> visitId);
+    bool cancelVisit(const std::optional<int32_t> visitId, const int32_t loggedUserId);
 
     inline static constexpr auto maxRequestedVisitPerUser{2};
     inline static std::array<std::string, 12> hours{
