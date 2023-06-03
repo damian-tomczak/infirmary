@@ -9,6 +9,7 @@ auto id=@@.get<std::string>("id");
 auto status=@@.get<std::string>("status");
 auto date=@@.get<std::string>("date");
 auto time=@@.get<std::string>("time");
+auto profession=@@.get<std::string>("profession");
 auto receipt=@@.get<std::string>("receipt");
 
 auto patientFirstName=@@.get<std::string>("patientFirstName");
@@ -28,16 +29,40 @@ auto doctorPhone=@@.get<std::string>("doctorPhone");
 auto controlVisitDate=@@.get<std::string>("controlVisitDate");
 auto controlVisitTime=@@.get<std::string>("controlVisitTime");
 
-auto errorCode=@@.get<int>("errorCode");
-
-if (errorCode == 3)
+auto errorCode = @@.get<int>("errorCode");
+if (errorCode)
 {
-    $$<<"<script>";
-    $$<<"window.onload = function() {";
-    $$<<"alert(\"";
-    $$<<"You can cancel the visit only 24 hours before";
-    $$<<"\")}";
-    $$<<"</script>";
+    std::stringstream message;
+    message << "<script>";
+    message << "window.onload = function() {";
+    message << "alert(\"";
+    switch (errorCode)
+    {
+    case 1:
+        message << "Update note failure:\\n"
+            "Your wanted to enter empty note or reached the limit of the note";
+        break;
+    case 2:
+        message << "Update note success";
+        break;
+    case 3:
+        message << "Cancel visit failure:\\n"
+            "You can not cancel visit less than 24h before or in the past";
+        break;
+    case 4:
+        message << "Cancel visit success";
+        break;
+    case 5:
+        message << "Update prescription failure:\\n"
+            "You have reached the limit of the prescription";
+        break;
+    case 6:
+        message << "Update prescription success";
+        break;
+    }
+    message << "\")}</script>";
+
+    $$ << message.str();
 }
 else if (controlVisitDate.length())
 {
@@ -62,41 +87,41 @@ else if (controlVisitDate.length())
     <body>
         <div class="container-fluid">
             <div class="row">
-                <div class="col-2 bg-light position-fixed h-100">
+                <div class="col-2 bg-light position-fixed h-100 scroll">
                     <div class="row justify-content-center text-center">
                         <h1><a href="/">Welcome to Infirmary</a></h1>
 <%c++
 if (role == 0)
 {
 %>
-                        <a href="/panel/patient/personal" class="btn btn-secondary my-2 menu-button mb-4">Personal information</a>
+                        <a href="/panel/patient/personal" class="btn btn-secondary my-2 w-75 mb-4">Personal information</a>
 
-                        <a href="/panel/patient/calendar?doctorProfession=internist" class="btn btn-secondary my-2 menu-button">Internist</a>
-                        <a href="/panel/patient/calendar?doctorProfession=gastroenterologist" class="btn btn-secondary my-2 menu-button">Gastroenterologist</a>
-                        <a href="/panel/patient/calendar?doctorProfession=pulmonologist" class="btn btn-secondary my-2 menu-button">Pulmonologist</a>
-                        <a href="/panel/patient/calendar?doctorProfession=oculist" class="btn btn-secondary my-2 menu-button">Oculist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=internist" class="btn btn-secondary my-2 w-75">Internist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=gastroenterologist" class="btn btn-secondary my-2 w-75">Gastroenterologist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=pulmonologist" class="btn btn-secondary my-2 w-75">Pulmonologist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=oculist" class="btn btn-secondary my-2 w-75">Oculist</a>
 <%c++
 }
 else if (role == 1)
 {
 %>
-                        <a href="/panel/admin/doctor-information" class="btn btn-primary my-2 menu-button">Personal information</a>
-                        <a href="/panel/admin/patient-information" class="btn  my-2 btn-secondary menu-button">Patient information</a>
+                        <a href="/panel/admin/doctor-information" class="btn btn-primary my-2 w-75">Personal information</a>
+                        <a href="/panel/admin/patient-information" class="btn  my-2 btn-secondary w-75">Patient information</a>
 <%c++
 }
 else if (role == 2)
 {
 %>
-                        <a href="/panel/admin/pending-requests" class="btn btn-secondary my-2 menu-button">Pending visit requests</a>
-                        <a href="/panel/admin/patient-information" class="btn btn-secondary my-2 menu-button">Patient information</a>
-                        <a href="/panel/admin/statistics" class="btn btn-secondary my-2 menu-button">Statistics</a>
-                        <a href="/panel/admin/add-doctor" class="btn btn-secondary my-2 menu-button mb-4">Add doctor</a>
+                        <a href="/panel/admin/pending-requests" class="btn btn-secondary my-2 w-75">Pending visit requests</a>
+                        <a href="/panel/admin/patient-information" class="btn btn-secondary my-2 w-75">Patient information</a>
+                        <a href="/panel/admin/statistics" class="btn btn-secondary my-2 w-75">Statistics</a>
+                        <a href="/panel/admin/add-doctor" class="btn btn-secondary my-2 w-75 mb-4">Add doctor</a>
 <%c++
     if (doctorIds.size() > 0)
     {
             for (size_t i = 0; i < doctorIds.size(); ++i)
             {
-                $$<<"<a href=\"/panel/admin/doctor-information?doctorId=" << doctorIds.at(i) << "\" class=\"btn btn-secondary my-2 menu-button\">";
+                $$<<"<a href=\"/panel/admin/doctor-information?doctorId=" << doctorIds.at(i) << "\" class=\"btn btn-secondary my-2 w-75\">";
                     $$<<doctorFirstNames.at(i) << " " << doctorLastNames.at(i) << "<br>";
                     $$<<doctorProfessions.at(i);
                 $$<<"</a>";
@@ -108,7 +133,7 @@ else if (role == 2)
     }
 }
 %>
-                        <a href="/logout" class="btn btn-secondary my-2 menu-button mt-4">Logout</a>
+                        <a href="/logout" class="btn btn-secondary my-2 w-75 mt-4">Logout</a>
                         <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
                     </div>
                 </div>
@@ -120,6 +145,7 @@ else if (role == 2)
                                 <p>Status: <%c++ $$<<status; %></p>
                                 <p>Data: <%c++ $$<<date; %></p>
                                 <p>Time: <%c++ $$<<time; %></p>
+                                <p>Profession: <%c++ $$<<profession; %></p>
                             </div>
                             <hr>
                             <div class="padding">
@@ -166,11 +192,11 @@ if (role == 0)
 }
 if (role == 0)
 {
-    $$<<"<input type=\"submit\" value=\"Append Note\" class=\"btn btn-secondary my-2 menu-button mb-4\"></input>";
+    $$<<"<input type=\"submit\" value=\"Append Note\" class=\"btn btn-secondary my-2 w-75 mb-4\"></input>";
 }
 else if (role == 1)
 {
-    $$<<"<input type=\"submit\" value=\"Edit Note\" class=\"btn btn-secondary my-2 menu-button mb-4\"></input>";
+    $$<<"<input type=\"submit\" value=\"Edit Note\" class=\"btn btn-secondary my-2 w-75 mb-4\"></input>";
 }
 %>
                                     </form>
@@ -187,7 +213,7 @@ if (role == 1)
     $$<<"<div class=\"col-8\">";
     $$<<"<textarea class=\"form-control\" rows=\"6\" placeholder=\"Prescription given during the visit\" name=\"prescription\">" << receipt << "</textarea>";
     $$<<"</div>";
-    $$<<"<input type=\"submit\" value=\"Edit Prescription\" class=\"btn btn-secondary my-2 menu-button mb-4\"></input>";
+    $$<<"<input type=\"submit\" value=\"Edit Prescription\" class=\"btn btn-secondary my-2 w-75 mb-4\"></input>";
 }
 else
 {
@@ -205,19 +231,19 @@ else
 if (role == 1 && status != "Completed")
 {
     $$<<"<div class=\"text-center\">";
-    $$<<"<a href=\"?id=" << id << "&confirmVisit=" << id << "\" class=\"btn btn-secondary my-4 menu-button\">Mark Visit as Completed</a>";
+    $$<<"<a href=\"?id=" << id << "&confirmVisit=" << id << "\" class=\"btn btn-secondary my-4 w-75\">Mark Visit as Completed</a>";
     $$<<"</div>";
 }
 %>
                                 <div class="col text-center">
-                                    <a href="/panel" class="btn btn-primary my-4 menu-button">Return</a>
+                                    <a href="/panel" class="btn btn-primary my-4 w-75">Return</a>
                                 </div>
 <%c++
 if (role == 0 && status != "Cancelled")
 {
 %>
                                 <div class="col text-center">
-                                    <a href="?id=<%c++ $$<<id; %>&cancelVisit=<%c++ $$<<id; %>" class="btn btn-secondary my-4 menu-button">Cancel Visit</a>
+                                    <a href="?id=<%c++ $$<<id; %>&cancelVisit=<%c++ $$<<id; %>" class="btn btn-secondary my-4 w-75">Cancel Visit</a>
                                 </div>
 <%c++
 }
@@ -225,7 +251,7 @@ else if (role == 1)
 {
 %>
                                 <div class="col text-center">
-                                    <a href="?id=<%c++ $$<<id; %>&controlVisit=1" class="btn btn-secondary my-4 menu-button">Set Control Visit</a>
+                                    <a href="?id=<%c++ $$<<id; %>&controlVisit=1" class="btn btn-secondary my-4 w-75">Set Control Visit</a>
                                 </div>
 <%c++
 }

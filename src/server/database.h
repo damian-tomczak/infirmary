@@ -83,6 +83,7 @@ public:
         std::string last_name;
         std::string email;
         std::string note;
+        inline static constexpr auto maxNoteLength{ 512 };
         Role role;
         // TODO: it should be named profession in the database
         Profession type;
@@ -142,6 +143,11 @@ public:
     std::vector<Visit> getVisitsByDoctorIdAndDate(const int32_t id, const std::string& date);
     std::optional<Visit> getVisitById(const int32_t id);
     std::vector<Visit> getVisitsByStatus(const Visit::Status status);
+    std::optional<Visit> getVisitByDateTimePatientId(
+        const std::string& date,
+        const std::string& time,
+        const int32_t patientId
+    );
     // TODO: those functions should be connected into one
     bool updateVisitStatus(const int32_t visitId, const Visit::Status status);
     bool updateVisitDoctorId(const int32_t visitId, const int32_t doctorId);

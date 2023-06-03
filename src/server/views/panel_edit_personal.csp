@@ -42,42 +42,42 @@ if (errorCode)
     <body>
         <div class="container-fluid">
             <div class="row">
-                <div class="col-2 bg-light position-fixed h-100">
+                <div class="col-2 bg-light position-fixed h-100 scroll">
                     <div class="row justify-content-center text-center">
                         <h1><a href="/">Welcome to Infirmary</a></h1>
 <%c++
 if (role == 0)
 {
 %>
-                        <a href="/panel/patient/personal" class="btn btn-primary my-2 menu-button mb-4">Personal information</a>
+                        <a href="/panel/patient/personal" class="btn btn-primary my-2 w-75 mb-4">Personal information</a>
 
-                        <a href="/panel/patient/calendar?doctorProfession=internist" class="btn btn-secondary my-2 menu-button">Internist</a>
-                        <a href="/panel/patient/calendar?doctorProfession=gastroenterologist" class="btn btn-secondary my-2 menu-button">Gastroenterologist</a>
-                        <a href="/panel/patient/calendar?doctorProfession=pulmonologist" class="btn btn-secondary my-2 menu-button">Pulmonologist</a>
-                        <a href="/panel/patient/calendar?doctorProfession=oculist" class="btn btn-secondary my-2 menu-button">Oculist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=internist" class="btn btn-secondary my-2 w-75">Internist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=gastroenterologist" class="btn btn-secondary my-2 w-75">Gastroenterologist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=pulmonologist" class="btn btn-secondary my-2 w-75">Pulmonologist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=oculist" class="btn btn-secondary my-2 w-75">Oculist</a>
 <%c++
 }
 else if (role == 1)
 {
 %>
-                        <a href="/panel/admin/doctor-information" class="btn btn-primary my-2 menu-button">Personal information</a>
-                        <a href="/panel/admin/patient-information" class="btn  my-2 btn-secondary menu-button">Patient information</a>
+                        <a href="/panel/admin/doctor-information" class="btn btn-primary my-2 w-75">Personal information</a>
+                        <a href="/panel/admin/patient-information" class="btn  my-2 btn-secondary w-75">Patient information</a>
 
 <%c++
 }
 else if (role == 2)
 {
-    $$<<"<a href=\"/panel/admin/pending-requests\" class=\"btn btn-secondary my-2 menu-button\">Pending visit requests</a>";
-    $$<<"<a href=\"/panel/admin/patient-information\" class=\"btn btn-secondary my-2 menu-button\">Patient information</a>";
-    $$<<"<a href=\"/panel/admin/statistics\" class=\"btn btn-secondary my-2 menu-button\">Statistics</a>";
-    $$<<"<a href=\"/panel/admin/add-doctor\" class=\"btn btn-secondary my-2 menu-button mb-4\">Add doctor</a>";
+    $$<<"<a href=\"/panel/admin/pending-requests\" class=\"btn btn-secondary my-2 w-75\">Pending visit requests</a>";
+    $$<<"<a href=\"/panel/admin/patient-information\" class=\"btn btn-secondary my-2 w-75\">Patient information</a>";
+    $$<<"<a href=\"/panel/admin/statistics\" class=\"btn btn-secondary my-2 w-75\">Statistics</a>";
+    $$<<"<a href=\"/panel/admin/add-doctor\" class=\"btn btn-secondary my-2 w-75 mb-4\">Add doctor</a>";
 
     if (doctorIds.size() > 0)
     {
             for (size_t i = 0; i < doctorIds.size(); ++i)
             {
                 $$<<"<a href=\"/panel/admin/doctor-information?doctorId=" << doctorIds.at(i) << "\" class=\"btn " <<
-                    ((doctorIds.at(i) == id) ? "btn-primary" : "btn-secondary") << " my-2 menu-button\">";
+                    ((doctorIds.at(i) == id) ? "btn-primary" : "btn-secondary") << " my-2 w-75\">";
                     $$<<doctorFirstNames.at(i) << " " << doctorLastNames.at(i) << "<br>";
                     $$<<doctorProfessions.at(i);
                 $$<<"</a>";
@@ -89,7 +89,7 @@ else if (role == 2)
     }
 }
 %>
-                        <a href="/logout" class="btn btn-secondary my-2 menu-button mt-4">Logout</a>
+                        <a href="/logout" class="btn btn-secondary my-2 w-75 mt-4">Logout</a>
                         <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
                     </div>
                 </div>

@@ -27,7 +27,7 @@
                     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 text-center">
                         <div class="col">
                             <div class="card shadow-sm">
-                                <img width="100%" height="225" src="images/index-1.png"></img>
+                                <img width="100%" height="225" src="images/index-1.jpg"></img>
                                 <div class="card-body">
                                     <p class="card-text">Excellence is our top priority, which is why only the best professionals work here.</p>
                                 </div>
@@ -35,7 +35,7 @@
                         </div>
                         <div class="col">
                             <div class="card shadow-sm">
-                                <img width="100%" height="225" src="images/index-2.png"></img>
+                                <img width="100%" height="225" src="images/index-2.jpg"></img>
                                 <div class="card-body">
                                     <p class="card-text">You deserve the best care, and that's exactly what our team of professionals provides.</p>
                                 </div>
@@ -43,7 +43,7 @@
                         </div>
                         <div class="col">
                             <div class="card shadow-sm">
-                                <img width="100%" height="225" src="images/index-3.png"></img>
+                                <img width="100%" height="225" src="images/index-3.jpg"></img>
                                 <div class="card-body">
                                     <p class="card-text">Our clinic is proud to have the most skilled and experienced professionals in the industry.</p>
                                 </div>
@@ -51,7 +51,7 @@
                         </div>
                         <div class="col">
                             <div class="card shadow-sm">
-                                <img width="100%" height="225" src="images/index-4.png"></img>
+                                <img width="100%" height="225" src="images/index-4.jpg"></img>
                                 <div class="card-body">
                                     <p class="card-text">At our clinic, you can trust that you'll receive care from the most knowledgeable and dedicated professionals.</p>
                                 </div>
@@ -59,7 +59,7 @@
                         </div>
                         <div class="col">
                             <div class="card shadow-sm">
-                                <img width="100%" height="225" src="images/index-5.png"></img>
+                                <img width="100%" height="225" src="images/index-5.jpg"></img>
                                 <div class="card-body">
                                     <p class="card-text">We only hire the best professionals to ensure that our patients receive exceptional care.</p>
                                 </div>
@@ -67,7 +67,7 @@
                         </div>
                         <div class="col">
                             <div class="card shadow-sm">
-                                <img width="100%" height="225" src="images/index-6.png"></img>
+                                <img width="100%" height="225" src="images/index-6.jpg"></img>
                                 <div class="card-body">
                                     <p class="card-text">When it comes to your health, we believe that only the best professionals should be caring for you.</p>
                                 </div>

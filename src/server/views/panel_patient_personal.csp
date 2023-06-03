@@ -14,18 +14,35 @@ auto doctorsLastName=@@.get<std::vector<std::string>>("doctorsLastName");
 auto dates=@@.get<std::vector<std::string>>("dates");
 auto times=@@.get<std::vector<std::string>>("times");
 
-auto errorCode=@@.get<int>("errorCode");
-
-if (errorCode == 3)
+auto errorCode = @@.get<int>("errorCode");
+if (errorCode)
 {
-    $$<<"<script>";
-    $$<<"window.onload = function() {";
-    $$<<"alert(\"";
-    $$<<"You can cancel the visit only 24 hours before";
-    $$<<"\")}";
-    $$<<"</script>";
+    std::stringstream message;
+    message << "<script>";
+    message << "window.onload = function() {";
+    message << "alert(\"";
+    switch (errorCode)
+    {
+    case 1:
+        message << "Update note failure:\\n"
+            "Your wanted to enter empty note or reached the limit of the note";
+        break;
+    case 2:
+        message << "Update note success";
+        break;
+    case 3:
+        message << "Cancel visit failure:\\n"
+            "You can not cancel visit less than 24h before or in the past";
+        break;
+    case 4:
+        message << "Cancel visit success";
+        break;
+    }
+    message << "\")}</script>";
+
+    $$ << message.str();
 }
-%>
+ %>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -39,17 +56,17 @@ if (errorCode == 3)
     <body>
         <div class="container-fluid">
             <div class="row">
-                <div class="col-2 bg-light position-fixed h-100">
+                <div class="col-2 bg-light position-fixed h-100 scroll">
                     <div class="row justify-content-center text-center">
                         <h1><a href="/">Welcome to Infirmary</a></h1>
-                        <a href="/panel/patient/personal" class="btn btn-primary my-2 menu-button mb-4">Personal information</a>
+                        <a href="/panel/patient/personal" class="btn btn-primary my-2 w-75 mb-4">Personal information</a>
 
-                        <a href="/panel/patient/calendar?doctorProfession=internist" class="btn btn-secondary my-2 menu-button">Internist</a>
-                        <a href="/panel/patient/calendar?doctorProfession=gastroenterologist" class="btn btn-secondary my-2 menu-button">Gastroenterologist</a>
-                        <a href="/panel/patient/calendar?doctorProfession=pulmonologist" class="btn btn-secondary my-2 menu-button">Pulmonologist</a>
-                        <a href="/panel/patient/calendar?doctorProfession=oculist" class="btn btn-secondary my-2 menu-button mb-4">Oculist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=internist" class="btn btn-secondary my-2 w-75">Internist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=gastroenterologist" class="btn btn-secondary my-2 w-75">Gastroenterologist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=pulmonologist" class="btn btn-secondary my-2 w-75">Pulmonologist</a>
+                        <a href="/panel/patient/calendar?doctorProfession=oculist" class="btn btn-secondary my-2 w-75 mb-4">Oculist</a>
 
-                        <a href="/logout" class="btn btn-secondary my-2 menu-button">Logout</a>
+                        <a href="/logout" class="btn btn-secondary my-2 w-75">Logout</a>
                         <a href="mailto:contact@damian-tomczak.pl">Technical Support</a>
                     </div>
                 </div>
@@ -64,23 +81,27 @@ if (errorCode == 3)
                                 <p>E-mail: <%c++ $$<<email; %></p>
                                 <p>Phone: <%c++ $$<<phone; %></p>
                                 <div class="row justify-content-center">
-                                    <a href="/panel/edit-personal" class="btn btn-secondary my-2 menu-button">Edit Information</a>
+                                    <a href="/panel/edit-personal" class="btn btn-secondary my-2 w-75">Edit Information</a>
                                 </div>
                             </div>
                             <hr>
                             <div>
                                 <h2>Notes</h2>
-                                <form method="post" class="row justify-content-center text-center">
-                                    <div class="col-10">
-                                        <textarea class="form-control" rows="6" placeholder="Describe your health condition and list of pills your are taking here." name="note"><%c++ $$<<note; %></textarea>
-                                    </div>
-                                    <p>You can not modify already written note</p>
-                                    <input type="submit" value="Append Note" class="btn btn-secondary my-2 menu-button mb-4"></input>
-                                </form>
+                                <div class="text-center">
+                                    <textarea class="form-control mb-3" rows="6" readonly><%c++ $$<<note; %></textarea>
+                                    <form method="post">
+                                        <div class="d-flex justify-content-center">
+                                            <div class="col-10">
+                                                <textarea class="form-control" rows="2" placeholder="Add your health condition and list of pills your are taking." name="note"></textarea>
+                                            </div>
+                                        </div>
+                                        <input type="submit" value="Add Note" class="btn btn-secondary my-2 w-75 mb-4 mt-2"></input>
+                                    </form>
+                                </div>
                             </div>
-                            <h2>Your visits</h2>
                             <hr>
-                            <div class="visits bg-white">
+                            <h2>Your visits</h2>
+                            <div class="visits bg-white mb-4">
                                 <table>
 <%c++
 $$<<"<tr>";
@@ -141,7 +162,7 @@ for (size_t i = 0; i < statuses.size(); ++i)
     {
         $$<<"<td></td>";
     }
-    $$<<"<td><a href=\"/panel/visit-information?id=" << ids.at(i) << "\" class=\"btn btn-secondary my-2 menu-button\">Visit Info</a></td>";
+    $$<<"<td><a href=\"/panel/visit-information?id=" << ids.at(i) << "\" class=\"btn btn-secondary my-2 w-75\">Visit Info</a></td>";
     $$<<"</tr>";
 }
 %>

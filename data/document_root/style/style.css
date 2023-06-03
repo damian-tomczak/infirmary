@@ -1,7 +1,4 @@
-.menu-button {
-    width: 75%;
-}
-
+/* TODO: it should be refactored to boostraps columns */
 .visits {
     padding: 0;
 }
@@ -24,4 +21,27 @@
 
 .visits tr:nth-child(odd) {
     background-color: #dddddd;
+}
+
+textarea {
+    overflow-y: auto;
+}
+
+textarea:read-only,
+textarea:read-only:focus {
+    background-color: #dddddd;
+    outline: 1px solid black;
+    resize: none;
+}
+
+.scroll {
+    overflow: auto;
+}
+
+.inactive-cal-hour {
+    background-color: #adb5bd;
+}
+
+.btn:hover.inactive-cal-hour {
+    background-color: #adb5bd !important;
 }

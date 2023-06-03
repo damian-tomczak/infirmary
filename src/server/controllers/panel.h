@@ -64,7 +64,7 @@ public:
         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 
 private:
-    bool appendNote(const tsrpp::Database::User::Role role, const std::string& currentNote, const std::string& newNote);
+    bool appendNote(std::string& currentNote, const std::string& noteToAppend);
     void appendDoctorsToSideMenu(drogon::HttpViewData& data);
     bool cancelVisit(const std::optional<int32_t> visitId);
 
