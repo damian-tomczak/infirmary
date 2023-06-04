@@ -7,6 +7,8 @@ auto availability=@@.get<std::vector<int>>("availability");
 auto pastVisits=@@.get<std::vector<bool>>("pastVisits");
 auto yourVisitsStatuses=@@.get<std::vector<std::string>>("yourVisitsStatuses");
 
+auto isWeekend=@@.get<bool>("isWeekend");
+
 auto ec=@@.get<int>("ec");
 if (ec)
 {
@@ -52,6 +54,8 @@ if (ec)
                 <div class="col-10 offset-2">
                     <div class="row text-center">
 <%c++
+if (!isWeekend)
+{
     for (size_t i{}; i < hours.size(); ++i)
     {
         auto isPastSelected = pastVisits.at(i);
@@ -112,6 +116,11 @@ if (ec)
             $$<<"</div>";
         }
     }
+}
+else
+{
+    $$<<"<p>There is no availability to book visit at weekend</p>";
+}
 %>
                         <div class="d-flex justify-content-center w-100">
                             <form class="col-3">

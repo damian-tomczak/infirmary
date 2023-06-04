@@ -92,4 +92,20 @@ inline std::string createUrl(const std::string& path)
 #endif
     return std::string{prefix} + path;
 }
+
+// TODO: there is no available C++20's sys_days feature thus
+// https://www.codespeedy.com/check-if-a-given-date-is-weekend-or-not-in-cpp/
+inline bool isWeekend(const int32_t day, const int32_t month, int32_t year)
+{
+    static std::array<int32_t, 12> magic{ 0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4 };
+    year -= (month < 3);
+    auto weekday{( year + year / 4 - year / 100 + year / 400 + magic[month - 1] + day) % 7};
+
+    if((weekday == 0) || (weekday == 6))
+    {
+        return true;
+    }
+
+    return false;
+}
 }

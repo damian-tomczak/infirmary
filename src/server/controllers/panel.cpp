@@ -578,49 +578,63 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
     std::vector<bool> pastVisits;
     std::vector<std::string> yourVisitsStatuses;
 
-    auto isVisitPast{[&date](auto hour) -> bool {
-        std::tm tm{};
-        std::stringstream ss;
-        ss << date << " " << hour;
-        ss >> std::get_time(&tm, "%Y-%m-%d %H:%M");
+    std::tm tm{};
+    std::istringstream ss(date);
 
-        tm.tm_isdst = 1;
+    ss >> std::get_time(&tm, "%Y-%m-%d");
 
-        std::time_t inputTime{mktime(&tm)};
-        std::time_t nowTime{std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())};
-        if (inputTime < nowTime)
-        {
-            return true;
-        }
+    auto year{tm.tm_year + 1900};
+    auto month{tm.tm_mon + 1};
+    auto day{tm.tm_mday};
+    auto isWeekend{tsrpp::isWeekend(day, month, year)};
 
-        return false;
-    }};
-
-    for (auto it{hours.begin()}; it != hours.end(); ++it)
+    if (!isWeekend)
     {
-        // TODO: omg it beggs for the refactor
-        auto avail{database.checkAvailabilityOfVisit(pUser->id, profession, date, *it)};
-        availability.emplace_back(static_cast<int>(avail.status));
-        int32_t id{};
-        if (avail.status == tsrpp::Database::VisitAvailability::Status::YOUR_VISIT)
-        {
-            id = *avail.pYourVisitId;
-            auto pStatusVisit{database.getVisitById(id)};
-            if (!pStatusVisit)
-            {
-                throw std::runtime_error{"visit should exist but then couldn't be found"};
-            }
-            yourVisitsStatuses.emplace_back(tsrpp::Database::Visit::status2Str(pStatusVisit->status));
-        }
-        else
-        {
-            id = -1;
-            yourVisitsStatuses.emplace_back();
-        }
-        ids.emplace_back(id);
+        auto isVisitPast{[&date](auto hour) -> bool {
+            std::tm tm{};
+            std::stringstream ss;
+            ss << date << " " << hour;
+            ss >> std::get_time(&tm, "%Y-%m-%d %H:%M");
 
-        pastVisits.emplace_back(isVisitPast(*it));
+            tm.tm_isdst = 1;
+
+            std::time_t inputTime{mktime(&tm)};
+            std::time_t nowTime{std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())};
+            if (inputTime < nowTime)
+            {
+                return true;
+            }
+
+            return false;
+        }};
+
+        for (auto it{hours.begin()}; it != hours.end(); ++it)
+        {
+            // TODO: omg it beggs for the refactor
+            auto avail{database.checkAvailabilityOfVisit(pUser->id, profession, date, *it)};
+            availability.emplace_back(static_cast<int>(avail.status));
+            int32_t id{};
+            if (avail.status == tsrpp::Database::VisitAvailability::Status::YOUR_VISIT)
+            {
+                id = *avail.pYourVisitId;
+                auto pStatusVisit{database.getVisitById(id)};
+                if (!pStatusVisit)
+                {
+                    throw std::runtime_error{"visit should exist but then couldn't be found"};
+                }
+                yourVisitsStatuses.emplace_back(tsrpp::Database::Visit::status2Str(pStatusVisit->status));
+            }
+            else
+            {
+                id = -1;
+                yourVisitsStatuses.emplace_back();
+            }
+            ids.emplace_back(id);
+
+            pastVisits.emplace_back(isVisitPast(*it));
+        }
     }
+
     data.insert("date", date);
     data.insert("pastVisits", pastVisits);
     data.insert("doctorProfession", *pDoctorProfession);
@@ -629,6 +643,7 @@ void Panel::patientCalendar(const drogon::HttpRequestPtr& pReq,
     data.insert("ids", ids);
     data.insert("ec", static_cast<int>(ec));
     data.insert("yourVisitsStatuses", yourVisitsStatuses);
+    data.insert("isWeekend", isWeekend);
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_patient_calendar", data);
     callback(pResp);
 }
