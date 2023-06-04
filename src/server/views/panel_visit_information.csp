@@ -11,6 +11,7 @@ auto date=@@.get<std::string>("date");
 auto time=@@.get<std::string>("time");
 auto profession=@@.get<std::string>("profession");
 auto receipt=@@.get<std::string>("receipt");
+auto isControlVisitSet=@@.get<bool>("isControlVisitSet");
 
 auto patientFirstName=@@.get<std::string>("patientFirstName");
 auto patientLastName=@@.get<std::string>("patientLastName");
@@ -226,32 +227,30 @@ if (role == 1 && status == "Scheduled")
 {
 %>
                                 <div class="text-center">
-                                    <a href="?id=<%c++ $$<<id; %>&confirmVisit=<%c++ $$<<id; %>" class="btn btn-secondary w-75">Mark Visit as Completed</a>
+                                    <a href="?id=<%c++ $$<<id; %>&confirmVisit=<%c++ $$<<id; %>#prescription" class="btn btn-secondary w-75">Mark Visit as Completed</a>
                                 </div>
 <%c++
 }
-else if (role == 1 && status == "Completed")
+else if (role == 1 && status == "Completed" && !isControlVisitSet)
 {
 %>
                                 <div class="text-center">
-                                    <a href="?id=<%c++ $$<<id; %>&controlVisit=1" class="btn btn-secondary w-75">Set Control Visit</a>
+                                    <a href="?id=<%c++ $$<<id; %>&controlVisit=1#prescription" class="btn btn-secondary w-75">Set Control Visit</a>
                                 </div>
 <%c++
 }
-%>
-                                <div class="col text-center">
-                                    <a href="/panel" class="btn btn-primary my-4 w-75">Return</a>
-                                </div>
-<%c++
 if (role == 0 && status != "Cancelled" && status != "Rejected")
 {
 %>
-                                <div class="col text-center">
-                                    <a href="?id=<%c++ $$<<id; %>&cancelVisit=<%c++ $$<<id; %>" class="btn btn-secondary my-4 w-75">Cancel Visit</a>
+                                <div class="text-center">
+                                    <a href="?id=<%c++ $$<<id; %>&cancelVisit=<%c++ $$<<id; %>" class="btn btn-secondary w-75">Cancel Visit</a>
                                 </div>
 <%c++
 }
 %>
+                                <div class="text-center">
+                                    <a href="/panel" class="btn btn-primary my-4 w-75">Return</a>
+                                </div>
                             </div>
                         </div>
                     </div>

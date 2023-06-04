@@ -132,6 +132,7 @@ public:
         std::string receipt;
         inline static constexpr auto maxPrescriptionLength{ 512 };
         User::Profession profession;
+        bool is_control_visit_set;
     };
 
     bool addVisit(const int32_t patientId,
@@ -150,6 +151,8 @@ public:
     bool updateVisitStatus(const int32_t visitId, const Visit::Status status);
     bool updateVisitDoctorId(const int32_t visitId, const int32_t doctorId);
     bool updateVisitPrescription(const int32_t visitId, const std::string& prescription);
+    bool updateVisitControlStatus(const int32_t id, bool isControlVisitSet);
+
     int32_t getVisitStats(const std::string& date, const User::Profession profession);
 
     struct VisitAvailability final

@@ -151,8 +151,8 @@ bool Database::addVisit(
     const int32_t doctorId
     )
 {
-    SQLite::Statement q{mDatabase, "INSERT INTO visits(patient_id, doctor_id, status, date, time, profession)"
-        "VALUES (:patient_id, :doctorId, :status, :date, :time, :profession)"};
+    SQLite::Statement q{mDatabase, "INSERT INTO visits(patient_id, doctor_id, status, date, time, profession, is_control_visit_set)"
+        "VALUES (:patient_id, :doctorId, :status, :date, :time, :profession, 0)"};
 
     q.bind(":doctorId", doctorId);
     q.bind(":patient_id", patientId);
@@ -202,7 +202,8 @@ std::vector<Database::Visit> Database::getVisitsByPatientPesel(const std::string
             q.getColumn("date"),
             q.getColumn("time"),
             q.getColumn("receipt"),
-            User::Profession{q.getColumn("profession").getInt()}
+            User::Profession{q.getColumn("profession").getInt()},
+            static_cast<bool>(q.getColumn("is_control_visit_set").getInt())
         });
     }
 
@@ -227,7 +228,8 @@ std::vector<Database::Visit> Database::getVisitsByDoctorIdAndDate(const int32_t 
             q.getColumn("date"),
             q.getColumn("time"),
             q.getColumn("receipt"),
-            User::Profession{q.getColumn("profession").getInt()}
+            User::Profession{q.getColumn("profession").getInt()},
+            static_cast<bool>(q.getColumn("is_control_visit_set").getInt())
         });
     }
 
@@ -265,7 +267,8 @@ std::optional<Database::Visit> Database::getVisitById(const int32_t id)
             .date{q.getColumn("date").getString()},
             .time{q.getColumn("time").getString()},
             .receipt{q.getColumn("receipt").getString()},
-            .profession{User::Profession{q.getColumn("profession").getInt()}}
+            .profession{User::Profession{q.getColumn("profession").getInt()}},
+            .is_control_visit_set{static_cast<bool>(q.getColumn("is_control_visit_set").getInt())}
         });
     }
 
@@ -289,7 +292,8 @@ std::vector<Database::Visit> Database::getVisitsByStatus(const Visit::Status sta
             q.getColumn("date"),
             q.getColumn("time"),
             q.getColumn("receipt"),
-            User::Profession{q.getColumn("profession").getInt()}
+            User::Profession{q.getColumn("profession").getInt()},
+            static_cast<bool>(q.getColumn("is_control_visit_set").getInt())
         });
     }
 
@@ -310,11 +314,25 @@ bool Database::updateVisitDoctorId(const int32_t visitId, const int32_t doctorId
     return false;
 }
 
-bool Database::updateVisitPrescription(const int32_t visitId, const std::string& prescription)
+bool Database::updateVisitPrescription(const int32_t id, const std::string& prescription)
 {
     SQLite::Statement q{mDatabase, "UPDATE visits SET receipt = :prescription WHERE id = :id"};
     q.bind(":prescription", prescription);
-    q.bind(":id", visitId);
+    q.bind(":id", id);
+
+    if (q.exec() == 1)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool Database::updateVisitControlStatus(const int32_t id, bool isControlVisitSet)
+{
+    SQLite::Statement q{mDatabase, "UPDATE visits SET is_control_visit_set = :isControlVisitSet WHERE id = :id"};
+    q.bind(":isControlVisitSet", static_cast<int32_t>(isControlVisitSet));
+    q.bind(":id", id);
 
     if (q.exec() == 1)
     {

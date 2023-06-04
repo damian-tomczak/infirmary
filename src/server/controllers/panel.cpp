@@ -145,7 +145,7 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     {
         auto pConfirmVisit{database.getVisitById(*pConfirmVisitId)};
 
-        if (pConfirmVisit && database.updateVisitStatus(pConfirmVisit->id, tsrpp::Database::Visit::Status::COMPLETED))
+        if (pConfirmVisit && database.updateVisitControlStatus(pConfirmVisit->id, true))
         {
             errorCode = ErrorCode::CONFIRM_VISIT_SUCCESS;
         }
@@ -205,6 +205,7 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     data.insert("time", pVisit->time);
     data.insert("profession", tsrpp::Database::User::profession2Str(pVisit->profession));
     data.insert("receipt", pVisit->receipt);
+    data.insert("isControlVisitSet", pVisit->is_control_visit_set);
 
     data.insert("patientFirstName", pPatient->first_name);
     data.insert("patientLastName", pPatient->last_name);
@@ -870,14 +871,13 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
         if (*pDecision == "approve")
         {
             auto pDoctor{database.getUserById(pVisit->doctor_id)};
-            ss << "has been approved<br>Doctor Info: " << pDoctor->first_name << " " << pDoctor->last_name << "<br>"
-            << "More Info: " << *pReason;
+            ss << "has been approved<br>Doctor Info: " << pDoctor->first_name << " " << pDoctor->last_name << "<br>";
         }
         else
         {
-            ss << "has been declined<br>"
-            << "Reason: " << *pReason;
+            ss << "has been declined<br>";
         }
+        ss << "Reason: " << ((pReason->length()) ? *pReason : "reason has not been specified");
 
         Mailer::sendMail(pPatient->email, ss.str());
     }
