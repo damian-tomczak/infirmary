@@ -119,7 +119,7 @@ if (!isWeekend)
 }
 else
 {
-    $$<<"<p>There is no availability to book visit at weekend</p>";
+    $$<<"<p class=\"mt-4\">There is no availability to book visit at weekend</p>";
 }
 %>
                         <div class="d-flex justify-content-center w-100">
