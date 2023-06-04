@@ -12,6 +12,9 @@ auto ids=@@.get<std::vector<int>>("ids");
 auto statuses=@@.get<std::vector<std::string>>("statuses");
 auto patientFirstNames=@@.get<std::vector<std::string>>("patientFirstNames");
 auto patientLastNames=@@.get<std::vector<std::string>>("patientLastNames");
+auto visitDoctorProfessions=@@.get<std::vector<std::string>>("visitDoctorProfessions");
+auto visitDoctorFirstNames=@@.get<std::vector<std::string>>("visitDoctorFirstNames");
+auto visitDoctorLastNames=@@.get<std::vector<std::string>>("visitDoctorLastNames");
 auto dates=@@.get<std::vector<std::string>>("dates");
 auto times=@@.get<std::vector<std::string>>("times");
 %>
@@ -87,9 +90,13 @@ else if (errorCode == 1)
             {
                 $$<<"<td>";
                 $$<<statuses.at(i);
-                $$<<" | ";
+                $$<<" | Patient ";
                 $$<<patientFirstNames.at(i) << " ";
                 $$<<patientLastNames.at(i) << " ";
+                $$<<" | ";
+                $$<<visitDoctorProfessions.at(i) << " ";
+                $$<<visitDoctorFirstNames.at(i) << " ";
+                $$<<visitDoctorLastNames.at(i) << " ";
                 $$<<" | ";
                 $$<<dates.at(i) << " ";
                 $$<<times.at(i);

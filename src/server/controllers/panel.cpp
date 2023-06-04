@@ -116,6 +116,25 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
 
     auto pUser{pReq->getSession()->getOptional<tsrpp::Database::User>("user")};
 
+    auto pVisitId{pReq->getOptionalParameter<int32_t>("id")};
+    if (!pVisitId)
+    {
+        throw std::runtime_error{"visit id must be specified"};
+    }
+
+    tsrpp::Database database{SQLite::OPEN_READWRITE};
+    auto pVisit{database.getVisitById(*pVisitId)};
+    if ((pUser->role == tsrpp::Database::User::Role::PATIENT) && (pVisit->patient_id != pUser->id))
+    {
+        throw std::runtime_error{"you are not allowed to see that"};
+    }
+
+    bool isDoctorPrivileged{};
+    if ((pUser->role == tsrpp::Database::User::Role::DOCTOR) && (pUser->id == pVisit->doctor_id))
+    {
+        isDoctorPrivileged = true;
+    }
+
     enum class ErrorCode
     {
         NOT_REQUESTED,
@@ -139,13 +158,16 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
         }
     }
 
-    tsrpp::Database database{SQLite::OPEN_READWRITE};
     auto pConfirmVisitId{pReq->getOptionalParameter<int32_t>("confirmVisit")};
     if (pConfirmVisitId)
     {
-        auto pConfirmVisit{database.getVisitById(*pConfirmVisitId)};
+        if (!isDoctorPrivileged)
+        {
+            throw std::runtime_error{"you are not allowed to do this"};
+        }
 
-        if (pConfirmVisit && database.updateVisitControlStatus(pConfirmVisit->id, true))
+        auto pConfirmVisit{database.getVisitById(*pConfirmVisitId)};
+        if (pConfirmVisit && database.updateVisitStatus(pConfirmVisit->id, tsrpp::Database::Visit::Status::COMPLETED))
         {
             errorCode = ErrorCode::CONFIRM_VISIT_SUCCESS;
         }
@@ -155,21 +177,15 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
         }
     }
 
-    auto pVisitId{pReq->getOptionalParameter<int32_t>("id")};
-    if (!pVisitId)
-    {
-        throw std::runtime_error{"visit id should be specified"};
-    }
-    auto pVisit{database.getVisitById(*pVisitId)};
-    if ((pUser->role == tsrpp::Database::User::Role::PATIENT) && (pVisit->patient_id != pUser->id))
-    {
-        throw std::runtime_error{"you are not allowed to see that"};
-    }
-
     if (pReq->method() == drogon::HttpMethod::Post)
     {
         if (auto pPrescription{pReq->getOptionalParameter<std::string>("prescription")}; pPrescription)
         {
+            if (!isDoctorPrivileged)
+            {
+                throw std::runtime_error{"you are not allowed to do this"};
+            }
+
             errorCode = ErrorCode::UPDATE_PRESCRIPTION_FAILURE;
 
             if ((pUser->role != tsrpp::Database::User::Role::DOCTOR) || (pUser->id != pVisit->doctor_id))
@@ -205,7 +221,6 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     data.insert("time", pVisit->time);
     data.insert("profession", tsrpp::Database::User::profession2Str(pVisit->profession));
     data.insert("receipt", pVisit->receipt);
-    data.insert("isControlVisitSet", pVisit->is_control_visit_set);
 
     data.insert("patientFirstName", pPatient->first_name);
     data.insert("patientLastName", pPatient->last_name);
@@ -227,7 +242,7 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
 
     auto pControlVisit{pReq->getOptionalParameter<int32_t>("controlVisit")};
     bool isControlVisitAdded{};
-    if (pControlVisit != std::nullopt)
+    if (pControlVisit)
     {
         for (int32_t days{14}; !isControlVisitAdded; ++days)
         {
@@ -258,11 +273,18 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
                     data.insert("controlVisitDate", controlVisitDate);
                     data.insert("controlVisitTime", *it);
                     isControlVisitAdded = true;
+                    if (!database.updateVisitControlStatus(*pVisitId, true))
+                    {
+                        throw std::runtime_error{"something went wrong"};
+                    }
+                    pVisit->is_control_visit_set = true;
                     break;
                 }
             }
         }
     }
+    data.insert("isControlVisitSet", pVisit->is_control_visit_set);
+    data.insert("isDoctorPrivileged", isDoctorPrivileged);
 
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_visit_information", data);
     callback(pResp);
@@ -309,7 +331,6 @@ void Panel::patientPersonal(const drogon::HttpRequestPtr& pReq,
     tsrpp::Database database{SQLite::OPEN_READWRITE};
     if (pReq->method() == drogon::HttpMethod::Post)
     {
-
         auto pNote{pReq->getOptionalParameter<std::string>("note")};
 
         if ((pUser != std::nullopt) && (pNote != std::nullopt))
@@ -683,16 +704,22 @@ void Panel::patientInformation(const drogon::HttpRequestPtr& pReq,
     std::vector<std::string> statuses;
     std::vector<std::string> patientFirstNames;
     std::vector<std::string> patientLastNames;
-    std::vector<std::string> patientPesels;
+    std::vector<std::string> doctorProfessions;
+    std::vector<std::string> doctorFirstNames;
+    std::vector<std::string> doctorLastNames;
     std::vector<std::string> dates;
     std::vector<std::string> times;
     for (auto it{visits.begin()}; it != visits.end(); ++it)
     {
         ids.emplace_back(static_cast<int>(it->id));
         statuses.emplace_back(tsrpp::Database::Visit::status2Str(static_cast<tsrpp::Database::Visit::Status>(it->status)));
-        auto pVisitUser{database.getUserById(it->patient_id)};
-        patientFirstNames.emplace_back(pVisitUser->first_name);
-        patientLastNames.emplace_back(pVisitUser->last_name);
+        auto pVisitPatient{database.getUserById(it->patient_id)};
+        auto pVisitDoctor{database.getUserById(it->doctor_id)};
+        patientFirstNames.emplace_back(pVisitPatient->first_name);
+        patientLastNames.emplace_back(pVisitPatient->last_name);
+        doctorProfessions.emplace_back(tsrpp::Database::User::profession2Str(it->profession));
+        doctorFirstNames.emplace_back(pVisitDoctor->first_name);
+        doctorLastNames.emplace_back(pVisitDoctor->last_name);
         dates.emplace_back(it->date);
         times.emplace_back(it->time);
     }
@@ -700,7 +727,9 @@ void Panel::patientInformation(const drogon::HttpRequestPtr& pReq,
     data.insert("statuses", statuses);
     data.insert("patientFirstNames", patientFirstNames);
     data.insert("patientLastNames", patientLastNames);
-    data.insert("patientPesels", patientPesels);
+    data.insert("visitDoctorProfessions", doctorProfessions);
+    data.insert("visitDoctorFirstNames", doctorFirstNames);
+    data.insert("visitDoctorLastNames", doctorLastNames);
     data.insert("dates", dates);
     data.insert("times", times);
     pResp = drogon::HttpResponse::newHttpViewResponse("panel_patient_information", data);

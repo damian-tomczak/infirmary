@@ -30,6 +30,8 @@ auto doctorPhone=@@.get<std::string>("doctorPhone");
 auto controlVisitDate=@@.get<std::string>("controlVisitDate");
 auto controlVisitTime=@@.get<std::string>("controlVisitTime");
 
+auto isDoctorPrivileged=@@.get<bool>("isDoctorPrivileged");
+
 auto errorCode = @@.get<int>("errorCode");
 if (errorCode)
 {
@@ -204,9 +206,9 @@ if (role == 0)
                                     </div>
                                 </div>
                                 <div class="col text-center">
-                                    <form method="post" class="row justify-content-center text-center">
+                                    <form method="post" class="row justify-content-center text-center" action="#prescription">
 <%c++
-if (role == 1 && status == "Scheduled")
+if (role == 1 && isDoctorPrivileged && status == "Scheduled")
 {
 %>
                                         <div class="col-8">
@@ -223,7 +225,7 @@ if (role == 1 && status == "Scheduled")
                             <hr>
                             <div class="row">
 <%c++
-if (role == 1 && status == "Scheduled")
+if (role == 1 && isDoctorPrivileged && status == "Scheduled")
 {
 %>
                                 <div class="text-center">
@@ -231,7 +233,7 @@ if (role == 1 && status == "Scheduled")
                                 </div>
 <%c++
 }
-else if (role == 1 && status == "Completed" && !isControlVisitSet)
+else if (role == 1 && isDoctorPrivileged && status == "Completed" && !isControlVisitSet)
 {
 %>
                                 <div class="text-center">
