@@ -1009,18 +1009,6 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
                 visitDates.emplace_back(pVisitIt->date);
                 visitTimes.emplace_back(pVisitIt->time);
             }
-            else
-            {
-                // database.updateVisitStatus(pVisitIt->id, tsrpp::Database::Visit::Status::REJECTED);
-
-                // std::ostringstream ss;
-                // ss << "Welcome " << pPatient->first_name << " " << pPatient->last_name << "<br>"
-                // << "Your appointment with " << tsrpp::Database::User::profession2Str(pVisitIt->profession) << " at "
-                // << pVisitIt->date << " " << pVisitIt->time << "<br>"
-                // "Has been automatically rejected due to the lack of doctors available in selected date and time.";
-
-                // Mailer::sendMail(pPatient->email, ss.str());
-            }
         }
     }
 
