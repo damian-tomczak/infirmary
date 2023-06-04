@@ -5,6 +5,8 @@
 #include "fmt/color.h"
 #include "SQLiteCpp/SQLiteCpp.h"
 
+#include <thread>
+
 using namespace std::chrono_literals;
 
 // TODO: Handle this at the level of cmake
@@ -41,6 +43,7 @@ void Server::run()
 
     auto pResp404{drogon::HttpResponse::newHttpViewResponse("resp404")};
 
+    // ISSUE: drogon takes the whole cout descriptor
     // TODO: it should be placed in json instead of hard-coded
     drogon::app()
         .setDocumentRoot(DOCUMENT_ROOT_PATH)

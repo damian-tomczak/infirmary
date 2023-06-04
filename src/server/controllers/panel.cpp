@@ -250,10 +250,11 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
             // TODO: about the performance it would good to only modify time_t structure by adding the right amount of seconds
             // but this variable usually should be created only once
             auto now{std::chrono::system_clock::to_time_t(std::chrono::system_clock::now() + std::chrono::hours(days * 24))};
-            std::tm buffer;
-            localtime_r(&now, &buffer);
+            std::tm tm;
+            localtime_r(&now, &tm);
+            tm.tm_isdst = 1;
             std::stringstream ss;
-            ss << std::put_time(&buffer, "%Y-%m-%d");
+            ss << std::put_time(&tm, "%Y-%m-%d");
             auto controlVisitDate{ss.str()};
             for (auto it{hours.begin()}; it != hours.end(); ++it)
             {
@@ -710,6 +711,7 @@ void Panel::patientInformation(const drogon::HttpRequestPtr& pReq,
             errorCode = ErrorCode::PESEL_CORRECT;
         }
     }
+
     drogon::HttpViewData data;
     appendDoctorsToSideMenu(data);
     data.insert("pesel", *pPesel);
@@ -893,13 +895,13 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
         if (*pDecision == "Approve")
         {
             status = tsrpp::Database::Visit::Status::SCHEDULED;
+            database.updateVisitDoctorId(*pVisitId, *pDoctorId);
         }
         else
         {
             status = tsrpp::Database::Visit::Status::REJECTED;
         }
         database.updateVisitStatus(*pVisitId, status);
-        database.updateVisitDoctorId(*pVisitId, *pDoctorId);
 
         auto pVisit{database.getVisitById(*pVisitId)};
         auto pReason{pReq->getOptionalParameter<std::string>("reason")};
@@ -938,55 +940,87 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
     std::vector<std::vector<int>> visitDoctorIds;
     std::vector<std::vector<std::string>> visitDoctorFirstNames;
     std::vector<std::vector<std::string>> visitDoctorLastNames;
+
+    auto isVisitOutdated{[](auto dateTime) -> bool {
+        std::tm tm{};
+        std::istringstream ss(dateTime);
+        ss >> std::get_time(&tm, "%Y-%m-%d %H-%M");
+        tm.tm_isdst = 1;
+        auto visitDateTime{std::chrono::system_clock::from_time_t(std::mktime(&tm))};
+
+        if (visitDateTime < std::chrono::system_clock::now())
+        {
+            return true;
+        }
+
+        return false;
+    }};
+
     for (auto pVisitIt{visits.begin()}; pVisitIt != visits.end(); ++pVisitIt)
     {
         auto pPatient{database.getUserById(pVisitIt->patient_id)};
-
-        auto takenDoctorsIds{database.checkAvailabilityOfVisit(
-            pUser->id,
-            static_cast<int32_t>(pVisitIt->profession),
-            pVisitIt->date,
-            pVisitIt->time
-        ).takenDoctorsIds};
-        auto freeDoctors{database.getFreeDoctors(pVisitIt->profession, takenDoctorsIds)};
-
-        std::vector<int> visitDoctorIdsThisVisit;
-        std::vector<std::string> visitDoctorFirstNamesThisVisit;
-        std::vector<std::string> visitDoctorLastNamesThisVisit;
-
-        for (auto doctorIt{freeDoctors.begin()}; doctorIt != freeDoctors.end(); ++doctorIt)
+        [[unlikely]] if (isVisitOutdated(pVisitIt->date + " " + pVisitIt->time))
         {
-            visitDoctorIdsThisVisit.emplace_back(doctorIt->id);
-            visitDoctorFirstNamesThisVisit.emplace_back(doctorIt->first_name);
-            visitDoctorLastNamesThisVisit.emplace_back(doctorIt->last_name);
-        }
+            database.updateVisitStatus(pVisitIt->id, tsrpp::Database::Visit::Status::REJECTED);
 
-        if (visitDoctorIdsThisVisit.size())
-        {
-            visitIds.emplace_back(static_cast<int>(pVisitIt->id));
-            visitPesels.emplace_back(pPatient->pesel);
-            visitPatientFirstNames.emplace_back(pPatient->first_name);
-            visitPatientLastNames.emplace_back(pPatient->last_name);
-            visitDoctorProfessions.emplace_back(tsrpp::Database::User::profession2Str(pVisitIt->profession));
+            // TODO: would be helpful to create function for it
+            std::ostringstream ss;
+            ss << "Welcome " << pPatient->first_name << " " << pPatient->last_name << "<br>"
+            << "Your appointment with " << tsrpp::Database::User::profession2Str(pVisitIt->profession) << " at "
+            << pVisitIt->date << " " << pVisitIt->time << " ";
+            ss << "has been declined<br>";
+            ss << "Reason: Reception did not make a decision in the allotted time";
 
-            visitDoctorIds.emplace_back(std::move(visitDoctorIdsThisVisit));
-            visitDoctorFirstNames.emplace_back(std::move(visitDoctorFirstNamesThisVisit));
-            visitDoctorLastNames.emplace_back(std::move(visitDoctorLastNamesThisVisit));
-
-            visitDates.emplace_back(pVisitIt->date);
-            visitTimes.emplace_back(pVisitIt->time);
+            Mailer::sendMail(pPatient->email, ss.str());
         }
         else
         {
-            // database.updateVisitStatus(pVisitIt->id, tsrpp::Database::Visit::Status::REJECTED);
+            auto takenDoctorsIds{database.checkAvailabilityOfVisit(
+                pUser->id,
+                static_cast<int32_t>(pVisitIt->profession),
+                pVisitIt->date,
+                pVisitIt->time
+            ).takenDoctorsIds};
+            auto freeDoctors{database.getFreeDoctors(pVisitIt->profession, takenDoctorsIds)};
 
-            // std::ostringstream ss;
-            // ss << "Welcome " << pPatient->first_name << " " << pPatient->last_name << "<br>"
-            // << "Your appointment with " << tsrpp::Database::User::profession2Str(pVisitIt->profession) << " at "
-            // << pVisitIt->date << " " << pVisitIt->time << "<br>"
-            // "Has been automatically rejected due to the lack of doctors available in selected date and time.";
+            std::vector<int> visitDoctorIdsThisVisit;
+            std::vector<std::string> visitDoctorFirstNamesThisVisit;
+            std::vector<std::string> visitDoctorLastNamesThisVisit;
 
-            // Mailer::sendMail(pPatient->email, ss.str());
+            for (auto doctorIt{freeDoctors.begin()}; doctorIt != freeDoctors.end(); ++doctorIt)
+            {
+                visitDoctorIdsThisVisit.emplace_back(doctorIt->id);
+                visitDoctorFirstNamesThisVisit.emplace_back(doctorIt->first_name);
+                visitDoctorLastNamesThisVisit.emplace_back(doctorIt->last_name);
+            }
+
+            if (visitDoctorIdsThisVisit.size())
+            {
+                visitIds.emplace_back(static_cast<int>(pVisitIt->id));
+                visitPesels.emplace_back(pPatient->pesel);
+                visitPatientFirstNames.emplace_back(pPatient->first_name);
+                visitPatientLastNames.emplace_back(pPatient->last_name);
+                visitDoctorProfessions.emplace_back(tsrpp::Database::User::profession2Str(pVisitIt->profession));
+
+                visitDoctorIds.emplace_back(std::move(visitDoctorIdsThisVisit));
+                visitDoctorFirstNames.emplace_back(std::move(visitDoctorFirstNamesThisVisit));
+                visitDoctorLastNames.emplace_back(std::move(visitDoctorLastNamesThisVisit));
+
+                visitDates.emplace_back(pVisitIt->date);
+                visitTimes.emplace_back(pVisitIt->time);
+            }
+            else
+            {
+                // database.updateVisitStatus(pVisitIt->id, tsrpp::Database::Visit::Status::REJECTED);
+
+                // std::ostringstream ss;
+                // ss << "Welcome " << pPatient->first_name << " " << pPatient->last_name << "<br>"
+                // << "Your appointment with " << tsrpp::Database::User::profession2Str(pVisitIt->profession) << " at "
+                // << pVisitIt->date << " " << pVisitIt->time << "<br>"
+                // "Has been automatically rejected due to the lack of doctors available in selected date and time.";
+
+                // Mailer::sendMail(pPatient->email, ss.str());
+            }
         }
     }
 

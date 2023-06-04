@@ -31,6 +31,7 @@ public:
             DOCTOR,
             RECEPTIONIST
         };
+
         enum class Profession
         {
             INTERNIST,
@@ -38,10 +39,12 @@ public:
             PULMONOLOGIST,
             OCULIST
         };
+
         static bool isValidProfession(const Profession profession)
         {
             return (profession >= Profession::INTERNIST) && (profession <= Profession::OCULIST);
         }
+
         static int32_t professionStr2Int(const std::string& profession)
         {
             if (profession == "internist")
@@ -63,6 +66,7 @@ public:
 
             return -1;
         }
+
         static std::string profession2Str(const Profession profession)
         {
             switch(profession)

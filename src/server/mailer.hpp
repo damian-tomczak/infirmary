@@ -6,6 +6,7 @@
 #include <optional>
 
 // TODO: it should take config from the file
+// TODO: mailio puts whitespaces randomly, it needs a investigation
 class Mailer final
 {
 using message = mailio::message;
