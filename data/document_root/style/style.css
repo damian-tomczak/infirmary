@@ -30,7 +30,6 @@ textarea {
 textarea:read-only,
 textarea:read-only:focus {
     background-color: #dddddd;
-    outline: 1px solid black;
 }
 
 .scroll {
@@ -49,4 +48,8 @@ textarea:read-only:focus {
     position: fixed;
     right: 0;
     bottom: 0;
+}
+
+textarea:not([readonly]) {
+    outline: 1px solid black;
 }

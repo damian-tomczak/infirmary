@@ -123,16 +123,18 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
     }
 
     tsrpp::Database database{SQLite::OPEN_READWRITE};
-    auto pVisit{database.getVisitById(*pVisitId)};
-    if ((pUser->role == tsrpp::Database::User::Role::PATIENT) && (pVisit->patient_id != pUser->id))
-    {
-        throw std::runtime_error{"you are not allowed to see that"};
-    }
-
     bool isDoctorPrivileged{};
-    if ((pUser->role == tsrpp::Database::User::Role::DOCTOR) && (pUser->id == pVisit->doctor_id))
     {
-        isDoctorPrivileged = true;
+        auto pVisit{database.getVisitById(*pVisitId)};
+        if ((pUser->role == tsrpp::Database::User::Role::PATIENT) && (pVisit->patient_id != pUser->id))
+        {
+            throw std::runtime_error{"you are not allowed to see that"};
+        }
+
+        if ((pUser->role == tsrpp::Database::User::Role::DOCTOR) && (pUser->id == pVisit->doctor_id))
+        {
+            isDoctorPrivileged = true;
+        }
     }
 
     enum class ErrorCode
@@ -177,6 +179,7 @@ void Panel::visitInformation(const drogon::HttpRequestPtr& pReq,
         }
     }
 
+    auto pVisit{database.getVisitById(*pVisitId)};
     if (pReq->method() == drogon::HttpMethod::Post)
     {
         if (auto pPrescription{pReq->getOptionalParameter<std::string>("prescription")}; pPrescription)
@@ -948,7 +951,7 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
         tm.tm_isdst = 1;
         auto visitDateTime{std::chrono::system_clock::from_time_t(std::mktime(&tm))};
 
-        if (visitDateTime < std::chrono::system_clock::now())
+        if (visitDateTime < std::chrono::system_clock::now()-1h)
         {
             return true;
         }

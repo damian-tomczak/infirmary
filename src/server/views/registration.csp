@@ -78,7 +78,7 @@ if (errorCode)
                             <div class="row mb-2">
                                 <label for="email" class="col-5 col-form-label">Email:</label>
                                 <div class="col-7">
-                                    <input type="email" class="form-control" id="email" name="email" placeholder="contact@damian-tomczak.pl">
+                                    <input type="email" class="form-control" id="email" name="email" placeholder="email@domain.pl">
                                 </div>
                             </div>
                             <div class="row mb-2">
