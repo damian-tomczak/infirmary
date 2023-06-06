@@ -241,7 +241,7 @@ else if (role == 1 && isDoctorPrivileged && status == "Completed" && !isControlV
                                 </div>
 <%c++
 }
-if (role == 0 && status != "Cancelled" && status != "Rejected")
+if (role == 0 && status != "Cancelled" && status != "Completed" && status != "Rejected")
 {
 %>
                                 <div class="text-center">
