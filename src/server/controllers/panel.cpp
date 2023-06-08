@@ -948,7 +948,7 @@ void Panel::receptionistPendingRequests(const drogon::HttpRequestPtr& pReq,
         std::tm tm{};
         std::istringstream ss(dateTime);
         ss >> std::get_time(&tm, "%Y-%m-%d %H-%M");
-        tm.tm_isdst = 1;
+
         auto visitDateTime{std::chrono::system_clock::from_time_t(std::mktime(&tm))};
 
         if (visitDateTime < std::chrono::system_clock::now())
