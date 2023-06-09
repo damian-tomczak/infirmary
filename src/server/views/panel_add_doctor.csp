@@ -10,32 +10,35 @@ if (errorCode)
     std::ostringstream message;
     message << "<script>";
     message << "window.onload = function() {";
-    message << "alert(\"Registration failure: ";
+    message << "alert(\"";
     switch (errorCode)
     {
     case 1:
-        message << "Incorrect pesel format";
+        message << "Registration failure: Incorrect pesel format";
         break;
     case 2:
-        message << "Incorrect first name format";
+        message << "Registration failure: Incorrect first name format";
         break;
     case 3:
-        message << "Incorrect last name format";
+        message << "Registration failure: Incorrect last name format";
         break;
     case 4:
-        message << "Your password is weak";
+        message << "Registration failure: Your password is weak";
         break;
     case 5:
-        message << "Incorrect email format";
+        message << "Registration failure: Incorrect email format";
         break;
     case 6:
-        message << "Your passwords are different";
+        message << "Registration failure: Your passwords are different";
         break;
     case 7:
-        message << "Patient or doctor with this pesel already exists";
+        message << "Registration failure: Patient or doctor with this pesel already exists";
         break;
     case 8:
-        message << "Incorrect phone format";
+        message << "Registration failure: Incorrect phone format";
+        break;
+    case 10:
+        message << "Registration success";
         break;
     }
     message << "\")}</script>";

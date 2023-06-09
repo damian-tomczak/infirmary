@@ -238,7 +238,7 @@ else if (role == 1 && isDoctorPrivileged && status == "Completed" && !isControlV
 %>
                                 <div class="text-center">
                                     <a href="?id=<%c++ $$<<id; %>&controlVisit=1#prescription" class="btn btn-secondary w-75">Set Control Visit</a>
-                                </div>
+                                 </div>
 <%c++
 }
 if (role == 0 && status != "Cancelled" && status != "Completed" && status != "Rejected")
